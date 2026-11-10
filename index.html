@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="blue">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -15,200 +15,340 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
-        :root {
-            --primary: #1E293B;
-            --accent-yellow: #FEF08A;
-            --accent-green: #BBF7D0;
-            --header-yellow: #EAB308;
-            --header-blue: #0284C7;
-            --header-purple: #9333EA;
+        :root, [data-theme="blue"] {
+            --primary: #0F172A;
+            --header-bg: linear-gradient(135deg, #0F172A 0%, #1E3A8A 100%);
+            --accent: #0284C7;
+            --strip-bg: #E0F2FE;
+            --strip-border: #BAE6FD;
             --bg: #F1F5F9;
             --card: #FFFFFF;
             --text: #0F172A;
+            --text-muted: #64748B;
             --debit: #EF4444;
             --kredit: #16A34A;
-            --border: #E2E8F0;
+            --border: #CBD5E1;
+            --th-bg: #E0F2FE;
+            --th-text: #0369A1;
+        }
+
+        [data-theme="green"] {
+            --primary: #064E3B;
+            --header-bg: linear-gradient(135deg, #064E3B 0%, #047857 100%);
+            --accent: #059669;
+            --strip-bg: #D1FAE5;
+            --strip-border: #A7F3D0;
+            --bg: #ECFDF5;
+            --card: #FFFFFF;
+            --text: #064E3B;
+            --text-muted: #047857;
+            --debit: #DC2626;
+            --kredit: #059669;
+            --border: #A7F3D0;
+            --th-bg: #D1FAE5;
+            --th-text: #065F46;
+        }
+
+        [data-theme="dark"] {
+            --primary: #020617;
+            --header-bg: linear-gradient(135deg, #020617 0%, #1E293B 100%);
+            --accent: #38BDF8;
+            --strip-bg: #1E293B;
+            --strip-border: #334155;
+            --bg: #090D16;
+            --card: #111827;
+            --text: #F8FAFC;
+            --text-muted: #94A3B8;
+            --debit: #F87171;
+            --kredit: #4ADE80;
+            --border: #1E293B;
+            --th-bg: #1E293B;
+            --th-text: #38BDF8;
         }
 
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        html, body { height: 100%; overflow: hidden; background-color: var(--bg); color: var(--text); }
+        html, body { height: 100%; overflow: hidden; background-color: var(--bg); color: var(--text); transition: background-color 0.25s, color 0.25s; }
 
+        /* 1. SIZE WINDOWS LEBIH BESAR (1280px di Desktop/Windows, pas di HP) */
         .app-shell {
             display: flex;
             flex-direction: column;
             height: 100dvh;
-            max-width: 720px;
+            width: 100%;
+            max-width: 1280px;
             margin: 0 auto;
             background: var(--bg);
             position: relative;
         }
 
-        /* BAGIAN ATAS TETAP (TIDAK IKUT KE-SCROLL) */
+        /* BAGIAN ATAS TETAP (STICKY / TIDAK IKUT KE-SCROLL) */
         .top-fixed-zone {
             flex-shrink: 0;
-            padding: 8px 8px 4px 8px;
+            padding: 8px 12px 6px 12px;
             background: var(--bg);
             z-index: 20;
-            border-bottom: 1px solid #CBD5E1;
-            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+            border-bottom: 1px solid var(--border);
         }
 
         /* AREA BAWAH YANG BISA DI-SCROLL */
         .scrollable-body {
             flex: 1;
             overflow-y: auto;
-            padding: 8px 8px 86px 8px;
+            padding: 8px 12px 90px 12px;
             -webkit-overflow-scrolling: touch;
         }
 
         header { 
-            background-color: var(--primary); 
+            background: var(--header-bg); 
             color: white; 
-            padding: 9px 12px; 
-            border-radius: 12px; 
-            margin-bottom: 6px; 
+            padding: 10px 14px; 
+            border-radius: 14px; 
+            margin-bottom: 8px; 
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         }
-        header .header-left { display: flex; align-items: center; gap: 8px; }
-        .btn-drawer-trigger {
-            background: #0284C7;
-            color: #FFF;
-            border: none;
-            padding: 6px 9px;
-            border-radius: 8px;
-            font-size: 11px;
-            font-weight: 800;
-            cursor: pointer;
+        header .header-title h1 { font-size: 16px; font-weight: 800; color: #FACC15; line-height: 1.15; }
+        header .header-title p { font-size: 10px; color: #E2E8F0; margin-top: 2px; }
+
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+        }
+        .header-btn-group {
             display: flex;
             align-items: center;
-            gap: 4px;
-            box-shadow: 0 2px 6px rgba(2, 132, 199, 0.35);
-            transition: transform 0.15s;
+            gap: 6px;
         }
-        .btn-drawer-trigger:active { transform: scale(0.93); }
-        header .header-title h1 { font-size: 14px; font-weight: 800; color: #FACC15; line-height: 1.1; }
-        header .header-title p { font-size: 9px; opacity: 0.85; margin-top: 1px; }
-        
-        .btn-mgmt {
-            background-color: #334155;
-            color: #F8FAFC;
-            border: 1px solid #475569;
-            padding: 6px 9px;
+        .btn-hdr {
+            background-color: rgba(255,255,255,0.14);
+            color: #FFFFFF;
+            border: 1px solid rgba(255,255,255,0.22);
+            padding: 5px 10px;
             border-radius: 8px;
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 4px;
+            transition: 0.2s;
         }
-
-        #cloudStatus { font-size: 9px; font-weight: 700; text-align: center; padding: 3px 6px; background: #E0F2FE; color: #0369A1; border-radius: 6px; margin-bottom: 6px; }
-
-        .top-summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 6px; }
-        .top-summary-card { 
-            background: #FFFFFF; 
-            padding: 6px 4px; 
-            border-radius: 9px; 
-            border: 1px solid var(--border); 
-            text-align: center; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
-            cursor: pointer;
-            transition: transform 0.15s;
-        }
-        .top-summary-card:active { transform: scale(0.96); }
-        .top-summary-card .icon-box { font-size: 12px; margin-bottom: 1px; }
-        .top-summary-card .lbl { font-size: 7.5px; font-weight: 700; color: #64748B; text-transform: uppercase; }
-        .top-summary-card .val { font-size: 10px; font-weight: 800; word-break: break-all; margin-top: 1px; }
-
-        /* BARIS MENU SIMPEL POPUP DI ATAS JURNAL (TRANSAKSI, PINDAH SALDO, VLOOKUP, SALDO KIRI) */
-        .quick-action-strip {
-            display: grid;
-            grid-template-columns: 1.25fr 1fr 1fr 0.9fr;
-            gap: 5px;
-            margin-bottom: 2px;
-        }
-        .qa-btn {
-            border: none;
-            padding: 7px 6px;
-            border-radius: 8px;
+        .btn-hdr:hover { background-color: rgba(255,255,255,0.24); }
+        .live-clock {
             font-size: 10px;
-            font-weight: 800;
+            font-weight: 700;
+            color: #FEF08A;
+            font-family: monospace;
+            letter-spacing: 0.2px;
+        }
+
+        /* 4. KARTU INFORMASI BERWARNA GRADIENT (SEPERTI GAMBAR 1) */
+        .top-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        @media (max-width: 640px) {
+            .top-summary-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+        }
+        .grad-card {
+            border-radius: 14px;
+            padding: 10px 12px;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            gap: 10px;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.15s;
+            position: relative;
+            overflow: hidden;
+        }
+        .grad-card:active { transform: scale(0.97); }
+        .grad-card-green { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+        .grad-card-blue  { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+        .grad-card-teal  { background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%); }
+        .grad-card-cyan  { background: linear-gradient(135deg, #0EA5E9 0%, #0284C7 100%); }
+
+        .grad-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
-            white-space: nowrap;
-            color: #FFF;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-            transition: transform 0.15s;
+            font-size: 17px;
+            flex-shrink: 0;
         }
-        .qa-btn:active { transform: scale(0.95); }
-        .qa-trx { background: #2563EB; }
-        .qa-mutasi { background: #0284C7; }
-        .qa-vlookup { background: #EAB308; color: #0F172A; }
-        .qa-saldo { background: #0F172A; color: #FACC15; }
+        .grad-info { min-width: 0; flex: 1; }
+        .grad-lbl { font-size: 9.5px; font-weight: 800; text-transform: uppercase; opacity: 0.92; letter-spacing: 0.3px; }
+        .grad-val { font-size: 14px; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 1px; }
 
-        /* SUB-TABS DI DALAM MENU LAPORAN */
-        .sub-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; background: #E2E8F0; padding: 4px; border-radius: 9px; margin-bottom: 8px; }
-        .sub-tab-btn { padding: 7px 6px; border: none; background: transparent; font-size: 10px; font-weight: 800; color: #475569; border-radius: 6px; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-        .sub-tab-btn.active { background: #FFFFFF; color: #0F172A; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        /* 5. STRIP MENU BAWAH KARTU DENGAN TOMBOL "💰 CEK SALDO ➜" (SEPERTI GAMBAR 2) */
+        .action-strip-box {
+            background: var(--strip-bg);
+            border: 1px solid var(--strip-border);
+            border-left: 5px solid var(--accent);
+            border-radius: 12px;
+            padding: 7px 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            overflow-x: auto;
+        }
+        .action-strip-left { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; }
+        .btn-cek-saldo {
+            background: #1D6FA5;
+            color: #FFFFFF;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 9px;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(29, 111, 165, 0.35);
+            transition: transform 0.15s, background 0.2s;
+        }
+        .btn-cek-saldo:hover { background: #155A8A; }
+        .btn-cek-saldo:active { transform: scale(0.95); }
+
+        .btn-strip-action {
+            background: var(--card);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 6px 11px;
+            border-radius: 8px;
+            font-size: 10.5px;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+            transition: 0.15s;
+        }
+        .btn-strip-action:hover { border-color: var(--accent); }
+
+        /* 6. JURNAL HEADER POLOS + BAR FILTER LENGKAP (SEPERTI GAMBAR 3) */
+        .jurnal-plain-header {
+            background: var(--strip-bg);
+            border: 1px solid var(--strip-border);
+            color: var(--th-text);
+            padding: 9px 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .jurnal-filter-bar {
+            background: var(--strip-bg);
+            border: 1px solid var(--strip-border);
+            padding: 8px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 11px;
+            font-weight: 900;
+            color: var(--th-text);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .filter-select, .filter-input {
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--card);
+            color: var(--text);
+            outline: none;
+        }
+        .filter-search-input {
+            flex: 1;
+            min-width: 180px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            border-radius: 7px;
+            background: var(--card);
+            color: var(--text);
+            outline: none;
+        }
+
+        .sub-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--strip-bg); padding: 5px; border-radius: 10px; margin-bottom: 10px; }
+        .sub-tab-btn { padding: 8px 6px; border: none; background: transparent; font-size: 11px; font-weight: 800; color: var(--text-muted); border-radius: 7px; cursor: pointer; text-transform: uppercase; }
+        .sub-tab-btn.active { background: var(--card); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.08); }
 
         .page-view { display: none; }
         .page-view.active { display: block; }
         .sub-view { display: none; }
         .sub-view.active { display: block; }
 
-        .card { background: var(--card); padding: 10px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 10px; border: 1px solid var(--border); }
-        .card-header { background-color: var(--header-yellow); color: #000; font-weight: 800; padding: 7px 10px; border-radius: 8px; font-size: 11px; margin-bottom: 8px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
-        .card-header-blue { background-color: var(--header-blue); color: #FFF; }
-        .card-header-purple { background-color: var(--header-purple); color: #FFF; }
+        .card { background: var(--card); padding: 12px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); margin-bottom: 10px; border: 1px solid var(--border); }
+        .card-header { background-color: #EAB308; color: #000; font-weight: 800; padding: 8px 12px; border-radius: 8px; font-size: 12px; margin-bottom: 10px; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; }
+        .card-header-blue { background-color: #0284C7; color: #FFF; }
+        .card-header-purple { background-color: #9333EA; color: #FFF; }
 
         .form-group { margin-bottom: 8px; }
-        .form-group label { display: block; font-size: 10.5px; font-weight: 600; margin-bottom: 3px; color: #475569; }
-        .form-control { width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; background: #FFF; }
-        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 700; margin-bottom: 3px; color: var(--text-muted); }
+        .form-control { width: 100%; padding: 8px 10px; font-size: 12px; border: 1px solid var(--border); border-radius: 7px; outline: none; background: var(--card); color: var(--text); }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 
-        .btn { width: 100%; padding: 10px; border: none; border-radius: 7px; background-color: #2563EB; color: white; font-weight: 800; font-size: 12px; cursor: pointer; }
-        .btn-edit { background-color: #EAB308; color: #000; border: none; padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .btn-delete { background-color: #EF4444; color: #FFF; border: none; padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; }
-        .btn-lunas { background-color: #16A34A; color: #FFF; border: none; padding: 3px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; }
+        .btn { width: 100%; padding: 10px; border: none; border-radius: 8px; background-color: #2563EB; color: white; font-weight: 800; font-size: 12px; cursor: pointer; }
+        .btn-edit { background-color: #EAB308; color: #000; border: none; padding: 4px 7px; border-radius: 5px; font-size: 9.5px; font-weight: bold; cursor: pointer; }
+        .btn-delete { background-color: #EF4444; color: #FFF; border: none; padding: 4px 7px; border-radius: 5px; font-size: 9.5px; font-weight: bold; cursor: pointer; }
+        .btn-lunas { background-color: #16A34A; color: #FFF; border: none; padding: 4px 7px; border-radius: 5px; font-size: 9.5px; font-weight: bold; cursor: pointer; }
 
-        .chip-row { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
-        .chip-btn { background: #F1F5F9; border: 1px solid #CBD5E1; color: #334155; padding: 3px 8px; border-radius: 5px; font-size: 9.5px; font-weight: 700; cursor: pointer; }
+        .chip-row { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+        .chip-btn { background: var(--strip-bg); border: 1px solid var(--strip-border); color: var(--text); padding: 4px 9px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; }
 
-        .filter-container { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 8px; }
-        .filter-btn { padding: 5px 9px; border: 1px solid #CBD5E1; background: #F1F5F9; border-radius: 6px; font-size: 9.5px; font-weight: 700; cursor: pointer; }
-        .filter-btn.active { background: #2563EB; color: white; border-color: #2563EB; }
-        .date-picker-input { padding: 4px 6px; font-size: 10px; border: 1px solid #CBD5E1; border-radius: 6px; outline: none; background: #FFF; font-weight: 600; color: #334155; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; white-space: nowrap; }
+        th, td { padding: 7px 8px; text-align: right; border: 1px solid var(--border); }
+        th { background-color: var(--th-bg); color: var(--th-text); font-weight: 800; text-align: center; text-transform: uppercase; }
+        th:first-child, td:first-child { text-align: center; }
 
-        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        table { width: 100%; border-collapse: collapse; font-size: 10px; white-space: nowrap; }
-        th, td { padding: 5px 5px; text-align: right; border: 1px solid var(--border); }
-        th { background-color: #F1F5F9; color: #334155; font-weight: 700; text-align: center; }
-        th:first-child, td:first-child { text-align: left; }
-
-        .th-blue { background-color: var(--header-blue); color: white; border-color: #0284C7; }
         .th-pemasukan { background-color: #FEF08A; color: #854D0E; }
         .th-pengeluaran { background-color: #BBF7D0; color: #166534; }
-        .td-pemasukan { background-color: #FEFCE8; }
-        .td-pengeluaran { background-color: #F0FDF4; }
+        .td-pemasukan { background-color: rgba(254, 240, 138, 0.18); }
+        .td-pengeluaran { background-color: rgba(187, 247, 208, 0.18); }
 
-        .text-debit { color: var(--debit); font-weight: 700; }
-        .text-kredit { color: var(--kredit); font-weight: 700; }
-        .text-muted { color: #94A3B8; }
-        .badge-lunas { background: #DCFCE7; color: #15803D; padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 9px; }
-        .badge-belum { background: #FEE2E2; color: #991B1B; padding: 2px 4px; border-radius: 4px; font-weight: bold; font-size: 9px; }
-        .highlight-cyan { background-color: #E0F2FE; }
-        .total-row { background-color: #F1F5F9; font-weight: bold; border-top: 2px solid #CBD5E1; }
-        .total-row-highlight { background-color: #FEF08A; font-weight: bold; }
-        .vlookup-badge { font-size: 9.5px; color: #2563EB; font-weight: 700; margin-top: 2px; display: none; }
-
-        .clickable-bank { cursor: pointer; color: #0284C7; }
-        .bank-badge-btn { display: inline-flex; align-items: center; gap: 2px; background: #0284C7; color: #FFF; font-size: 8px; padding: 1px 4px; border-radius: 4px; margin-left: 4px; font-weight: bold; }
+        .text-debit { color: var(--debit); font-weight: 800; }
+        .text-kredit { color: var(--kredit); font-weight: 800; }
+        .text-muted { color: var(--text-muted); }
+        .badge-lunas { background: #DCFCE7; color: #15803D; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 9.5px; }
+        .badge-belum { background: #FEE2E2; color: #991B1B; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 9.5px; }
+        .highlight-cyan { background-color: rgba(14, 165, 233, 0.15); }
+        .total-row { background-color: var(--th-bg); font-weight: 900; }
+        .total-row-highlight { background-color: #FEF08A; color: #0F172A; font-weight: 900; }
+        .vlookup-badge { font-size: 10px; color: #2563EB; font-weight: 700; margin-top: 3px; display: none; }
 
         /* LEFT SLIDE-OVER DRAWER REKAP SALDO */
         .drawer-backdrop {
@@ -226,43 +366,64 @@
             left: 0;
             bottom: 0;
             width: 88%;
-            max-width: 390px;
-            background: #FFFFFF;
+            max-width: 410px;
+            background: var(--card);
+            color: var(--text);
             z-index: 9100;
             transform: translateX(-102%);
             transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
             display: flex;
             flex-direction: column;
-            box-shadow: 8px 0 25px rgba(0,0,0,0.25);
+            box-shadow: 8px 0 25px rgba(0,0,0,0.3);
         }
         .left-drawer.open { transform: translateX(0); }
         .drawer-header {
-            background: #0F172A;
+            background: var(--header-bg);
             color: #FFF;
-            padding: 12px 14px;
+            padding: 13px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .drawer-body {
-            flex: 1;
-            overflow-y: auto;
-            padding: 10px;
-        }
+        .drawer-body { flex: 1; overflow-y: auto; padding: 12px; }
 
-        /* INTERACTIVE ANIMATED BOTTOM NAVIGATION BAR */
+        /* FLOATING ACTION BUTTON (+) DI KANAN BAWAH SEMUA HALAMAN */
+        .fab-add-trx {
+            position: fixed;
+            bottom: 68px;
+            right: 22px;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+            color: #FFFFFF;
+            border: none;
+            font-size: 28px;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 6000;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fab-add-trx:hover { transform: scale(1.07); }
+        .fab-add-trx:active { transform: scale(0.9); }
+
+        /* 3-ITEM BOTTOM NAVIGATION BAR INTERAKTIF */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: 100%;
-            max-width: 720px;
-            background: #FFFFFF;
-            border-top: 1px solid #CBD5E1;
+            max-width: 1280px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            padding: 5px 8px 8px 8px;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 5px 12px 7px 12px;
             z-index: 5000;
             box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
         }
@@ -276,30 +437,13 @@
             padding: 5px 4px;
             border-radius: 12px;
             cursor: pointer;
-            color: #64748B;
+            color: var(--text-muted);
             transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
         }
-        .bnav-item .bnav-icon {
-            font-size: 17px;
-            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .bnav-item .bnav-lbl {
-            font-size: 9.5px;
-            font-weight: 800;
-            margin-top: 2px;
-            transition: color 0.2s;
-        }
-        .bnav-item.active {
-            color: #2563EB;
-            background: #EFF6FF;
-        }
-        .bnav-item.active .bnav-icon {
-            transform: translateY(-3px) scale(1.18);
-        }
-        .bnav-item:active .bnav-icon {
-            transform: scale(0.86);
-        }
+        .bnav-item .bnav-icon { font-size: 17px; transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1); }
+        .bnav-item .bnav-lbl { font-size: 10px; font-weight: 800; margin-top: 2px; }
+        .bnav-item.active { color: var(--accent); background: var(--strip-bg); }
+        .bnav-item.active .bnav-icon { transform: translateY(-2px) scale(1.16); }
 
         /* MODAL POPUP OVERLAY */
         .modal-overlay {
@@ -315,19 +459,16 @@
         }
         .modal-overlay.active { display: flex; }
         .modal-content-popup {
-            background: #FFFFFF;
+            background: var(--card);
+            color: var(--text);
             border-radius: 14px;
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             max-height: 90dvh;
             overflow-y: auto;
-            padding: 15px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.25);
-            animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.93) translateY(8px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            padding: 16px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
         }
         .modal-header-popup {
             display: flex;
@@ -337,108 +478,135 @@
             padding-bottom: 8px;
             border-bottom: 1px solid var(--border);
         }
-        .modal-header-popup h3 { font-size: 13.5px; color: var(--text); font-weight: 800; text-transform: uppercase; }
-        .btn-close-popup { background: #F1F5F9; border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; font-weight: bold; cursor: pointer; color: #475569; }
+        .modal-header-popup h3 { font-size: 13.5px; font-weight: 800; text-transform: uppercase; }
+        .btn-close-popup { background: var(--strip-bg); border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 16px; font-weight: bold; cursor: pointer; color: var(--text); }
     </style>
 </head>
 <body>
 <div class="app-shell">
-    <!-- ZONA ATAS TETAP (STICKY / TIDAK IKUT KE-SCROLL) -->
+    <!-- ZONA ATAS TETAP (STICKY) -->
     <div class="top-fixed-zone">
         <header>
-            <div class="header-left">
-                <button class="btn-drawer-trigger" onclick="toggleLeftDrawer(true)" title="Buka Rekap Saldo Samping">
-                    💰 Saldo
-                </button>
-                <div class="header-title">
-                    <h1>Keuangan & Saldo Pribadi</h1>
-                    <p>Realtime Firebase Safe-Sync</p>
-                </div>
+            <div class="header-title">
+                <h1>📖 Keuangan & Saldo Pribadi</h1>
+                <p id="cloudStatusText">⚡ Menghubungkan ke Firebase...</p>
             </div>
-            <button class="btn-mgmt" onclick="openModal('mgmtDataModal')">⚙ Data</button>
+            <div class="header-right">
+                <div class="header-btn-group">
+                    <button class="btn-hdr" onclick="cycleTheme()" id="btnThemeLabel" title="Ganti Tema Warna">🎨 Tema: Biru</button>
+                    <button class="btn-hdr" onclick="openModal('mgmtDataModal')" title="Pengaturan Data">⚙ Data</button>
+                </div>
+                <div class="live-clock" id="liveClockDisplay">--/--/---- --:--:--</div>
+            </div>
         </header>
 
-        <div id="cloudStatus">⚡ Menghubungkan ke Firebase...</div>
-
-        <!-- 4 KARTU INFORMASI (TETAP DI ATAS SAAT SCROLL) -->
+        <!-- 4 KARTU INFORMASI BERWARNA GRADIENT (SEPERTI GAMBAR 1) -->
         <div class="top-summary-grid">
-            <div class="top-summary-card" onclick="switchMainPage('page-laporan', 'sub-pembukuan')">
-                <div class="icon-box">📈</div>
-                <div class="lbl">Profit Hari Ini</div>
-                <div class="val text-kredit" id="topProfitHariIni">Rp0</div>
+            <div class="grad-card grad-card-green" onclick="switchMainPage('page-laporan', 'sub-pembukuan')">
+                <div class="grad-icon-box">📈</div>
+                <div class="grad-info">
+                    <div class="grad-lbl">Profit Hari Ini</div>
+                    <div class="grad-val" id="topProfitHariIni">Rp0</div>
+                </div>
             </div>
-            <div class="top-summary-card" onclick="switchMainPage('page-transaksi')">
-                <div class="icon-box">💸</div>
-                <div class="lbl">Pengeluaran</div>
-                <div class="val text-debit" id="topPengeluaranHariIni">Rp0</div>
+            <div class="grad-card grad-card-blue" onclick="switchMainPage('page-transaksi')">
+                <div class="grad-icon-box">💸</div>
+                <div class="grad-info">
+                    <div class="grad-lbl">Pengeluaran Hari Ini</div>
+                    <div class="grad-val" id="topPengeluaranHariIni">Rp0</div>
+                </div>
             </div>
-            <div class="top-summary-card" onclick="toggleLeftDrawer(true)">
-                <div class="icon-box">⚡</div>
-                <div class="lbl">Fast Money</div>
-                <div class="val" id="topFastMoney" style="color:#D97706;">Rp0</div>
+            <div class="grad-card grad-card-teal" onclick="toggleLeftDrawer(true)">
+                <div class="grad-icon-box">⚡</div>
+                <div class="grad-info">
+                    <div class="grad-lbl">Fast Money</div>
+                    <div class="grad-val" id="topFastMoney">Rp0</div>
+                </div>
             </div>
-            <div class="top-summary-card" onclick="toggleLeftDrawer(true)">
-                <div class="icon-box">🏦</div>
-                <div class="lbl">Total Saldo</div>
-                <div class="val" id="topTotalSaldoRiil" style="color:#0284C7;">Rp0</div>
+            <div class="grad-card grad-card-cyan" onclick="toggleLeftDrawer(true)">
+                <div class="grad-icon-box">🏦</div>
+                <div class="grad-info">
+                    <div class="grad-lbl">Total Saldo Riil</div>
+                    <div class="grad-val" id="topTotalSaldoRiil">Rp0</div>
+                </div>
             </div>
         </div>
 
-        <!-- MENU SIMPEL POPUP DI ATAS JURNAL (TETAP DI ATAS SAAT SCROLL) -->
-        <div class="quick-action-strip">
-            <button class="qa-btn qa-trx" onclick="openNewTrxPopup()">+ Input Trx</button>
-            <button class="qa-btn qa-mutasi" onclick="openModal('popupPindahSaldo')">🔄 Pindah Saldo</button>
-            <button class="qa-btn qa-vlookup" onclick="openModal('popupVlookup')">⚙️ VLOOKUP</button>
-            <button class="qa-btn qa-saldo" onclick="openModal('popupKelolaSaldo')">🏦 Edit Akun</button>
+        <!-- STRIP MENU DI BAWAH KARTU DENGAN TOMBOL "💰 CEK SALDO ➜" (SEPERTI GAMBAR 2) -->
+        <div class="action-strip-box">
+            <div class="action-strip-left">
+                <button class="btn-cek-saldo" onclick="toggleLeftDrawer(true)">
+                    💰 CEK SALDO ➜
+                </button>
+                <button class="btn-strip-action" onclick="openModal('popupPindahSaldo')">
+                    🔄 Pindah Saldo
+                </button>
+                <button class="btn-strip-action" onclick="openModal('popupVlookup')">
+                    ⚙️ Master VLOOKUP
+                </button>
+                <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">
+                    🏦 Edit Akun Saldo
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- ZONA BAWAH YANG BISA DI-SCROLL -->
     <div class="scrollable-body">
-        <!-- HALAMAN 1: TRANSAKSI (LANGSUNG BERISI JURNAL TRANSAKSI HARIAN) -->
+        <!-- HALAMAN 1: TRANSAKSI (JURNAL TRANSAKSI HARIAN) -->
         <div id="page-transaksi" class="page-view active">
-            <div class="card">
-                <div class="card-header card-header-blue">
-                    <span>📖 Jurnal Transaksi Harian</span>
-                    <span id="jurnalCountBadge" style="font-size:9.5px; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:4px;">0 Trx</span>
-                </div>
+            <!-- Header Jurnal Polos Tanpa Deretan Tombol di Kanan -->
+            <div class="jurnal-plain-header">
+                <span>📖 JURNAL TRANSAKSI HARIAN</span>
+                <span id="jurnalCountBadge" style="font-size:11px; font-weight:800;">0 TRX</span>
+            </div>
 
-                <div class="filter-container">
-                    <button id="btnFilterAll" class="filter-btn active" onclick="resetFilterDate()">SEMUA</button>
-                    <input type="date" id="datePickerFilter" class="date-picker-input" onchange="filterJurnalByDatePicker(this.value)">
-                    <select id="akunFilterJurnal" class="date-picker-input" onchange="renderJurnalTable()">
-                        <option value="ALL">Semua Akun</option>
-                    </select>
-                    <input type="text" id="searchJurnalInput" class="date-picker-input" placeholder="Cari ket..." oninput="renderJurnalTable()" style="flex:1; min-width:100px;">
-                </div>
+            <!-- Bar Filter Lengkap Seperti Gambar 3 -->
+            <div class="jurnal-filter-bar">
+                <span class="filter-label">🔍 FILTER:</span>
+                <select id="filterModeJurnal" class="filter-select" onchange="onChangeFilterModeJurnal()">
+                    <option value="ALL">📅 SEMUA TANGGAL</option>
+                    <option value="DATE">📅 PER HARI (TANGGAL)</option>
+                </select>
+                <input type="date" id="datePickerFilter" class="filter-input" onchange="filterJurnalByDatePicker(this.value)">
+                <select id="katFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
+                    <option value="ALL">-- ALL KATEGORI --</option>
+                </select>
+                <select id="masukFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
+                    <option value="ALL">-- ALL MASUK --</option>
+                </select>
+                <select id="keluarFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
+                    <option value="ALL">-- ALL KELUAR --</option>
+                </select>
+                <input type="text" id="searchJurnalInput" class="filter-search-input" placeholder="🔍 CARI KET / NAMA / NOMINAL..." oninput="renderJurnalTable()">
+            </div>
 
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th rowspan="2">NO</th>
-                                <th rowspan="2">WAKTU</th>
-                                <th rowspan="2">KETERANGAN</th>
-                                <th rowspan="2">JENIS</th>
-                                <th colspan="2" class="th-pemasukan">PEMASUKAN</th>
-                                <th colspan="2" class="th-pengeluaran">PENGELUARAN</th>
-                                <th rowspan="2">PROFIT</th>
-                                <th rowspan="2">AKSI</th>
-                            </tr>
-                            <tr>
-                                <th class="th-pemasukan">KET</th>
-                                <th class="th-pemasukan">NOMINAL</th>
-                                <th class="th-pengeluaran">KET</th>
-                                <th class="th-pengeluaran">NOMINAL</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bodyJurnal"></tbody>
-                    </table>
-                </div>
+            <div class="table-responsive" style="background: var(--card);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">NO</th>
+                            <th rowspan="2">WAKTU</th>
+                            <th rowspan="2" style="text-align:left;">KETERANGAN</th>
+                            <th rowspan="2">KATEGORI</th>
+                            <th colspan="2" class="th-pemasukan">PEMASUKAN</th>
+                            <th colspan="2" class="th-pengeluaran">PENGELUARAN</th>
+                            <th rowspan="2">SELISIH</th>
+                            <th rowspan="2">AKSI</th>
+                        </tr>
+                        <tr>
+                            <th class="th-pemasukan">KET</th>
+                            <th class="th-pemasukan">NOMINAL</th>
+                            <th class="th-pengeluaran">KET</th>
+                            <th class="th-pengeluaran">NOMINAL</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyJurnal"></tbody>
+                </table>
             </div>
         </div>
 
-        <!-- HALAMAN 2: LAPORAN (GABUNGAN REKAP HARIAN, PEMBUKUAN, REKAP SALDO) -->
+        <!-- HALAMAN 2: LAPORAN -->
         <div id="page-laporan" class="page-view">
             <div class="sub-tabs">
                 <button id="btnSubHarian" class="sub-tab-btn active" onclick="switchReportSubTab('sub-rekap-harian', this)">📅 Rekap Harian</button>
@@ -446,22 +614,21 @@
                 <button id="btnSubSaldo" class="sub-tab-btn" onclick="switchReportSubTab('sub-saldo', this)">💰 Rekap Saldo</button>
             </div>
 
-            <!-- SUB 1: REKAP HARIAN -->
             <div id="sub-rekap-harian" class="sub-view active">
                 <div class="card">
                     <div class="card-header card-header-blue">
                         <span>📅 Rekap Arus Kas Harian</span>
-                        <input type="month" id="rekapMonthPicker" class="date-picker-input" onchange="renderTables()">
+                        <input type="month" id="rekapMonthPicker" class="filter-input" onchange="renderTables()">
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th class="th-blue" style="text-align:left;">TANGGAL</th>
-                                    <th class="th-blue">PEMASUKAN</th>
-                                    <th class="th-blue">PENGELUARAN</th>
-                                    <th class="th-blue">CUAN KONTER</th>
-                                    <th class="th-blue">BERSIH</th>
+                                    <th style="text-align:left;">TANGGAL</th>
+                                    <th>PEMASUKAN</th>
+                                    <th>PENGELUARAN</th>
+                                    <th>CUAN KONTER</th>
+                                    <th>SELISIH BERSIH</th>
                                 </tr>
                             </thead>
                             <tbody id="bodyRekapHarian"></tbody>
@@ -479,24 +646,23 @@
                 </div>
             </div>
 
-            <!-- SUB 2: PEMBUKUAN -->
             <div id="sub-pembukuan" class="sub-view">
                 <div class="card">
                     <div class="card-header">📊 Rekap Transaksi Pembukuan</div>
-                    <div class="filter-container">
-                        <span style="font-size:10px; font-weight:700; color:#475569;">Filter:</span>
-                        <button id="btnFilterAllPembukuan" class="filter-btn active" onclick="resetFilterDatePembukuan()">SEMUA</button>
-                        <input type="date" id="datePickerFilterPembukuan" class="date-picker-input" onchange="filterPembukuanByDatePicker(this.value)">
+                    <div class="jurnal-filter-bar">
+                        <span class="filter-label">Filter:</span>
+                        <button id="btnFilterAllPembukuan" class="btn-strip-action" onclick="resetFilterDatePembukuan()">SEMUA</button>
+                        <input type="date" id="datePickerFilterPembukuan" class="filter-input" onchange="filterPembukuanByDatePicker(this.value)">
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>TRANSAKSI</th>
+                                    <th style="text-align:left;">TRANSAKSI</th>
                                     <th>JML</th>
                                     <th>DEBIT</th>
                                     <th>KREDIT</th>
-                                    <th>TOTAL</th>
+                                    <th>SELISIH</th>
                                 </tr>
                             </thead>
                             <tbody id="bodyPembukuan"></tbody>
@@ -505,21 +671,20 @@
                 </div>
             </div>
 
-            <!-- SUB 3: REKAP SALDO LENGKAP -->
             <div id="sub-saldo" class="sub-view">
                 <div class="card">
                     <div class="card-header">
                         <span>💰 Rekap Saldo Semua Akun</span>
-                        <div style="display:flex; gap:4px;">
-                            <button class="btn-toggle" onclick="openModal('popupSaldoAwal')">⚙ Set Awal</button>
-                            <button class="btn-toggle" onclick="openModal('popupKelolaSaldo')">+ Kelola Akun</button>
+                        <div style="display:flex; gap:6px;">
+                            <button class="btn-strip-action" onclick="openModal('popupSaldoAwal')">⚙ Set Awal</button>
+                            <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">+ Kelola Akun</button>
                         </div>
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th class="col-nama-saldo">SALDO</th>
+                                    <th style="text-align:left;">SALDO</th>
                                     <th>AWAL</th>
                                     <th>MASUK</th>
                                     <th>KELUAR</th>
@@ -533,7 +698,7 @@
                                     <td id="sAwalTotal">Rp0</td>
                                     <td id="sMasukTotal" class="text-kredit">Rp0</td>
                                     <td id="sKeluarTotal" class="text-debit">Rp0</td>
-                                    <td id="sSaldoRiilSaya" style="font-size:11px; font-weight:800; color:#16A34A;">Rp0</td>
+                                    <td id="sSaldoRiilSaya" style="font-size:12px; font-weight:900; color:#16A34A;">Rp0</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -578,10 +743,10 @@
                             <tr>
                                 <th>NO</th>
                                 <th>WAKTU</th>
-                                <th>NAMA</th>
+                                <th style="text-align:left;">NAMA</th>
                                 <th>NOMINAL</th>
                                 <th>AKUN</th>
-                                <th>KET</th>
+                                <th style="text-align:left;">KET</th>
                                 <th>STATUS</th>
                                 <th>AKSI</th>
                             </tr>
@@ -598,13 +763,13 @@
     <aside id="leftSaldoDrawer" class="left-drawer">
         <div class="drawer-header">
             <div>
-                <div style="font-size:13px; font-weight:800; color:#FACC15;">💰 Rekap Saldo Saya</div>
-                <div style="font-size:9.5px; color:#CBD5E1;">Klik akun untuk filter jurnal · Geser tutup</div>
+                <div style="font-size:14px; font-weight:800; color:#FACC15;">💰 Rekap Saldo Saya</div>
+                <div style="font-size:10px; color:#E2E8F0;">Klik akun untuk filter jurnal</div>
             </div>
             <button class="btn-close-popup" onclick="toggleLeftDrawer(false)">&times;</button>
         </div>
         <div class="drawer-body">
-            <div style="display:flex; gap:5px; margin-bottom:8px;">
+            <div style="display:flex; gap:6px; margin-bottom:10px;">
                 <button class="btn" style="padding:7px; font-size:10px; background:#0284C7;" onclick="toggleLeftDrawer(false); openModal('popupPindahSaldo');">🔄 Pindah Saldo</button>
                 <button class="btn" style="padding:7px; font-size:10px; background:#16A34A;" onclick="toggleLeftDrawer(false); openModal('popupSaldoAwal');">⚙ Saldo Awal</button>
                 <button class="btn" style="padding:7px; font-size:10px; background:#334155;" onclick="toggleLeftDrawer(false); openModal('popupKelolaSaldo');">+ Edit Akun</button>
@@ -623,13 +788,16 @@
                         <tr class="total-row-highlight">
                             <td style="text-align:left; font-weight:800;">SALDO BERSIH</td>
                             <td id="dAwalTotal">Rp0</td>
-                            <td id="dSaldoRiilSaya" style="font-weight:800; color:#16A34A;">Rp0</td>
+                            <td id="dSaldoRiilSaya" style="font-weight:900; color:#16A34A;">Rp0</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
         </div>
     </aside>
+
+    <!-- FLOATING ACTION BUTTON (+) DI KANAN BAWAH SEMUA HALAMAN -->
+    <button class="fab-add-trx" onclick="openNewTrxPopup()" title="Input Transaksi Baru">+</button>
 
     <!-- POPUP 1: INPUT / EDIT TRANSAKSI BARU -->
     <div id="popupTrxModal" class="modal-overlay">
@@ -686,7 +854,7 @@
         </div>
     </div>
 
-    <!-- POPUP 2: PINDAH SALDO / TRANSFER -->
+    <!-- POPUP 2: PINDAH SALDO -->
     <div id="popupPindahSaldo" class="modal-overlay">
         <div class="modal-content-popup">
             <div class="modal-header-popup">
@@ -764,7 +932,7 @@
         </div>
     </div>
 
-    <!-- POPUP 5: KELOLA AKUN SALDO (TAMBAH / EDIT NAMA / HAPUS AKUN) -->
+    <!-- POPUP 5: KELOLA AKUN SALDO -->
     <div id="popupKelolaSaldo" class="modal-overlay">
         <div class="modal-content-popup">
             <div class="modal-header-popup">
@@ -806,7 +974,7 @@
                     💾 Backup Data (JSON)
                 </button>
                 <div>
-                    <label style="font-size: 10.5px; font-weight: 600; color: #475569; display: block; margin-bottom: 4px;">
+                    <label style="font-size: 10.5px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">
                         📥 Restore Data dari JSON:
                     </label>
                     <input type="file" id="restoreFileInput" accept=".json" class="form-control" onchange="restoreJSON(event)">
@@ -815,15 +983,11 @@
         </div>
     </div>
 
-    <!-- BOTTOM NAVIGATION BAR INTERAKTIF -->
+    <!-- BOTTOM NAVIGATION BAR (3 MENU UTAMA) -->
     <nav class="bottom-nav">
         <button id="bnav-transaksi" class="bnav-item active" onclick="switchMainPage('page-transaksi')">
             <span class="bnav-icon">📝</span>
             <span class="bnav-lbl">Transaksi</span>
-        </button>
-        <button id="bnav-saldo-drawer" class="bnav-item" onclick="toggleLeftDrawer(true)">
-            <span class="bnav-icon">💰</span>
-            <span class="bnav-lbl">Rekap Saldo</span>
         </button>
         <button id="bnav-laporan" class="bnav-item" onclick="switchMainPage('page-laporan')">
             <span class="bnav-icon">📊</span>
@@ -854,6 +1018,34 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPtfv5DAAKgzH_FVxrKX5Cg43fTSiiyRDKK2sGschbi26npMmu03wIQAVwSHPmpzgpag/exec";
+
+    // LIVE CLOCK LENGKAP DENGAN HARI, TANGGAL & DETIK
+    function updateClock() {
+        const now = new Date();
+        const tgl = now.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' });
+        const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const el = document.getElementById('liveClockDisplay');
+        if (el) el.innerText = `🕒 ${tgl} • ${jam}`;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 3 PILIHAN TEMA (BIRU, HIJAU, GELAP)
+    const themes = ['blue', 'green', 'dark'];
+    const themeNames = { blue: 'Biru', green: 'Hijau', dark: 'Gelap' };
+    let currentTheme = localStorage.getItem('zencell_theme') || 'blue';
+    function applyTheme(t) {
+        document.documentElement.setAttribute('data-theme', t);
+        const btn = document.getElementById('btnThemeLabel');
+        if (btn) btn.innerText = `🎨 Tema: ${themeNames[t]}`;
+        localStorage.setItem('zencell_theme', t);
+    }
+    applyTheme(currentTheme);
+    window.cycleTheme = function() {
+        const nextIdx = (themes.indexOf(currentTheme) + 1) % themes.length;
+        currentTheme = themes[nextIdx];
+        applyTheme(currentTheme);
+    };
 
     let selectedDateFilter = 'ALL';
     let selectedDateFilterPembukuan = 'ALL';
@@ -896,25 +1088,25 @@
         return 'Rp' + Number(num).toLocaleString('id-ID');
     };
 
+    const formatSelisih = (num) => {
+        if (!num) return 'Rp0';
+        if (num > 0) return '+Rp' + Math.abs(num).toLocaleString('id-ID');
+        return '-Rp' + Math.abs(num).toLocaleString('id-ID');
+    };
+
     window.openModal = function(id) { document.getElementById(id).classList.add('active'); };
     window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); };
 
     window.toggleLeftDrawer = function(open) {
         const drawer = document.getElementById('leftSaldoDrawer');
         const backdrop = document.getElementById('drawerBackdrop');
-        if (open) {
-            drawer.classList.add('open');
-            backdrop.classList.add('open');
-        } else {
-            drawer.classList.remove('open');
-            backdrop.classList.remove('open');
-        }
+        if (open) { drawer.classList.add('open'); backdrop.classList.add('open'); }
+        else { drawer.classList.remove('open'); backdrop.classList.remove('open'); }
     };
 
     window.switchMainPage = function(pageId, optionalSubTabId) {
         document.querySelectorAll('.page-view').forEach(el => el.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-
         document.querySelectorAll('.bnav-item').forEach(el => el.classList.remove('active'));
         if (pageId === 'page-transaksi') document.getElementById('bnav-transaksi').classList.add('active');
         if (pageId === 'page-laporan') document.getElementById('bnav-laporan').classList.add('active');
@@ -1005,15 +1197,11 @@
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    const statusEl = document.getElementById('cloudStatus');
+    const statusEl = document.getElementById('cloudStatusText');
     onValue(ref(db, '.info/connected'), (snap) => {
         if (snap.val() === true) {
-            statusEl.style.background = '#DCFCE7';
-            statusEl.style.color = '#15803D';
             statusEl.innerText = '⚡ Terhubung Realtime Firebase (Safe-Sync Active)';
         } else {
-            statusEl.style.background = '#FEF9C3';
-            statusEl.style.color = '#854D0E';
             statusEl.innerText = '⚠️ Mode Offline Sementara - Menunggu Jaringan...';
         }
     });
@@ -1028,7 +1216,7 @@
                 saldoList = [...defaultSaldoList];
             }
             if (Array.isArray(data.akunFastMoney) && data.akunFastMoney.length > 0) {
-                akunFastMoney = data.akunFastMoney;
+                akunFastMoney = data.akunFastMoney.filter(s => s !== 'SP' && s !== 'VOUCHER');
             } else {
                 akunFastMoney = [...defaultFastMoney];
             }
@@ -1054,10 +1242,7 @@
     });
 
     function saveToFirebase() {
-        if (!isInitialLoaded) {
-            alert("Sedang memuat data dari Firebase, tunggu sebentar!");
-            return false;
-        }
+        if (!isInitialLoaded) { alert("Sedang memuat data dari Firebase!"); return false; }
         set(ref(db, 'keuanganData'), {
             transaksi: transaksiJurnal,
             piutang: piutangData,
@@ -1070,7 +1255,6 @@
         return true;
     }
 
-    // KELOLA NAMA AKUN SALDO (TAMBAH, RENAME, HAPUS, TOGGLE FAST MONEY)
     function renderKelolaSaldoList() {
         const tbody = document.getElementById('bodyKelolaSaldoList');
         if (!tbody) return;
@@ -1114,34 +1298,24 @@
         saldoList[idx] = newName;
         saldoAwalData[newName] = saldoAwalData[oldName] || 0;
         delete saldoAwalData[oldName];
-
-        if (akunFastMoney.includes(oldName)) {
-            akunFastMoney = akunFastMoney.map(a => a === oldName ? newName : a);
-        }
+        if (akunFastMoney.includes(oldName)) akunFastMoney = akunFastMoney.map(a => a === oldName ? newName : a);
         transaksiJurnal = transaksiJurnal.map(t => ({ ...t, akun: t.akun === oldName ? newName : t.akun }));
         piutangData = piutangData.map(p => ({ ...p, sumber: p.sumber === oldName ? newName : p.sumber }));
-        Object.keys(vlookupMaster).forEach(k => {
-            if (vlookupMaster[k].akun === oldName) vlookupMaster[k].akun = newName;
-        });
-
+        Object.keys(vlookupMaster).forEach(k => { if (vlookupMaster[k].akun === oldName) vlookupMaster[k].akun = newName; });
         saveToFirebase();
     };
 
     window.deleteSaldoAccount = function(idx) {
         const target = saldoList[idx];
-        if (!target) return;
-        if (!confirm(`Hapus akun saldo "${target}" dari daftar?`)) return;
+        if (!target || !confirm(`Hapus akun saldo "${target}"?`)) return;
         saldoList.splice(idx, 1);
         akunFastMoney = akunFastMoney.filter(a => a !== target);
         saveToFirebase();
     };
 
     window.toggleFastMoneyAccount = function(accName) {
-        if (akunFastMoney.includes(accName)) {
-            akunFastMoney = akunFastMoney.filter(a => a !== accName);
-        } else {
-            akunFastMoney.push(accName);
-        }
+        if (akunFastMoney.includes(accName)) akunFastMoney = akunFastMoney.filter(a => a !== accName);
+        else akunFastMoney.push(accName);
         saveToFirebase();
     };
 
@@ -1154,10 +1328,13 @@
     function initDropdowns() {
         const selKat = document.getElementById('kategori');
         const vKat = document.getElementById('v_kat');
+        const fKatJurnal = document.getElementById('katFilterJurnal');
         selKat.innerHTML = ''; vKat.innerHTML = '';
+        fKatJurnal.innerHTML = '<option value="ALL">-- ALL KATEGORI --</option>';
         kategoriList.forEach(k => {
             selKat.innerHTML += `<option value="${k}">${k}</option>`;
             vKat.innerHTML += `<option value="${k}">${k}</option>`;
+            fKatJurnal.innerHTML += `<option value="${k}">${k}</option>`;
         });
 
         const ids = ['sumberSaldo', 'v_akun', 'pindahDari', 'pindahKe', 'piutangSumberSaldo'];
@@ -1168,9 +1345,14 @@
             saldoList.forEach(s => { el.innerHTML += `<option value="${s}">${s}</option>`; });
         });
 
-        const fAkunJurnal = document.getElementById('akunFilterJurnal');
-        fAkunJurnal.innerHTML = '<option value="ALL">Semua Akun</option>';
-        saldoList.forEach(s => { fAkunJurnal.innerHTML += `<option value="${s}">${s}</option>`; });
+        const fMasuk = document.getElementById('masukFilterJurnal');
+        const fKeluar = document.getElementById('keluarFilterJurnal');
+        fMasuk.innerHTML = '<option value="ALL">-- ALL MASUK --</option>';
+        fKeluar.innerHTML = '<option value="ALL">-- ALL KELUAR --</option>';
+        saldoList.forEach(s => {
+            fMasuk.innerHTML += `<option value="${s}">${s}</option>`;
+            fKeluar.innerHTML += `<option value="${s}">${s}</option>`;
+        });
 
         const dList = document.getElementById('listVlookup');
         const chipsEl = document.getElementById('vlookupChips');
@@ -1216,33 +1398,12 @@
         if (nom <= 0) { alert("Nominal pindah saldo harus lebih dari 0!"); return; }
 
         const skrg = new Date();
-        const opsiTgl = { weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' };
-        const waktuStr = skrg.toLocaleDateString('id-ID', opsiTgl);
+        const waktuStr = skrg.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
         const isoDateStr = `${skrg.getFullYear()}-${String(skrg.getMonth() + 1).padStart(2, '0')}-${String(skrg.getDate()).padStart(2, '0')}`;
         const noteText = ket ? ` (${ket})` : '';
 
-        transaksiJurnal.unshift({
-            id: Date.now() + 1,
-            action: 'addTrx',
-            waktu: waktuStr,
-            isoDate: isoDateStr,
-            keterangan: `[MUTASI] Terima dari ${dari}${noteText}`,
-            jenis: 'BELANJA',
-            jenisKas: 'MASUK',
-            akun: ke,
-            nominal: nom
-        });
-        transaksiJurnal.unshift({
-            id: Date.now(),
-            action: 'addTrx',
-            waktu: waktuStr,
-            isoDate: isoDateStr,
-            keterangan: `[MUTASI] Pindah ke ${ke}${noteText}`,
-            jenis: 'BELANJA',
-            jenisKas: 'KELUAR',
-            akun: dari,
-            nominal: nom
-        });
+        transaksiJurnal.unshift({ id: Date.now() + 1, action: 'addTrx', waktu: waktuStr, isoDate: isoDateStr, keterangan: `[MUTASI] Terima dari ${dari}${noteText}`, jenis: 'BELANJA', jenisKas: 'MASUK', akun: ke, nominal: nom });
+        transaksiJurnal.unshift({ id: Date.now(), action: 'addTrx', waktu: waktuStr, isoDate: isoDateStr, keterangan: `[MUTASI] Pindah ke ${ke}${noteText}`, jenis: 'BELANJA', jenisKas: 'KELUAR', akun: dari, nominal: nom });
 
         if (saveToFirebase()) {
             document.getElementById('formPindahSaldo').reset();
@@ -1375,79 +1536,93 @@
     };
 
     window.filterByAccountFromDrawer = function(accName) {
-        document.getElementById('akunFilterJurnal').value = accName;
+        document.getElementById('masukFilterJurnal').value = 'ALL';
+        document.getElementById('keluarFilterJurnal').value = 'ALL';
+        document.getElementById('searchJurnalInput').value = accName;
         toggleLeftDrawer(false);
         switchMainPage('page-transaksi');
         renderJurnalTable();
     };
 
-    window.filterJurnalByDatePicker = function(val) {
-        if (!val) { resetFilterDate(); return; }
-        selectedDateFilter = val;
-        document.getElementById('btnFilterAll').classList.remove('active');
+    window.onChangeFilterModeJurnal = function() {
+        const mode = document.getElementById('filterModeJurnal').value;
+        if (mode === 'ALL') {
+            selectedDateFilter = 'ALL';
+            document.getElementById('datePickerFilter').value = '';
+        } else {
+            const today = extractIsoDate();
+            selectedDateFilter = today;
+            document.getElementById('datePickerFilter').value = today;
+        }
         renderJurnalTable();
     };
 
-    window.resetFilterDate = function() {
-        selectedDateFilter = 'ALL';
-        document.getElementById('datePickerFilter').value = '';
-        document.getElementById('akunFilterJurnal').value = 'ALL';
-        document.getElementById('searchJurnalInput').value = '';
-        document.getElementById('btnFilterAll').classList.add('active');
+    window.filterJurnalByDatePicker = function(val) {
+        if (!val) {
+            selectedDateFilter = 'ALL';
+            document.getElementById('filterModeJurnal').value = 'ALL';
+        } else {
+            selectedDateFilter = val;
+            document.getElementById('filterModeJurnal').value = 'DATE';
+        }
         renderJurnalTable();
     };
 
     window.filterPembukuanByDatePicker = function(val) {
-        if (!val) { resetFilterDatePembukuan(); return; }
-        selectedDateFilterPembukuan = val;
-        document.getElementById('btnFilterAllPembukuan').classList.remove('active');
+        selectedDateFilterPembukuan = val || 'ALL';
         renderPembukuanTable();
     };
 
     window.resetFilterDatePembukuan = function() {
         selectedDateFilterPembukuan = 'ALL';
         document.getElementById('datePickerFilterPembukuan').value = '';
-        document.getElementById('btnFilterAllPembukuan').classList.add('active');
         renderPembukuanTable();
     };
 
     window.renderJurnalTable = function() {
         const bJurnal = document.getElementById('bodyJurnal');
-        const akunFilter = document.getElementById('akunFilterJurnal')?.value || 'ALL';
+        const katFilter = document.getElementById('katFilterJurnal')?.value || 'ALL';
+        const masukFilter = document.getElementById('masukFilterJurnal')?.value || 'ALL';
+        const keluarFilter = document.getElementById('keluarFilterJurnal')?.value || 'ALL';
         const qSearch = (document.getElementById('searchJurnalInput')?.value || '').trim().toLowerCase();
 
         let filteredList = transaksiJurnal.map((t, idx) => ({ ...t, originalIndex: idx }));
         if (selectedDateFilter !== 'ALL') filteredList = filteredList.filter(t => extractIsoDate(t.isoDate, t.waktu) === selectedDateFilter);
-        if (akunFilter !== 'ALL') filteredList = filteredList.filter(t => t.akun === akunFilter);
+        if (katFilter !== 'ALL') filteredList = filteredList.filter(t => t.jenis === katFilter);
+        if (masukFilter !== 'ALL') filteredList = filteredList.filter(t => t.jenisKas === 'MASUK' && t.akun === masukFilter);
+        if (keluarFilter !== 'ALL') filteredList = filteredList.filter(t => t.jenisKas === 'KELUAR' && t.akun === keluarFilter);
         if (qSearch) {
             filteredList = filteredList.filter(t =>
                 (t.keterangan || '').toLowerCase().includes(qSearch) ||
                 (t.jenis || '').toLowerCase().includes(qSearch) ||
-                (t.akun || '').toLowerCase().includes(qSearch)
+                (t.akun || '').toLowerCase().includes(qSearch) ||
+                String(t.nominal || '').includes(qSearch)
             );
         }
 
-        document.getElementById('jurnalCountBadge').innerText = `${filteredList.length} Trx`;
+        document.getElementById('jurnalCountBadge').innerText = `${filteredList.length} TRX`;
 
         if (filteredList.length === 0) {
-            bJurnal.innerHTML = `<tr><td colspan="10" style="text-align:center; color:#94A3B8; padding:14px;">Tidak ada transaksi.</td></tr>`;
+            bJurnal.innerHTML = `<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:16px;">Tidak ada transaksi yang sesuai filter.</td></tr>`;
             return;
         }
 
         bJurnal.innerHTML = filteredList.map((t) => {
             const isMasuk = t.jenisKas === 'MASUK';
             const origIdx = t.originalIndex;
+            const selisihVal = isMasuk ? Number(t.nominal) : -Number(t.nominal);
+            const selisihText = formatSelisih(selisihVal);
             return `
                 <tr>
                     <td style="text-align:center;">${transaksiJurnal.length - origIdx}</td>
                     <td>${t.waktu}</td>
                     <td style="text-align:left;"><b>${t.keterangan}</b></td>
                     <td style="text-align:center;">${t.jenis}</td>
-                    <td class="td-pemasukan">${isMasuk ? t.akun : '-'}</td>
+                    <td class="td-pemasukan" style="text-align:center;">${isMasuk ? t.akun : '-'}</td>
                     <td class="td-pemasukan text-kredit">${isMasuk ? formatRp(t.nominal) : '-'}</td>
-                    <td class="td-pengeluaran">${!isMasuk ? t.akun : '-'}</td>
+                    <td class="td-pengeluaran" style="text-align:center;">${!isMasuk ? t.akun : '-'}</td>
                     <td class="td-pengeluaran text-debit">${!isMasuk ? formatRp(t.nominal) : '-'}</td>
-                    <td>${t.jenis === 'CUAN KONTER' ? formatRp(t.nominal) : '-'}</td>
+                    <td class="${isMasuk ? 'text-kredit' : 'text-debit'}">${selisihText}</td>
                     <td style="text-align:center;">
                         <button class="btn-edit" onclick="editTrx(${origIdx})">Edit</button>
                         <button class="btn-delete" onclick="deleteTrx(${origIdx})">Hapus</button>
@@ -1480,7 +1655,7 @@
                     <td style="text-align:center;">${item.jml}</td>
                     <td class="text-debit">${formatRp(item.debit)}</td>
                     <td class="text-kredit">${formatRp(item.kredit)}</td>
-                    <td><b>${formatRp(total)}</b></td>
+                    <td class="${total > 0 ? 'text-kredit' : (total < 0 ? 'text-debit' : '')}"><b>${formatSelisih(total)}</b></td>
                 </tr>
             `;
         }).join('');
@@ -1535,7 +1710,7 @@
 
         const bPiutang = document.getElementById('bodyPiutang');
         bPiutang.innerHTML = piutangData.length === 0
-            ? `<tr><td colspan="8" style="text-align:center; color:#94A3B8;">Belum ada catatan utang/piutang.</td></tr>`
+            ? `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">Belum ada catatan utang/piutang.</td></tr>`
             : piutangData.map((p, idx) => {
                 const isLunas = p.status === 'LUNAS';
                 return `
@@ -1598,8 +1773,8 @@
                     <td style="text-align:left; font-weight:600;">${tglFormat}</td>
                     <td class="${totalMasuk > 0 ? 'text-kredit' : 'text-muted'}">${totalMasuk > 0 ? formatRp(totalMasuk) : '-'}</td>
                     <td class="${totalKeluar > 0 ? 'text-debit' : 'text-muted'}">${totalKeluar > 0 ? formatRp(totalKeluar) : '-'}</td>
-                    <td style="${totalCuan > 0 ? 'color:#0284C7; font-weight:700;' : 'color:#94A3B8;'}">${totalCuan > 0 ? formatRp(totalCuan) : '-'}</td>
-                    <td class="${bersih > 0 ? 'text-kredit' : (bersih < 0 ? 'text-debit' : 'text-muted')}">${hasData ? formatRp(bersih) : '-'}</td>
+                    <td style="${totalCuan > 0 ? 'color:#0284C7; font-weight:700;' : 'color:var(--text-muted);'}">${totalCuan > 0 ? formatRp(totalCuan) : '-'}</td>
+                    <td class="${bersih > 0 ? 'text-kredit' : (bersih < 0 ? 'text-debit' : 'text-muted')}">${hasData ? formatSelisih(bersih) : '-'}</td>
                 </tr>
             `;
         }
@@ -1608,7 +1783,7 @@
         document.getElementById('totPemasukanHarian').innerText = formatRp(grandPemasukan);
         document.getElementById('totPengeluaranHarian').innerText = formatRp(grandPengeluaran);
         document.getElementById('totCuanHarian').innerText = formatRp(grandCuan);
-        document.getElementById('totBersihHarian').innerText = formatRp(grandBersih);
+        document.getElementById('totBersihHarian').innerText = formatSelisih(grandBersih);
 
         let rekapSaldo = {};
         saldoList.forEach(s => rekapSaldo[s] = { awal: saldoAwalData[s] || 0, masuk: 0, keluar: 0 });
@@ -1646,12 +1821,12 @@
             let subNote = '';
             if (s === 'ZEN 1') subNote = '<br><span style="font-size:8px; color:#0284C7;">(Net / Sesudah Deposito&Bunga)</span>';
             if (s === 'ZEN 2') subNote = '<br><span style="font-size:8px; color:#0284C7;">(Net / Sesudah M Deded)</span>';
-            if (isInformasiTitipan) subNote = '<br><span style="font-size:8px; color:#94A3B8;">(Catatan Titipan)</span>';
+            if (isInformasiTitipan) subNote = '<br><span style="font-size:8px; color:var(--text-muted);">(Catatan Titipan)</span>';
             let bankBadge = isBankApp ? `<span class="bank-badge-btn" onclick="event.stopPropagation(); openBankApp('${s}')">🚀 Buka</span>` : '';
 
             return `
-                <tr style="${isInformasiTitipan ? 'background-color:#F8FAFC; opacity:0.7;' : ''}">
-                    <td class="col-nama-saldo clickable-bank" onclick="filterByAccountFromDrawer('${s}')" style="text-align:left;">
+                <tr style="${isInformasiTitipan ? 'opacity:0.65;' : ''}">
+                    <td onclick="filterByAccountFromDrawer('${s}')" style="text-align:left; cursor:pointer;">
                         <b>${s}</b> ${bankBadge} ${subNote}
                     </td>
                     <td>${formatRp(item.awal)}</td>
@@ -1672,7 +1847,7 @@
                 <tr onclick="filterByAccountFromDrawer('${s}')" style="cursor:pointer; ${isTitipan ? 'opacity:0.65;' : ''}">
                     <td style="text-align:left;"><b>${s}</b> ${akunFastMoney.includes(s) ? '⚡' : ''}</td>
                     <td>${formatRp(item.awal)}</td>
-                    <td style="font-weight:800; color:${totalDisplay >= 0 ? '#0F172A' : '#EF4444'};">${formatRp(totalDisplay)}</td>
+                    <td style="font-weight:800; color:${totalDisplay >= 0 ? 'var(--text)' : 'var(--debit)'};">${formatRp(totalDisplay)}</td>
                 </tr>
             `;
         }).join('');
