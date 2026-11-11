@@ -1327,7 +1327,7 @@
     let logsData = [];
     let editingSaldoIdx = null;
 
-    // Deteksi otomatis maupun kustom dana titipan yang berputar di ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan ZEN 2 (M Deded / Uang M Deded)
+    // Deteksi otomatis maupun kustom dana titipan yang berputar di SALDO ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan SALDO ZEN 2 (M Deded / Uang M Deded)
     function resolveTargetPotonganSaldo(accName) {
         if (potonganSaldoMap && potonganSaldoMap[accName]) {
             if (potonganSaldoMap[accName] === 'NONE') return null;
@@ -1336,8 +1336,16 @@
             }
         }
         const upper = (accName || '').toUpperCase().trim();
-        const zen1Acc = saldoList.find(s => s.toUpperCase().trim() === 'ZEN 1') || saldoList.find(s => /^ZEN\s*1\b/i.test(s.trim()));
-        const zen2Acc = saldoList.find(s => s.toUpperCase().trim() === 'ZEN 2') || saldoList.find(s => /^ZEN\s*2\b/i.test(s.trim()));
+        const zen1Acc =
+            saldoList.find(s => s.toUpperCase().trim() === 'SALDO ZEN 1') ||
+            saldoList.find(s => s.toUpperCase().trim() === 'ZEN 1') ||
+            saldoList.find(s => /\bZEN\s*1\b/i.test(s.trim())) ||
+            saldoList.find(s => s.toUpperCase().includes('ZEN 1'));
+        const zen2Acc =
+            saldoList.find(s => s.toUpperCase().trim() === 'SALDO ZEN 2') ||
+            saldoList.find(s => s.toUpperCase().trim() === 'ZEN 2') ||
+            saldoList.find(s => /\bZEN\s*2\b/i.test(s.trim())) ||
+            saldoList.find(s => s.toUpperCase().includes('ZEN 2'));
         if (upper.includes('DEPOSITO') && zen1Acc && accName !== zen1Acc) return zen1Acc;
         if (upper.includes('DEDED') && zen2Acc && accName !== zen2Acc) return zen2Acc;
         return null;
@@ -2331,14 +2339,4 @@
         document.getElementById('dSaldoRiilSaya').innerText = formatRp(sumSaldoRiilMurni);
 
         document.getElementById('topProfitHariIni').innerText = formatRp(hI_Profit);
-        document.getElementById('topPengeluaranHariIni').innerText = formatRp(hI_Pengeluaran);
-        document.getElementById('topFastMoney').innerText = formatRp(totalFastMoney);
-        document.getElementById('topTotalSaldoRiil').innerText = formatRp(sumSaldoRiilMurni);
-    };
-
-    updateClock();
-    setTodayDateInput();
-    initDropdowns();
-</script>
-</body>
-</html>
+        document.
