@@ -1129,21 +1129,25 @@
 
 <!-- POPUP 5: KELOLA AKUN SALDO -->
 <div id="popupKelolaSaldo" class="modal-overlay">
-    <div class="modal-content-popup">
+    <div class="modal-content-popup" style="max-width: 520px;">
         <div class="modal-header-popup">
-            <h3>🏦 Kelola Nama & Jenis Saldo</h3>
+            <div>
+                <h3>🏦 Kelola Nama & Jenis Saldo</h3>
+                <div style="font-size:9px; color:var(--text-muted);">Atur nama akun & dana berputar (Deposito Mamah/Bunga ➜ Potong ZEN 1, M Deded ➜ Potong ZEN 2)</div>
+            </div>
             <button class="btn-close-popup" onclick="closeModal('popupKelolaSaldo')">&times;</button>
         </div>
         <form id="formAddSaldo" style="display:flex; gap:6px; margin-bottom:10px;">
             <input type="text" id="newSaldoNameInput" class="form-control" placeholder="Nama Saldo Baru (misal: BCA, DANA...)" required>
             <button type="submit" class="btn" style="width:auto; padding:8px 12px; white-space:nowrap;">+ Tambah</button>
         </form>
-        <div class="table-responsive" style="max-height:260px;">
+        <div class="table-responsive" style="max-height:280px;">
             <table>
                 <thead>
                     <tr>
                         <th style="text-align:left;">NAMA AKUN</th>
-                        <th>FAST MONEY</th>
+                        <th>BERPUTAR DI (POTONG SALDO)</th>
+                        <th>FAST ⚡</th>
                         <th>AKSI</th>
                     </tr>
                 </thead>
@@ -1317,10 +1321,27 @@
     let transaksiJurnal = [];
     let piutangData = [];
     let saldoAwalData = {};
+    let potonganSaldoMap = {};
     let jadwalData = [];
     let catatanData = [];
     let logsData = [];
     let editingSaldoIdx = null;
+
+    // Deteksi otomatis maupun kustom dana titipan yang berputar di ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan ZEN 2 (M Deded / Uang M Deded)
+    function resolveTargetPotonganSaldo(accName) {
+        if (potonganSaldoMap && potonganSaldoMap[accName]) {
+            if (potonganSaldoMap[accName] === 'NONE') return null;
+            if (saldoList.includes(potonganSaldoMap[accName]) && potonganSaldoMap[accName] !== accName) {
+                return potonganSaldoMap[accName];
+            }
+        }
+        const upper = (accName || '').toUpperCase().trim();
+        const zen1Acc = saldoList.find(s => s.toUpperCase().trim() === 'ZEN 1') || saldoList.find(s => /^ZEN\s*1\b/i.test(s.trim()));
+        const zen2Acc = saldoList.find(s => s.toUpperCase().trim() === 'ZEN 2') || saldoList.find(s => /^ZEN\s*2\b/i.test(s.trim()));
+        if (upper.includes('DEPOSITO') && zen1Acc && accName !== zen1Acc) return zen1Acc;
+        if (upper.includes('DEDED') && zen2Acc && accName !== zen2Acc) return zen2Acc;
+        return null;
+    }
 
     function addLogEntry(kategori, aksi, detail, tipe = 'INFO') {
         const now = new Date();
@@ -1580,6 +1601,7 @@
             transaksiJurnal = normalizeTransactions(data.transaksi || []);
             piutangData = Array.isArray(data.piutang) ? data.piutang.filter(Boolean) : [];
             saldoAwalData = data.saldoAwal || {};
+            potonganSaldoMap = (data.potonganSaldo && typeof data.potonganSaldo === 'object') ? data.potonganSaldo : {};
             vlookupMaster = Object.assign({}, defaultMaster, data.vlookup || {});
             jadwalData = Array.isArray(data.jadwal) ? data.jadwal.filter(Boolean) : [];
             catatanData = Array.isArray(data.catatan) ? data.catatan.filter(Boolean) : [];
@@ -1605,6 +1627,7 @@
             vlookup: vlookupMaster,
             saldoList: saldoList,
             akunFastMoney: akunFastMoney,
+            potonganSaldo: potonganSaldoMap,
             jadwal: jadwalData,
             catatan: catatanData,
             logs: logsData,
@@ -1713,6 +1736,10 @@
         tbody.innerHTML = saldoList.map((s, idx) => {
             const isFast = akunFastMoney.includes(s);
             const isEditing = editingSaldoIdx === idx;
+            const resolvedTarget = resolveTargetPotonganSaldo(s) || 'NONE';
+            const optionsHtml = ['<option value="NONE"' + (resolvedTarget === 'NONE' ? ' selected' : '') + '>Saldo Murni</option>']
+                .concat(saldoList.filter(other => other !== s).map(other => `<option value="${other}"${resolvedTarget === other ? ' selected' : ''}>🔄 Potong ${other}</option>`))
+                .join('');
             return `
                 <tr>
                     <td style="text-align:left; font-weight:700;">
@@ -1720,6 +1747,11 @@
                             ? `<input type="text" id="inlineRenameInput_${idx}" class="form-control" style="padding:3px 6px; font-size:10px; font-weight:800;" value="${s}" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmRenameSaldoAccount(${idx});}else if(event.key==='Escape'){cancelRenameSaldoAccount();}">`
                             : s
                         }
+                    </td>
+                    <td style="text-align:center;">
+                        <select class="filter-select" style="font-size:9px; padding:2px 4px;" onchange="changePotonganSaldoAccount('${s}', this.value)">
+                            ${optionsHtml}
+                        </select>
                     </td>
                     <td style="text-align:center;">
                         <input type="checkbox" ${isFast ? 'checked' : ''} onchange="toggleFastMoneyAccount('${s}')">
@@ -1740,6 +1772,14 @@
             if (inp) { inp.focus(); inp.select(); }
         }
     }
+
+    window.changePotonganSaldoAccount = function(accName, targetVal) {
+        potonganSaldoMap[accName] = targetVal;
+        addLogEntry('SALDO', 'Atur Dana Berputar', `Akun "${accName}" diatur ke: ${targetVal === 'NONE' ? 'Saldo Murni' : 'Memotong ' + targetVal}`, 'EDIT');
+        renderKelolaSaldoList();
+        renderTables();
+        saveToFirebase();
+    };
 
     document.getElementById('formAddSaldo').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -1781,6 +1821,18 @@
             return;
         }
 
+        const prevTargetForOld = resolveTargetPotonganSaldo(oldName);
+        const nextPotongan = {};
+        Object.keys(potonganSaldoMap).forEach(k => {
+            const uk = k === oldName ? newName : k;
+            const uv = potonganSaldoMap[k] === oldName ? newName : potonganSaldoMap[k];
+            nextPotongan[uk] = uv;
+        });
+        if (prevTargetForOld && !nextPotongan[newName]) {
+            nextPotongan[newName] = prevTargetForOld === oldName ? newName : prevTargetForOld;
+        }
+        potonganSaldoMap = nextPotongan;
+
         saldoList[idx] = newName;
         saldoAwalData[newName] = saldoAwalData[oldName] || 0;
         delete saldoAwalData[oldName];
@@ -1803,7 +1855,7 @@
 
         piutangData = piutangData.map(p => ({
             ...p,
-            akun: p.akun === oldName ? newName : p.akun
+            sumber: p.sumber === oldName ? newName : p.sumber
         }));
 
         Object.keys(vlookupMaster).forEach(k => {
@@ -2200,11 +2252,29 @@
 
         let rawSaldo = {};
         saldoList.forEach(s => { rawSaldo[s] = rekapSaldo[s].awal + rekapSaldo[s].masuk - rekapSaldo[s].keluar; });
-        let displaySaldo = { ...rawSaldo };
-        if (displaySaldo['ZEN 1'] !== undefined) displaySaldo['ZEN 1'] = (rawSaldo['ZEN 1'] || 0) - ((rawSaldo['DEPOSITO'] || 0) + (rawSaldo['BUNGA DEPOSITO'] || 0));
-        if (displaySaldo['ZEN 2'] !== undefined) displaySaldo['ZEN 2'] = (rawSaldo['ZEN 2'] || 0) - (rawSaldo['M DEDED'] || 0);
 
-        const akunTitipan = ['DEPOSITO', 'BUNGA DEPOSITO', 'M DEDED'];
+        // Hitung potongan dana titipan yang berputar di ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan ZEN 2 (M Deded / Uang M Deded)
+        let targetIndukByAccount = {};
+        let rincianPotonganInduk = {};
+        let totalPotonganInduk = {};
+
+        saldoList.forEach(s => {
+            const targetInduk = resolveTargetPotonganSaldo(s);
+            targetIndukByAccount[s] = targetInduk;
+            if (targetInduk) {
+                if (!rincianPotonganInduk[targetInduk]) rincianPotonganInduk[targetInduk] = [];
+                rincianPotonganInduk[targetInduk].push({ akun: s, nominal: rawSaldo[s] || 0 });
+                totalPotonganInduk[targetInduk] = (totalPotonganInduk[targetInduk] || 0) + (rawSaldo[s] || 0);
+            }
+        });
+
+        let displaySaldo = { ...rawSaldo };
+        saldoList.forEach(s => {
+            if (totalPotonganInduk[s] !== undefined) {
+                displaySaldo[s] = (rawSaldo[s] || 0) - totalPotonganInduk[s];
+            }
+        });
+
         let sumAwal = 0, sumMasuk = 0, sumKeluar = 0, sumSaldoRiilMurni = 0, totalFastMoney = 0;
 
         const rowsSaldoHtml = [];
@@ -2212,17 +2282,30 @@
 
         saldoList.forEach(s => {
             const item = rekapSaldo[s];
+            const rawVal = rawSaldo[s] || 0;
             const totalDisplay = displaySaldo[s];
-            const isTitipan = akunTitipan.includes(s);
+            const targetInduk = targetIndukByAccount[s];
+            const isTitipan = Boolean(targetInduk);
+            const rincianPotongan = rincianPotonganInduk[s] || [];
+            const totalPotongan = totalPotonganInduk[s] || 0;
+
             if (!isTitipan) {
                 sumAwal += item.awal; sumMasuk += item.masuk; sumKeluar += item.keluar;
                 sumSaldoRiilMurni += totalDisplay;
             }
             if (akunFastMoney.includes(s)) totalFastMoney += totalDisplay;
 
+            let subNoteHtml = '';
+            if (rincianPotongan.length > 0) {
+                const listNames = rincianPotongan.map(r => r.akun).join(' + ');
+                subNoteHtml = `<div style="font-size:8px; color:#0284C7; font-weight:700; white-space:normal;">Kotor: ${formatRp(rawVal)} • Dipotong (${listNames}): -${formatRp(totalPotongan)}</div>`;
+            } else if (isTitipan) {
+                subNoteHtml = `<div style="font-size:8px; color:#D97706; font-weight:700; white-space:normal;">🔄 Berputar di ${targetInduk} (Memotong ${targetInduk})</div>`;
+            }
+
             rowsSaldoHtml.push(`
-                <tr style="${isTitipan ? 'opacity:0.65;' : ''}">
-                    <td style="text-align:left;"><b>${s}</b></td>
+                <tr style="${isTitipan ? 'opacity:0.7;' : ''}">
+                    <td style="text-align:left;"><b>${s}</b>${subNoteHtml}</td>
                     <td>${formatRp(item.awal)}</td>
                     <td class="text-kredit">${formatRp(item.masuk)}</td>
                     <td class="text-debit">${formatRp(item.keluar)}</td>
@@ -2231,8 +2314,8 @@
             `);
 
             rowsDrawerHtml.push(`
-                <tr style="${isTitipan ? 'opacity:0.65;' : ''}">
-                    <td style="text-align:left;"><b>${s}</b></td>
+                <tr style="${isTitipan ? 'opacity:0.7;' : ''}">
+                    <td style="text-align:left;"><b>${s}</b>${subNoteHtml}</td>
                     <td style="font-size:9px;"><span class="text-kredit">+${formatRp(item.masuk)}</span><br><span class="text-debit">-${formatRp(item.keluar)}</span></td>
                     <td><b>${formatRp(totalDisplay)}</b></td>
                 </tr>
