@@ -592,6 +592,7 @@
                 </div>
                 <div class="header-right">
                     <div class="header-btn-group">
+                        <button class="btn-hdr" onclick="openLogModal()" title="Log Aktivitas">📜 Log <span id="hdrLogBadge" style="background:#FACC15; color:#0F172A; padding:0 4px; border-radius:4px; font-size:8px; font-weight:900;">0</span></button>
                         <button class="btn-hdr" onclick="cycleTheme()" id="btnThemeLabel">🎨 Biru</button>
                         <button class="btn-hdr" onclick="openModal('mgmtDataModal')">⚙ Data</button>
                     </div>
@@ -664,14 +665,16 @@
                     <span id="jurnalCountBadge" style="font-size:10px; font-weight:800;">0 TRX</span>
                 </div>
 
-                <!-- Bar Filter Lengkap (Default: PER HARI / TANGGAL HARI INI) -->
+                <!-- Bar Filter Lengkap (Default: PER HARI / TANGGAL HARI INI, ditambah PER BULAN) -->
                 <div class="jurnal-filter-bar">
                     <span class="filter-label">🔍 FILTER:</span>
                     <select id="filterModeJurnal" class="filter-select" onchange="onChangeFilterModeJurnal()">
                         <option value="DATE">📅 PER HARI (TANGGAL)</option>
+                        <option value="MONTH">🗓️ PER BULAN</option>
                         <option value="ALL">📅 SEMUA TANGGAL</option>
                     </select>
                     <input type="date" id="datePickerFilter" class="filter-input" onchange="filterJurnalByDatePicker(this.value)">
+                    <input type="month" id="monthPickerFilter" class="filter-input" style="display:none;" onchange="filterJurnalByMonthPicker(this.value)">
                     <select id="katFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
                         <option value="ALL">-- ALL KATEGORI --</option>
                     </select>
@@ -1175,6 +1178,33 @@
     </div>
 </div>
 
+<!-- POPUP 7: LOG AKTIVITAS -->
+<div id="logModal" class="modal-overlay">
+    <div class="modal-content-popup" style="max-width: 520px;">
+        <div class="modal-header-popup">
+            <div>
+                <h3>📜 Log Aktivitas Aplikasi</h3>
+                <div style="font-size:9.5px; color:var(--text-muted);">Riwayat otomatis perubahan transaksi, saldo, jadwal & pengaturan</div>
+            </div>
+            <button class="btn-close-popup" onclick="closeModal('logModal')">&times;</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px;">
+            <select id="logFilterKat" class="filter-select" onchange="renderLogList()">
+                <option value="ALL">-- SEMUA KATEGORI --</option>
+                <option value="TRANSAKSI">💸 TRANSAKSI</option>
+                <option value="SALDO">🏦 AKUN SALDO</option>
+                <option value="PIUTANG">🤝 PIUTANG</option>
+                <option value="JADWAL">⏰ JADWAL</option>
+                <option value="CATATAN">📝 CATATAN</option>
+                <option value="SISTEM">⚙️ SISTEM</option>
+            </select>
+            <input type="text" id="logSearchInput" class="filter-search-input" placeholder="🔍 Cari aktivitas / detail..." oninput="renderLogList()">
+            <button type="button" class="btn-delete" style="padding:4px 8px; font-size:9.5px;" onclick="clearAllLogs()">🗑️ Bersihkan</button>
+        </div>
+        <div id="logListContainer" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:6px;"></div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -1265,6 +1295,7 @@
 
     // DEFAULT TANGGAL HARI INI SESUAI INSTRUKSI #4
     let selectedDateFilter = getTodayIsoStr();
+    let selectedMonthFilter = getTodayIsoStr().slice(0, 7);
     let selectedDateFilterPembukuan = 'ALL';
     let isInitialLoaded = false;
 
@@ -1288,6 +1319,76 @@
     let saldoAwalData = {};
     let jadwalData = [];
     let catatanData = [];
+    let logsData = [];
+    let editingSaldoIdx = null;
+
+    function addLogEntry(kategori, aksi, detail, tipe = 'INFO') {
+        const now = new Date();
+        const tgl = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+        const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        logsData.unshift({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            waktu: `${tgl} ${jam}`,
+            isoDate: getTodayIsoStr(),
+            kategori,
+            aksi,
+            detail,
+            tipe
+        });
+        if (logsData.length > 250) logsData = logsData.slice(0, 250);
+        updateLogBadge();
+    }
+
+    function updateLogBadge() {
+        const badge = document.getElementById('hdrLogBadge');
+        if (badge) badge.innerText = String(logsData.length);
+    }
+
+    window.openLogModal = function() {
+        renderLogList();
+        openModal('logModal');
+    };
+
+    window.clearAllLogs = function() {
+        if (!logsData.length) return;
+        if (!confirm('Bersihkan semua riwayat log aktivitas?')) return;
+        logsData = [];
+        updateLogBadge();
+        renderLogList();
+        saveToFirebase();
+    };
+
+    window.renderLogList = function() {
+        const cont = document.getElementById('logListContainer');
+        if (!cont) return;
+        const kat = document.getElementById('logFilterKat')?.value || 'ALL';
+        const q = (document.getElementById('logSearchInput')?.value || '').trim().toLowerCase();
+        let list = logsData;
+        if (kat !== 'ALL') list = list.filter(l => l.kategori === kat);
+        if (q) list = list.filter(l => (l.aksi || '').toLowerCase().includes(q) || (l.detail || '').toLowerCase().includes(q) || (l.kategori || '').toLowerCase().includes(q));
+        if (!list.length) {
+            cont.innerHTML = '<div style="text-align:center; padding:18px; color:var(--text-muted); font-size:10.5px;">Belum ada riwayat aktivitas pada filter ini.</div>';
+            return;
+        }
+        const badgeColors = {
+            ADD: 'background:#DCFCE7; color:#15803D;',
+            EDIT: 'background:#FEF9C3; color:#A16207;',
+            DELETE: 'background:#FEE2E2; color:#B91C1C;',
+            INFO: 'background:#E0F2FE; color:#0369A1;'
+        };
+        cont.innerHTML = list.map(item => `
+            <div style="padding:7px 9px; border:1px solid var(--border); border-radius:8px; background:var(--strip-bg); display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div style="min-width:0; flex:1;">
+                    <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
+                        <span style="padding:1px 5px; border-radius:4px; font-size:8.5px; font-weight:800; ${badgeColors[item.tipe] || badgeColors.INFO}">${item.kategori}</span>
+                        <span style="font-size:10.5px; font-weight:800;">${item.aksi}</span>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-muted); word-break:break-word;">${item.detail}</div>
+                </div>
+                <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap;">${item.waktu}</div>
+            </div>
+        `).join('');
+    };
 
     function extractIsoDate(str, waktuStr) {
         if (str && typeof str === 'string') {
@@ -1351,6 +1452,8 @@
         if (jTgl && !jTgl.value) jTgl.value = today;
         const monthEl = document.getElementById('rekapMonthPicker');
         if (monthEl && !monthEl.value) monthEl.value = today.slice(0, 7);
+        const mpJurnal = document.getElementById('monthPickerFilter');
+        if (mpJurnal && !mpJurnal.value) mpJurnal.value = today.slice(0, 7);
     }
 
     const formatRp = (num) => {
@@ -1480,7 +1583,9 @@
             vlookupMaster = Object.assign({}, defaultMaster, data.vlookup || {});
             jadwalData = Array.isArray(data.jadwal) ? data.jadwal.filter(Boolean) : [];
             catatanData = Array.isArray(data.catatan) ? data.catatan.filter(Boolean) : [];
+            logsData = Array.isArray(data.logs) ? data.logs.filter(Boolean) : [];
 
+            updateLogBadge();
             setTodayDateInput();
             initDropdowns();
             initSaldoGrid();
@@ -1492,7 +1597,8 @@
 
     function saveToFirebase() {
         if (!isInitialLoaded) { alert("Sedang memuat data dari Firebase!"); return false; }
-        set(ref(db, 'keuanganData'), {
+        // Sanitize payload with JSON.parse(JSON.stringify(...)) so undefined properties never break Firebase set()
+        const rawPayload = {
             transaksi: transaksiJurnal,
             piutang: piutangData,
             saldoAwal: saldoAwalData,
@@ -1501,8 +1607,11 @@
             akunFastMoney: akunFastMoney,
             jadwal: jadwalData,
             catatan: catatanData,
+            logs: logsData,
             lastUpdated: new Date().toISOString()
-        });
+        };
+        const cleanPayload = JSON.parse(JSON.stringify(rawPayload));
+        set(ref(db, 'keuanganData'), cleanPayload);
         return true;
     }
 
@@ -1603,19 +1712,33 @@
         if (!tbody) return;
         tbody.innerHTML = saldoList.map((s, idx) => {
             const isFast = akunFastMoney.includes(s);
+            const isEditing = editingSaldoIdx === idx;
             return `
                 <tr>
-                    <td style="text-align:left; font-weight:700;">${s}</td>
+                    <td style="text-align:left; font-weight:700;">
+                        ${isEditing
+                            ? `<input type="text" id="inlineRenameInput_${idx}" class="form-control" style="padding:3px 6px; font-size:10px; font-weight:800;" value="${s}" onkeydown="if(event.key==='Enter'){event.preventDefault();confirmRenameSaldoAccount(${idx});}else if(event.key==='Escape'){cancelRenameSaldoAccount();}">`
+                            : s
+                        }
+                    </td>
                     <td style="text-align:center;">
                         <input type="checkbox" ${isFast ? 'checked' : ''} onchange="toggleFastMoneyAccount('${s}')">
                     </td>
                     <td style="text-align:center;">
-                        <button class="btn-edit" onclick="renameSaldoAccount(${idx})">Ubah Nama</button>
-                        <button class="btn-delete" onclick="deleteSaldoAccount(${idx})">Hapus</button>
+                        ${isEditing
+                            ? `<button class="btn-lunas" onclick="confirmRenameSaldoAccount(${idx})">Simpan</button>
+                               <button class="btn-edit" style="background:#94A3B8; color:#FFF;" onclick="cancelRenameSaldoAccount()">Batal</button>`
+                            : `<button class="btn-edit" onclick="startRenameSaldoAccount(${idx})">Ubah Nama</button>
+                               <button class="btn-delete" onclick="deleteSaldoAccount(${idx})">Hapus</button>`
+                        }
                     </td>
                 </tr>
             `;
         }).join('');
+        if (editingSaldoIdx !== null) {
+            const inp = document.getElementById(`inlineRenameInput_${editingSaldoIdx}`);
+            if (inp) { inp.focus(); inp.select(); }
+        }
     }
 
     document.getElementById('formAddSaldo').addEventListener('submit', function(e) {
@@ -1625,24 +1748,76 @@
         saldoList.push(rawName);
         saldoAwalData[rawName] = 0;
         document.getElementById('newSaldoNameInput').value = '';
+        addLogEntry('SALDO', 'Tambah Akun Saldo', `Menambahkan akun saldo baru: "${rawName}"`, 'ADD');
+        initDropdowns();
+        initSaldoGrid();
+        renderKelolaSaldoList();
+        renderTables();
         saveToFirebase();
     });
 
-    window.renameSaldoAccount = function(idx) {
+    window.startRenameSaldoAccount = function(idx) {
+        editingSaldoIdx = idx;
+        renderKelolaSaldoList();
+    };
+
+    window.cancelRenameSaldoAccount = function() {
+        editingSaldoIdx = null;
+        renderKelolaSaldoList();
+    };
+
+    window.confirmRenameSaldoAccount = function(idx) {
         const oldName = saldoList[idx];
-        const newNameRaw = prompt(`Ubah nama akun saldo "${oldName}" menjadi:`, oldName);
-        if (!newNameRaw) return;
-        const newName = newNameRaw.trim().toUpperCase();
-        if (!newName || newName === oldName || saldoList.includes(newName)) return;
+        const inp = document.getElementById(`inlineRenameInput_${idx}`);
+        if (!oldName || !inp) return;
+        const newName = inp.value.trim().toUpperCase();
+        if (!newName || newName === oldName) {
+            editingSaldoIdx = null;
+            renderKelolaSaldoList();
+            return;
+        }
+        if (saldoList.some((s, i) => i !== idx && s === newName)) {
+            alert('Nama akun saldo tersebut sudah ada!');
+            return;
+        }
+
         saldoList[idx] = newName;
         saldoAwalData[newName] = saldoAwalData[oldName] || 0;
         delete saldoAwalData[oldName];
         akunFastMoney = akunFastMoney.map(a => a === oldName ? newName : a);
-        transaksiJurnal = transaksiJurnal.map(t => ({
-            ...t,
-            akun: t.akun === oldName ? newName : t.akun,
-            akunTujuan: t.akunTujuan === oldName ? newName : t.akunTujuan
+
+        // Update semua transaksi (tanpa membuat akunTujuan: undefined yang menggagalkan Firebase set)
+        transaksiJurnal = transaksiJurnal.map(t => {
+            const updated = {
+                ...t,
+                akun: t.akun === oldName ? newName : t.akun,
+                keterangan: t.keterangan ? t.keterangan.split(oldName).join(newName) : t.keterangan
+            };
+            if (t.akunTujuan) {
+                updated.akunTujuan = t.akunTujuan === oldName ? newName : t.akunTujuan;
+            } else {
+                delete updated.akunTujuan;
+            }
+            return updated;
+        });
+
+        piutangData = piutangData.map(p => ({
+            ...p,
+            akun: p.akun === oldName ? newName : p.akun
         }));
+
+        Object.keys(vlookupMaster).forEach(k => {
+            if (vlookupMaster[k] && vlookupMaster[k].akun === oldName) {
+                vlookupMaster[k].akun = newName;
+            }
+        });
+
+        editingSaldoIdx = null;
+        addLogEntry('SALDO', 'Ubah Nama Akun Saldo', `Mengubah nama akun "${oldName}" ➜ "${newName}"`, 'EDIT');
+        initDropdowns();
+        initSaldoGrid();
+        renderKelolaSaldoList();
+        renderTables();
         saveToFirebase();
     };
 
@@ -1651,12 +1826,19 @@
         if (!target || !confirm(`Hapus akun saldo "${target}"?`)) return;
         saldoList.splice(idx, 1);
         akunFastMoney = akunFastMoney.filter(a => a !== target);
+        addLogEntry('SALDO', 'Hapus Akun Saldo', `Menghapus akun saldo "${target}"`, 'DELETE');
+        initDropdowns();
+        initSaldoGrid();
+        renderKelolaSaldoList();
+        renderTables();
         saveToFirebase();
     };
 
     window.toggleFastMoneyAccount = function(accName) {
         if (akunFastMoney.includes(accName)) akunFastMoney = akunFastMoney.filter(a => a !== accName);
         else akunFastMoney.push(accName);
+        addLogEntry('SALDO', 'Ubah Status Fast Money', `Toggle Fast Money untuk akun "${accName}"`, 'EDIT');
+        renderTables();
         saveToFirebase();
     };
 
@@ -1826,8 +2008,13 @@
             nominal: nom
         };
 
-        if (editIdx >= 0 && transaksiJurnal[editIdx]) transaksiJurnal[editIdx] = payload;
-        else transaksiJurnal.unshift(payload);
+        if (editIdx >= 0 && transaksiJurnal[editIdx]) {
+            transaksiJurnal[editIdx] = payload;
+            addLogEntry('TRANSAKSI', 'Edit Transaksi', `${ket} (${formatRp(nom)}) pada akun ${akun}`, 'EDIT');
+        } else {
+            transaksiJurnal.unshift(payload);
+            addLogEntry('TRANSAKSI', 'Tambah Transaksi', `${ket} (${formatRp(nom)}) - [${jenisKas}] ${akun}`, 'ADD');
+        }
 
         saveToFirebase();
         cancelEdit();
@@ -1860,7 +2047,9 @@
     };
 
     window.deleteTrx = function(index) {
-        if (transaksiJurnal[index] && confirm(`Hapus transaksi "${transaksiJurnal[index].keterangan}"?`)) {
+        const target = transaksiJurnal[index];
+        if (target && confirm(`Hapus transaksi "${target.keterangan}"?`)) {
+            addLogEntry('TRANSAKSI', 'Hapus Transaksi', `${target.keterangan} (${formatRp(target.nominal)}) - ${target.akun}`, 'DELETE');
             transaksiJurnal.splice(index, 1);
             saveToFirebase();
         }
@@ -1868,13 +2057,28 @@
 
     window.onChangeFilterModeJurnal = function() {
         const mode = document.getElementById('filterModeJurnal').value;
+        const dp = document.getElementById('datePickerFilter');
+        const mp = document.getElementById('monthPickerFilter');
+        const today = getTodayIsoStr();
+
         if (mode === 'ALL') {
             selectedDateFilter = 'ALL';
-            document.getElementById('datePickerFilter').value = '';
+            if (dp) dp.style.display = 'none';
+            if (mp) mp.style.display = 'none';
+        } else if (mode === 'MONTH') {
+            selectedMonthFilter = today.slice(0, 7);
+            if (dp) dp.style.display = 'none';
+            if (mp) {
+                mp.style.display = 'inline-block';
+                mp.value = selectedMonthFilter;
+            }
         } else {
-            const today = getTodayIsoStr();
             selectedDateFilter = today;
-            document.getElementById('datePickerFilter').value = today;
+            if (mp) mp.style.display = 'none';
+            if (dp) {
+                dp.style.display = 'inline-block';
+                dp.value = today;
+            }
         }
         renderJurnalTable();
     };
@@ -1890,15 +2094,31 @@
         renderJurnalTable();
     };
 
+    window.filterJurnalByMonthPicker = function(val) {
+        if (!val) {
+            selectedDateFilter = 'ALL';
+            document.getElementById('filterModeJurnal').value = 'ALL';
+        } else {
+            selectedMonthFilter = val;
+            document.getElementById('filterModeJurnal').value = 'MONTH';
+        }
+        renderJurnalTable();
+    };
+
     window.renderJurnalTable = function() {
         const bJurnal = document.getElementById('bodyJurnal');
+        const mode = document.getElementById('filterModeJurnal')?.value || 'DATE';
         const katFilter = document.getElementById('katFilterJurnal')?.value || 'ALL';
         const masukFilter = document.getElementById('masukFilterJurnal')?.value || 'ALL';
         const keluarFilter = document.getElementById('keluarFilterJurnal')?.value || 'ALL';
         const qSearch = (document.getElementById('searchJurnalInput')?.value || '').trim().toLowerCase();
 
         let filteredList = transaksiJurnal.map((t, idx) => ({ ...t, originalIndex: idx }));
-        if (selectedDateFilter !== 'ALL') filteredList = filteredList.filter(t => extractIsoDate(t.isoDate, t.waktu) === selectedDateFilter);
+        if (mode === 'DATE' && selectedDateFilter !== 'ALL') {
+            filteredList = filteredList.filter(t => extractIsoDate(t.isoDate, t.waktu) === selectedDateFilter);
+        } else if (mode === 'MONTH' && selectedMonthFilter) {
+            filteredList = filteredList.filter(t => extractIsoDate(t.isoDate, t.waktu).slice(0, 7) === selectedMonthFilter);
+        }
         if (katFilter !== 'ALL') filteredList = filteredList.filter(t => t.jenis === katFilter);
         if (masukFilter !== 'ALL') filteredList = filteredList.filter(t => (t.jenisKas === 'MASUK' && t.akun === masukFilter) || (t.jenisKas === 'TRANSFER' && t.akunTujuan === masukFilter));
         if (keluarFilter !== 'ALL') filteredList = filteredList.filter(t => (t.jenisKas === 'KELUAR' && t.akun === keluarFilter) || (t.jenisKas === 'TRANSFER' && t.akun === keluarFilter));
@@ -1919,11 +2139,13 @@
             return;
         }
 
-        bJurnal.innerHTML = filteredList.map((t) => {
+        // Nomor urut dinamis sesuai periode filter aktif (Per Hari mulai dari 1, Per Bulan mulai dari 1..Total Bulan)
+        bJurnal.innerHTML = filteredList.map((t, filteredIdx) => {
             const isTransfer = t.jenisKas === 'TRANSFER';
             const isMasuk = t.jenisKas === 'MASUK';
             const origIdx = t.originalIndex;
             const nom = Number(t.nominal) || 0;
+            const nomorUrutPeriode = filteredList.length - filteredIdx;
 
             const ketMasuk = isTransfer ? (t.akunTujuan || '-') : (isMasuk ? t.akun : '-');
             const nomMasuk = (isTransfer || isMasuk) ? formatRp(nom) : '-';
@@ -1933,7 +2155,7 @@
 
             return `
                 <tr>
-                    <td style="text-align:center;">${transaksiJurnal.length - origIdx}</td>
+                    <td style="text-align:center; font-weight:800;">${nomorUrutPeriode}</td>
                     <td>${t.waktu}</td>
                     <td style="text-align:left;"><b>${t.keterangan}</b></td>
                     <td style="text-align:center;">${t.jenis}</td>
