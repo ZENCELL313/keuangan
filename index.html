@@ -580,6 +580,252 @@
         }
         .modal-header-popup h3 { font-size: 12.5px; font-weight: 800; text-transform: uppercase; }
         .btn-close-popup { background: var(--strip-bg); border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; font-weight: bold; cursor: pointer; color: var(--text); }
+        .drawer-title { font-size: 12px; font-weight: 800; color: #FACC15; }
+        .drawer-sub { font-size: 9px; color: #CBD5E1; }
+        .drawer-btn { padding: 5px; font-size: 9.5px; }
+        .saldo-sub-note { font-size: 8px; font-weight: 700; white-space: normal; line-height: 1.25; margin-top: 2px; }
+        .drawer-mk-cell { font-size: 9px; }
+
+        /* ==========================================================================
+           KHUSUS TAMPILAN WEB / DESKTOP (MIN-WIDTH: 768PX) - HP TETAP SAMA PERSIS
+        ========================================================================== */
+        @media (min-width: 768px) {
+            .app-layout {
+                max-width: 1620px;
+            }
+            .app-layout.drawer-open-desktop {
+                max-width: 1920px;
+            }
+            .bottom-nav {
+                max-width: 1620px;
+                padding: 8px 18px 10px 18px;
+                gap: 8px;
+            }
+            .app-layout.drawer-open-desktop .bottom-nav {
+                max-width: 1920px;
+            }
+            .left-drawer {
+                width: 395px;
+            }
+            .drawer-header {
+                padding: 14px 16px;
+            }
+            .drawer-title {
+                font-size: 15px;
+            }
+            .drawer-sub {
+                font-size: 11.5px;
+                margin-top: 2px;
+            }
+            .drawer-body {
+                padding: 12px;
+            }
+            .drawer-btn {
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+                border-radius: 8px;
+            }
+            .saldo-sub-note {
+                font-size: 10.5px;
+            }
+            .drawer-mk-cell {
+                font-size: 11.5px !important;
+            }
+            .top-fixed-zone {
+                padding: 12px 20px 12px 20px;
+            }
+            .scrollable-body {
+                padding: 12px 20px 96px 20px;
+            }
+            header {
+                padding: 12px 20px;
+                border-radius: 16px;
+                margin-bottom: 10px;
+            }
+            header .header-title h1 {
+                font-size: 21px;
+                letter-spacing: 0.6px;
+            }
+            header .header-title p {
+                font-size: 13px;
+                margin-top: 4px;
+            }
+            .header-btn-group {
+                gap: 8px;
+            }
+            .btn-hdr {
+                padding: 6px 12px;
+                font-size: 12px;
+                border-radius: 8px;
+                gap: 5px;
+            }
+            #hdrLogBadge {
+                font-size: 10.5px !important;
+                padding: 1px 6px !important;
+            }
+            .clock-box {
+                padding: 6px 14px;
+                border-radius: 10px;
+            }
+            .clock-date-line {
+                font-size: 12.5px;
+            }
+            .clock-time-text {
+                font-size: 18px;
+            }
+            .top-summary-grid {
+                gap: 12px;
+                margin-bottom: 10px;
+            }
+            .grad-card {
+                padding: 12px 16px;
+                border-radius: 14px;
+                gap: 14px;
+            }
+            .grad-icon-box {
+                width: 42px;
+                height: 42px;
+                border-radius: 11px;
+                font-size: 20px;
+            }
+            .grad-lbl {
+                font-size: 11px;
+                letter-spacing: 0.5px;
+            }
+            .grad-val {
+                font-size: 19px;
+                margin-top: 2px;
+            }
+            .action-strip-box {
+                padding: 9px 14px;
+                border-radius: 13px;
+                gap: 10px;
+            }
+            .btn-cek-saldo {
+                padding: 8px 16px;
+                font-size: 13px;
+                border-radius: 9px;
+                gap: 7px;
+            }
+            .btn-strip-action {
+                padding: 8px 14px;
+                font-size: 12.5px;
+                border-radius: 9px;
+                gap: 6px;
+            }
+            .jurnal-plain-header {
+                padding: 10px 16px;
+                font-size: 14px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+            }
+            #jurnalCountBadge {
+                font-size: 13px !important;
+            }
+            .jurnal-filter-bar {
+                padding: 10px 14px;
+                border-radius: 10px;
+                margin-bottom: 10px;
+                gap: 8px;
+            }
+            .filter-label {
+                font-size: 12px;
+            }
+            .filter-select, .filter-input {
+                padding: 7px 11px;
+                font-size: 12.5px;
+                border-radius: 8px;
+            }
+            .filter-search-input {
+                padding: 7px 12px;
+                font-size: 12.5px;
+                border-radius: 8px;
+            }
+            .sub-tabs {
+                padding: 6px;
+                gap: 8px;
+                border-radius: 12px;
+                margin-bottom: 12px;
+            }
+            .sub-tab-btn {
+                padding: 9px 12px;
+                font-size: 13px;
+                border-radius: 9px;
+            }
+            .card {
+                padding: 16px;
+                border-radius: 14px;
+                margin-bottom: 12px;
+            }
+            .card-header {
+                padding: 9px 14px;
+                font-size: 14px;
+                border-radius: 9px;
+                margin-bottom: 12px;
+            }
+            .form-group label {
+                font-size: 12px;
+                margin-bottom: 4px;
+            }
+            .form-control {
+                padding: 9px 12px;
+                font-size: 13px;
+                border-radius: 8px;
+            }
+            .btn {
+                padding: 10px 14px;
+                font-size: 13px;
+                border-radius: 9px;
+            }
+            table {
+                font-size: 13px;
+            }
+            th, td {
+                padding: 8px 11px;
+            }
+            .btn-edit, .btn-delete, .btn-lunas {
+                padding: 4px 10px;
+                font-size: 11.5px;
+                border-radius: 6px;
+            }
+            .badge-lunas, .badge-belum {
+                font-size: 11.5px;
+                padding: 3px 8px;
+            }
+            .bnav-item {
+                padding: 6px 4px;
+            }
+            .bnav-indicator {
+                width: 36px;
+                height: 4px;
+            }
+            .bnav-icon {
+                font-size: 20px;
+            }
+            .bnav-lbl {
+                font-size: 12px;
+                margin-top: 2px;
+            }
+            .fab-add-trx {
+                bottom: 78px;
+                right: 30px;
+                width: 56px;
+                height: 56px;
+                font-size: 28px;
+            }
+            .modal-content-popup {
+                max-width: 540px;
+                padding: 20px;
+            }
+            .modal-header-popup h3 {
+                font-size: 15px;
+            }
+            .btn-close-popup {
+                width: 30px;
+                height: 30px;
+                font-size: 17px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -589,16 +835,16 @@
     <aside id="leftSaldoDrawer" class="left-drawer">
         <div class="drawer-header">
             <div>
-                <div style="font-size:12px; font-weight:800; color:#FACC15;">💰 Rekap Saldo Saya</div>
-                <div style="font-size:9px; color:#CBD5E1;">Klik akun untuk filter jurnal</div>
+                <div class="drawer-title">💰 Rekap Saldo Saya</div>
+                <div class="drawer-sub">Klik akun untuk filter jurnal</div>
             </div>
             <button class="btn-close-popup" onclick="toggleLeftDrawer(false)">&times;</button>
         </div>
         <div class="drawer-body">
-            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:4px; margin-bottom:8px;">
-                <button class="btn" style="padding:5px; font-size:9.5px; background:#0284C7;" onclick="openModal('popupPindahSaldo');">🔄 Pindah</button>
-                <button class="btn" style="padding:5px; font-size:9.5px; background:#16A34A;" onclick="openModal('popupSaldoAwal');">⚙ Saldo Awal</button>
-                <button class="btn" style="padding:5px; font-size:9.5px; background:#334155;" onclick="openModal('popupKelolaSaldo');">+ Edit Akun</button>
+            <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-bottom:10px;">
+                <button class="btn drawer-btn" style="background:#0284C7;" onclick="openModal('popupPindahSaldo');">🔄 Pindah</button>
+                <button class="btn drawer-btn" style="background:#16A34A;" onclick="openModal('popupSaldoAwal');">⚙ Saldo Awal</button>
+                <button class="btn drawer-btn" style="background:#334155;" onclick="openModal('popupKelolaSaldo');">+ Edit Akun</button>
             </div>
             <div class="table-responsive">
                 <table>
@@ -647,52 +893,54 @@
                 </div>
             </header>
 
-            <!-- 4 KARTU INFORMASI BERWARNA GRADIENT (COMPACT) -->
-            <div class="top-summary-grid">
-                <div class="grad-card grad-card-green" onclick="switchMainPage('page-laporan', 'sub-pembukuan')">
-                    <div class="grad-icon-box">📈</div>
-                    <div class="grad-info">
-                        <div class="grad-lbl">Profit Hari Ini</div>
-                        <div class="grad-val" id="topProfitHariIni">Rp0</div>
+            <!-- 4 KARTU INFORMASI & BARIS TOMBOL CEK SALDO (DISEMBUNYIKAN SAAT MODE JADWAL / CATATAN) -->
+            <div id="topSummaryAndStripZone">
+                <div class="top-summary-grid">
+                    <div class="grad-card grad-card-green" onclick="switchMainPage('page-laporan', 'sub-rekap-harian')">
+                        <div class="grad-icon-box">📈</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl">Selisih Hari Ini</div>
+                            <div class="grad-val" id="topSelisihHariIni">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-blue" onclick="switchMainPage('page-transaksi')">
+                        <div class="grad-icon-box">💸</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl">Pengeluaran Hari Ini</div>
+                            <div class="grad-val" id="topPengeluaranHariIni">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-teal" onclick="toggleLeftDrawer()">
+                        <div class="grad-icon-box">⚡</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl">Fast Money</div>
+                            <div class="grad-val" id="topFastMoney">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-cyan" onclick="toggleLeftDrawer()">
+                        <div class="grad-icon-box">🏦</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl">Total Saldo Riil</div>
+                            <div class="grad-val" id="topTotalSaldoRiil">Rp0</div>
+                        </div>
                     </div>
                 </div>
-                <div class="grad-card grad-card-blue" onclick="switchMainPage('page-transaksi')">
-                    <div class="grad-icon-box">💸</div>
-                    <div class="grad-info">
-                        <div class="grad-lbl">Pengeluaran Hari Ini</div>
-                        <div class="grad-val" id="topPengeluaranHariIni">Rp0</div>
-                    </div>
-                </div>
-                <div class="grad-card grad-card-teal" onclick="toggleLeftDrawer()">
-                    <div class="grad-icon-box">⚡</div>
-                    <div class="grad-info">
-                        <div class="grad-lbl">Fast Money</div>
-                        <div class="grad-val" id="topFastMoney">Rp0</div>
-                    </div>
-                </div>
-                <div class="grad-card grad-card-cyan" onclick="toggleLeftDrawer()">
-                    <div class="grad-icon-box">🏦</div>
-                    <div class="grad-info">
-                        <div class="grad-lbl">Total Saldo Riil</div>
-                        <div class="grad-val" id="topTotalSaldoRiil">Rp0</div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- STRIP MENU DI BAWAH KARTU -->
-            <div class="action-strip-box">
-                <button class="btn-cek-saldo" id="btnToggleSaldo" onclick="toggleLeftDrawer()">
-                    💰 CEK SALDO ➜
-                </button>
-                <button class="btn-strip-action" onclick="openModal('popupPindahSaldo')">
-                    🔄 Pindah Saldo
-                </button>
-                <button class="btn-strip-action" onclick="openModal('popupVlookup')">
-                    ⚙️ Master VLOOKUP
-                </button>
-                <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">
-                    🏦 Edit Akun Saldo
-                </button>
+                <!-- STRIP MENU DI BAWAH KARTU -->
+                <div class="action-strip-box">
+                    <button class="btn-cek-saldo" id="btnToggleSaldo" onclick="toggleLeftDrawer()">
+                        💰 CEK SALDO ➜
+                    </button>
+                    <button class="btn-strip-action" onclick="openModal('popupPindahSaldo')">
+                        🔄 Pindah Saldo
+                    </button>
+                    <button class="btn-strip-action" onclick="openModal('popupVlookup')">
+                        ⚙️ Master VLOOKUP
+                    </button>
+                    <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">
+                        🏦 Edit Akun Saldo
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -748,15 +996,20 @@
                             </tr>
                         </thead>
                         <tbody id="bodyJurnal"></tbody>
+                        <tfoot id="footJurnal"></tfoot>
                     </table>
                 </div>
             </div>
 
-            <!-- HALAMAN 2: PIUTANG / UTANG -->
+            <!-- HALAMAN 2: PIUTANG / UTANG (SINKRON OTOMATIS KE SALDO PIUTANG + FITUR CICIL & EDIT) -->
             <div id="page-piutang" class="page-view">
                 <div class="card">
-                    <div class="card-header card-header-purple">+ Input Utang / Piutang Baru</div>
+                    <div class="card-header card-header-purple">
+                        <span id="piutangFormHeader">+ Input Utang / Piutang Baru</span>
+                        <span style="font-size:9.5px; font-weight:normal; opacity:0.9;">Otomatis masuk ke Saldo PIUTANG</span>
+                    </div>
                     <form id="formPiutang">
+                        <input type="hidden" id="editPiutangId" value="">
                         <div class="form-group">
                             <label>Nama Peminjam</label>
                             <input type="text" id="piutangNama" class="form-control" placeholder="Budi, Pak RT..." required>
@@ -768,20 +1021,26 @@
                                 <input type="hidden" id="piutangNominal" value="0">
                             </div>
                             <div class="form-group">
-                                <label>Dari Saldo</label>
+                                <label>Keluar Dari Saldo (Sumber Pinjaman)</label>
                                 <select id="piutangSumberSaldo" class="form-control" required></select>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Keterangan</label>
-                            <input type="text" id="piutangKet" class="form-control" placeholder="Talangan, Beli Pulsa...">
+                            <input type="text" id="piutangKet" class="form-control" placeholder="Talangan, Beli Pulsa, Kasbon...">
                         </div>
-                        <button type="submit" class="btn" style="background-color:#9333EA;">Catat Piutang</button>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" id="btnCancelEditPiutang" class="btn" style="display:none; background:#64748B; width:auto; padding:8px 14px;" onclick="cancelEditPiutang()">Batal Edit</button>
+                            <button type="submit" id="btnSubmitPiutang" class="btn" style="background-color:#9333EA;">+ Catat Piutang</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="card">
-                    <div class="card-header card-header-purple">🤝 Rekapan Utang / Piutang</div>
+                    <div class="card-header card-header-purple">
+                        <span>🤝 Rekapan Utang / Piutang</span>
+                        <span id="badgeSisaPiutang" style="font-size:10px; font-family:monospace; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:5px;">Total Sisa: Rp0</span>
+                    </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
@@ -789,9 +1048,10 @@
                                     <th>NO</th>
                                     <th>WAKTU</th>
                                     <th style="text-align:left;">NAMA</th>
-                                    <th>NOMINAL</th>
-                                    <th>AKUN</th>
-                                    <th style="text-align:left;">KET</th>
+                                    <th>NOMINAL UTANG</th>
+                                    <th>DIBAYAR / SISA</th>
+                                    <th>SUMBER</th>
+                                    <th style="text-align:left;">KET & HISTORY CICILAN</th>
                                     <th>STATUS</th>
                                     <th>AKSI</th>
                                 </tr>
@@ -812,28 +1072,35 @@
 
                 <div id="sub-rekap-harian" class="sub-view active">
                     <div class="card">
-                        <div class="card-header card-header-blue">
-                            <span>📅 Rekap Arus Kas Harian</span>
-                            <input type="month" id="rekapMonthPicker" class="filter-input" onchange="renderTables()">
+                        <div class="card-header card-header-blue" style="flex-wrap:wrap; gap:6px;">
+                            <span>📅 Rekap Arus Kas Harian (Tanpa Pindah Saldo)</span>
+                            <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;">
+                                <select id="rekapFilterModeSelect" class="filter-select" onchange="onChangeRekapFilterMode()">
+                                    <option value="DATE">📅 PER TANGGAL (HARI INI)</option>
+                                    <option value="MONTH">🗓️ SEMUA HARI (PER BULAN)</option>
+                                </select>
+                                <input type="date" id="rekapDatePicker" class="filter-input" onchange="renderTables()">
+                                <input type="month" id="rekapMonthPicker" class="filter-input" style="display:none;" onchange="renderTables()">
+                            </div>
                         </div>
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
                                         <th style="text-align:left;">TANGGAL</th>
+                                        <th>JML TRX</th>
                                         <th>PEMASUKAN</th>
                                         <th>PENGELUARAN</th>
-                                        <th>CUAN KONTER</th>
                                         <th>SELISIH BERSIH</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bodyRekapHarian"></tbody>
                                 <tfoot>
                                     <tr class="total-row">
-                                        <td style="text-align:left;">TOTAL BULAN INI</td>
+                                        <td id="lblTotalRekapHarian" style="text-align:left;">TOTAL</td>
+                                        <td id="totTrxHarian" style="text-align:center;">0 Trx</td>
                                         <td id="totPemasukanHarian" class="text-kredit">Rp0</td>
                                         <td id="totPengeluaranHarian" class="text-debit">Rp0</td>
-                                        <td id="totCuanHarian" style="color:#0284C7;">Rp0</td>
                                         <td id="totBersihHarian">Rp0</td>
                                     </tr>
                                 </tfoot>
@@ -844,24 +1111,53 @@
 
                 <div id="sub-pembukuan" class="sub-view">
                     <div class="card">
-                        <div class="card-header">📊 Rekap Transaksi Pembukuan</div>
+                        <div class="card-header">
+                            <span>📊 Rekap Transaksi Pembukuan (Per Jenis Transaksi)</span>
+                            <span id="lblFilterPembukuan" style="font-size:10px; font-family:monospace;">SEMUA TANGGAL</span>
+                        </div>
                         <div class="jurnal-filter-bar">
                             <span class="filter-label">Filter:</span>
                             <button class="btn-strip-action" onclick="resetFilterDatePembukuan()">SEMUA</button>
+                            <button class="btn-strip-action" onclick="setTodayFilterDatePembukuan()">HARI INI</button>
                             <input type="date" id="datePickerFilterPembukuan" class="filter-input" onchange="filterPembukuanByDatePicker(this.value)">
                         </div>
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style="text-align:left;">TRANSAKSI</th>
-                                        <th>JML</th>
-                                        <th>DEBIT</th>
-                                        <th>KREDIT</th>
+                                        <th style="text-align:left;">JENIS TRANSAKSI</th>
+                                        <th>JML TRX</th>
+                                        <th>DEBIT (KELUAR)</th>
+                                        <th>KREDIT (MASUK)</th>
                                         <th>SELISIH</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bodyPembukuan"></tbody>
+                                <tfoot id="footPembukuan"></tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TABEL REKAP PINDAH SALDO DI BAWAH PEMBUKUAN + FITUR EDIT & HAPUS -->
+                    <div class="card">
+                        <div class="card-header card-header-blue">
+                            <span id="lblCountPindahPembukuan">🔄 Rekap Pindah Saldo (0 Transaksi)</span>
+                            <button type="button" class="btn-strip-action" onclick="openModal('popupPindahSaldo')">+ Pindah Saldo Baru</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>WAKTU</th>
+                                        <th style="text-align:left;">KETERANGAN</th>
+                                        <th>KELUAR DARI</th>
+                                        <th>MASUK KE</th>
+                                        <th>NOMINAL</th>
+                                        <th>AKSI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyPembukuanPindahSaldo"></tbody>
                             </table>
                         </div>
                     </div>
@@ -903,14 +1199,15 @@
                 </div>
             </div>
 
-            <!-- HALAMAN 4: JADWAL / SCHEDULE (ALARM + NOTIFIKASI HP + REPEAT + KATEGORI) -->
+            <!-- HALAMAN 4: JADWAL / SCHEDULE (FULL SAMPAI BAWAH HEADER + PILIH SOUND ALARM HP + KLIK ITEM UNTUK EDIT) -->
             <div id="page-jadwal" class="page-view">
                 <div class="card">
                     <div class="card-header" style="background:#F59E0B; color:#000;">
-                        <span>⏰ Buat Jadwal & Pengingat Alarm</span>
+                        <span id="jadwalFormHeader">⏰ Buat Jadwal & Pengingat Alarm</span>
                         <button type="button" class="btn-strip-action" style="background:#0F172A; color:#FACC15; border:none;" onclick="requestPhoneNotif()">🔔 Aktifkan/Tes Notif HP</button>
                     </div>
                     <form id="formJadwal">
+                        <input type="hidden" id="editJadwalIdInput" value="">
                         <div class="row-2">
                             <div class="form-group">
                                 <label>Judul Kegiatan / Jadwal</label>
@@ -946,57 +1243,113 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>Keterangan</label>
-                                <input type="text" id="jadwalKet" class="form-control" placeholder="Catatan tambahan...">
+                                <label>Pilih Nada / Sound Alarm HP</label>
+                                <div style="display:flex; gap:4px; align-items:center;">
+                                    <select id="jadwalSoundType" class="form-control" style="flex:1;">
+                                        <option value="SIRINE">🚨 Sirine Nyaring (Default)</option>
+                                        <option value="BEEP">📟 Beep Digital Cepat</option>
+                                        <option value="MELODI">🎵 Melodi Musik Lembut</option>
+                                        <option value="LONCENG">🔔 Lonceng Klasik</option>
+                                        <option value="DARURAT">⚠️ Alarm Darurat Kencang</option>
+                                        <option value="CUSTOM" id="optCustomSound">📱 File Sound HP</option>
+                                    </select>
+                                    <button type="button" class="btn-strip-action" style="background:#0F172A; color:#FACC15;" onclick="testSelectedAlarmSound()">🔊 Tes</button>
+                                    <label class="btn-strip-action" style="background:#0284C7; color:#FFF; margin:0; cursor:pointer;">
+                                        📂 Sound HP
+                                        <input type="file" accept="audio/*" style="display:none;" onchange="uploadCustomAlarmSound(event)">
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        <button type="submit" class="btn" style="background:#D97706;">+ Simpan Jadwal & Alarm</button>
+                        <div class="form-group">
+                            <label>Keterangan</label>
+                            <input type="text" id="jadwalKet" class="form-control" placeholder="Catatan tambahan...">
+                        </div>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" id="btnCancelEditJadwal" class="btn" style="display:none; background:#64748B; width:auto; padding:8px 14px;" onclick="cancelEditJadwal()">Batal Edit</button>
+                            <button type="submit" id="btnSubmitJadwal" class="btn" style="background:#D97706;">+ Simpan Jadwal & Alarm</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="card">
-                    <div class="card-header" style="background:#F59E0B; color:#000;">📋 Daftar Schedule / Jadwal</div>
+                    <div class="card-header" style="background:#F59E0B; color:#000;">
+                        <span>📋 Daftar Schedule / Jadwal (Klik Baris Untuk Edit)</span>
+                        <select id="filterJadwalKatSelect" class="filter-select" onchange="renderJadwalAndCatatan()">
+                            <option value="ALL">SEMUA</option>
+                            <option value="PRIBADI">PRIBADI</option>
+                            <option value="KONTER">KONTER</option>
+                            <option value="KELUARGA">KELUARGA</option>
+                        </select>
+                    </div>
                     <div id="listJadwalContainer" style="display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
             </div>
 
-            <!-- HALAMAN 5: CATATAN HARIAN -->
+            <!-- HALAMAN 5: CATATAN HARIAN (FULL SAMPAI BAWAH HEADER + KLIK UNTUK EDIT + IKON SAJA + SEARCH) -->
             <div id="page-catatan" class="page-view">
                 <div class="card">
-                    <div class="card-header" style="background:#E11D48; color:#FFF;">📝 Tambah Catatan Harian</div>
+                    <div class="card-header" style="background:#E11D48; color:#FFF;">
+                        <span id="catatanFormHeader">📝 Tambah Catatan Harian</span>
+                        <span id="catatanCountLabel" style="font-size:10px; font-family:monospace;">0 Catatan</span>
+                    </div>
                     <form id="formCatatan">
+                        <input type="hidden" id="editCatatanIdInput" value="">
                         <div class="row-2">
                             <div class="form-group">
                                 <label>Judul Catatan</label>
                                 <input type="text" id="catatanJudul" class="form-control" placeholder="Judul memo / catatan..." required>
                             </div>
                             <div class="form-group">
-                                <label>Kategori</label>
-                                <select id="catatanKategori" class="form-control">
-                                    <option value="PRIBADI">👤 PRIBADI</option>
-                                    <option value="KONTER">🏪 KONTER</option>
-                                    <option value="KELUARGA">👨‍👩‍👧‍👦 KELUARGA</option>
-                                    <option value="PENTING">⭐ PENTING</option>
-                                </select>
+                                <label>Kategori & Warna</label>
+                                <div style="display:flex; gap:5px;">
+                                    <select id="catatanKategori" class="form-control">
+                                        <option value="PRIBADI">👤 PRIBADI</option>
+                                        <option value="KONTER">🏪 KONTER</option>
+                                        <option value="KELUARGA">👨‍👩‍👧‍👦 KELUARGA</option>
+                                        <option value="PENTING">⭐ PENTING</option>
+                                    </select>
+                                    <select id="catatanWarna" class="form-control" style="width:110px;">
+                                        <option value="blue">🔵 Biru</option>
+                                        <option value="yellow">🟡 Kuning</option>
+                                        <option value="green">🟢 Hijau</option>
+                                        <option value="rose">🔴 Pink</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                         <div class="form-group">
                             <label>Isi Catatan</label>
                             <textarea id="catatanIsi" rows="3" class="form-control" placeholder="Tulis catatan harian di sini..." required></textarea>
                         </div>
-                        <button type="submit" class="btn" style="background:#E11D48;">+ Simpan Catatan</button>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" id="btnCancelEditCatatan" class="btn" style="display:none; background:#64748B; width:auto; padding:8px 14px;" onclick="cancelEditCatatan()">Batal Edit</button>
+                            <button type="submit" id="btnSubmitCatatan" class="btn" style="background:#E11D48;">+ Simpan Catatan</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="card">
-                    <div class="card-header" style="background:#E11D48; color:#FFF;">📌 Daftar Catatan Harian</div>
+                    <div class="card-header" style="background:#E11D48; color:#FFF; flex-wrap:wrap; gap:6px;">
+                        <span>📌 Daftar Catatan Harian (Klik Kartu Untuk Edit)</span>
+                        <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+                            <select id="filterCatatanKatSelect" class="filter-select" onchange="renderJadwalAndCatatan()">
+                                <option value="ALL">SEMUA</option>
+                                <option value="PRIBADI">PRIBADI</option>
+                                <option value="KONTER">KONTER</option>
+                                <option value="KELUARGA">KELUARGA</option>
+                                <option value="PENTING">PENTING</option>
+                            </select>
+                            <input type="text" id="searchCatatanInput" class="filter-input" placeholder="🔍 Cari judul / isi catatan..." oninput="renderJadwalAndCatatan()">
+                        </div>
+                    </div>
                     <div id="listCatatanContainer" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:8px;"></div>
                 </div>
             </div>
         </div>
 
-        <!-- FLOATING ACTION BUTTON (+) COMPACT -->
-        <button class="fab-add-trx" onclick="openNewTrxPopup()" title="Input Transaksi Baru">+</button>
+        <!-- FLOATING ACTION BUTTON (+) COMPACT (DISEMBUNYIKAN SAAT MODE JADWAL / CATATAN) -->
+        <button id="fabAddTrx" class="fab-add-trx" onclick="openNewTrxPopup()" title="Input Transaksi Baru">+</button>
 
         <!-- BOTTOM NAVIGATION BAR (URUTAN: TRANSAKSI, PIUTANG, LAPORAN, JADWAL, CATATAN) -->
         <nav class="bottom-nav">
@@ -1249,6 +1602,40 @@
     </div>
 </div>
 
+<!-- POPUP 8: CICILAN / PELUNASAN PIUTANG -->
+<div id="popupCicilPiutang" class="modal-overlay">
+    <div class="modal-content-popup">
+        <div class="modal-header-popup">
+            <h3 id="cicilPiutangHeader">💵 Cicilan / Pelunasan Piutang</h3>
+            <button class="btn-close-popup" onclick="closeModal('popupCicilPiutang')">&times;</button>
+        </div>
+        <form id="formCicilPiutang">
+            <input type="hidden" id="cicilTargetId" value="">
+            <div id="cicilInfoBox" style="padding:8px 10px; border-radius:8px; background:var(--strip-bg); border:1px solid var(--border); margin-bottom:8px; font-size:11px;"></div>
+            <div class="form-group">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                    <label style="margin:0;">Nominal Bayar / Cicil Sekarang (Rp)</label>
+                    <div style="display:flex; gap:4px;">
+                        <button type="button" class="chip-btn" onclick="setCicilNominalQuick(0.5)">50%</button>
+                        <button type="button" class="chip-btn" style="background:#DCFCE7; color:#15803D;" onclick="setCicilNominalQuick(1)">Lunas Penuh</button>
+                    </div>
+                </div>
+                <input type="text" id="cicilNominalDisplay" inputmode="numeric" class="form-control" placeholder="0" required oninput="formatNominalCustom(this, 'cicilNominal')">
+                <input type="hidden" id="cicilNominal" value="0">
+            </div>
+            <div class="form-group">
+                <label>Masuk Ke Akun Saldo (Keluar Otomatis dari Saldo PIUTANG)</label>
+                <select id="cicilAkunTujuan" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+                <label>Keterangan Cicilan / Pelunasan (Opsional)</label>
+                <input type="text" id="cicilKet" class="form-control" placeholder="Cicilan ke-1, Transfer BCA, Lunas...">
+            </div>
+            <button type="submit" class="btn" style="background-color:#16A34A;">✅ Simpan Pembayaran Piutang</button>
+        </form>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -1266,7 +1653,6 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwPtfv5DAAKgzH_FVxrKX5Cg43fTSiiyRDKK2sGschbi26npMmu03wIQAVwSHPmpzgpag/exec";
 
     function getTodayIsoStr() {
         const d = new Date();
@@ -1292,27 +1678,118 @@
     }
     setInterval(updateClock, 1000);
 
-    function playAlarmSound() {
+    // PILIHAN NADA ALARM & SOUND HP KUSTOM
+    let customAlarmDataUrl = localStorage.getItem('zencell_custom_alarm_audio') || '';
+    let customAlarmFileName = localStorage.getItem('zencell_custom_alarm_name') || '';
+    let activeAudioEl = null;
+
+    function updateCustomSoundOptionLabel() {
+        const opt = document.getElementById('optCustomSound');
+        if (opt) {
+            opt.innerText = '📱 File Sound HP (' + (customAlarmFileName || 'Belum dipilih') + ')';
+        }
+    }
+    updateCustomSoundOptionLabel();
+
+    window.uploadCustomAlarmSound = function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        if (file.size > 4.5 * 1024 * 1024) {
+            alert('Ukuran file audio terlalu besar (maksimal 4.5 MB)!');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            customAlarmDataUrl = String(ev.target.result || '');
+            customAlarmFileName = file.name;
+            try {
+                localStorage.setItem('zencell_custom_alarm_audio', customAlarmDataUrl);
+                localStorage.setItem('zencell_custom_alarm_name', customAlarmFileName);
+            } catch (err) {}
+            updateCustomSoundOptionLabel();
+            document.getElementById('jadwalSoundType').value = 'CUSTOM';
+            playAlarmSound('CUSTOM');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.playAlarmSound = function(soundType = 'SIRINE') {
         try {
+            if (activeAudioEl) {
+                activeAudioEl.pause();
+                activeAudioEl.currentTime = 0;
+                activeAudioEl = null;
+            }
+            if (soundType === 'CUSTOM' && customAlarmDataUrl) {
+                activeAudioEl = new Audio(customAlarmDataUrl);
+                activeAudioEl.play().catch(() => {});
+                if ('vibrate' in navigator) navigator.vibrate([300, 120, 300, 120, 500]);
+                return;
+            }
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
             const ctx = new AudioCtx();
-            [880, 1174.66, 880, 1174.66, 1318.51].forEach((freq, idx) => {
+            let notes = [
+                { f: 880, d: 0.16, g: 0.18, t: 'sine' },
+                { f: 1174.66, d: 0.16, g: 0.18, t: 'sine' },
+                { f: 880, d: 0.16, g: 0.18, t: 'sine' },
+                { f: 1174.66, d: 0.16, g: 0.18, t: 'sine' },
+                { f: 1318.51, d: 0.32, g: 0.35, t: 'sine' }
+            ];
+            if (soundType === 'BEEP') {
+                notes = [
+                    { f: 1567.98, d: 0.09, g: 0.11, t: 'square' },
+                    { f: 1567.98, d: 0.09, g: 0.11, t: 'square' },
+                    { f: 1567.98, d: 0.09, g: 0.22, t: 'square' },
+                    { f: 1567.98, d: 0.09, g: 0.11, t: 'square' },
+                    { f: 2093.0, d: 0.25, g: 0.3, t: 'square' }
+                ];
+            } else if (soundType === 'MELODI') {
+                notes = [
+                    { f: 523.25, d: 0.18, g: 0.2, t: 'triangle' },
+                    { f: 659.25, d: 0.18, g: 0.2, t: 'triangle' },
+                    { f: 783.99, d: 0.18, g: 0.2, t: 'triangle' },
+                    { f: 1046.5, d: 0.35, g: 0.38, t: 'triangle' }
+                ];
+            } else if (soundType === 'LONCENG') {
+                notes = [
+                    { f: 1046.5, d: 0.35, g: 0.4, t: 'sine' },
+                    { f: 1318.51, d: 0.35, g: 0.4, t: 'sine' },
+                    { f: 1567.98, d: 0.5, g: 0.55, t: 'sine' }
+                ];
+            } else if (soundType === 'DARURAT') {
+                notes = [
+                    { f: 622.25, d: 0.14, g: 0.15, t: 'sawtooth' },
+                    { f: 932.33, d: 0.14, g: 0.15, t: 'sawtooth' },
+                    { f: 622.25, d: 0.14, g: 0.15, t: 'sawtooth' },
+                    { f: 932.33, d: 0.14, g: 0.15, t: 'sawtooth' }
+                ];
+            }
+            let offset = 0;
+            notes.forEach(n => {
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
-                osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.18);
-                gain.gain.setValueAtTime(0.25, ctx.currentTime + idx * 0.18);
-                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.18 + 0.16);
+                osc.type = n.t;
+                osc.frequency.setValueAtTime(n.f, ctx.currentTime + offset);
+                gain.gain.setValueAtTime(0.28, ctx.currentTime + offset);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + offset + n.d);
                 osc.connect(gain); gain.connect(ctx.destination);
-                osc.start(ctx.currentTime + idx * 0.18);
-                osc.stop(ctx.currentTime + idx * 0.18 + 0.17);
+                osc.start(ctx.currentTime + offset);
+                osc.stop(ctx.currentTime + offset + n.d + 0.02);
+                offset += n.g;
             });
             if ('vibrate' in navigator) navigator.vibrate([300, 120, 300, 120, 500]);
         } catch (e) {}
-    }
+    };
+
+    window.testSelectedAlarmSound = function() {
+        const st = document.getElementById('jadwalSoundType')?.value || 'SIRINE';
+        playAlarmSound(st);
+    };
 
     window.requestPhoneNotif = async function() {
-        playAlarmSound();
+        const st = document.getElementById('jadwalSoundType')?.value || 'SIRINE';
+        playAlarmSound(st);
         if (!('Notification' in window)) { alert("Suara alarm aktif!"); return; }
         const perm = await Notification.requestPermission();
         if (perm === 'granted') {
@@ -1345,7 +1822,6 @@
         applyTheme(currentTheme);
     };
 
-    // DEFAULT TANGGAL HARI INI SESUAI INSTRUKSI #4
     let selectedDateFilter = getTodayIsoStr();
     let selectedMonthFilter = getTodayIsoStr().slice(0, 7);
     let selectedDateFilterPembukuan = 'ALL';
@@ -1375,7 +1851,6 @@
     let logsData = [];
     let editingSaldoIdx = null;
 
-    // Deteksi otomatis maupun kustom dana titipan yang berputar di SALDO ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan SALDO ZEN 2 (M Deded / Uang M Deded)
     function resolveTargetPotonganSaldo(accName) {
         if (potonganSaldoMap && potonganSaldoMap[accName]) {
             if (potonganSaldoMap[accName] === 'NONE') return null;
@@ -1442,15 +1917,17 @@
         const q = (document.getElementById('logSearchInput')?.value || '').trim().toLowerCase();
         let list = logsData;
         if (kat !== 'ALL') list = list.filter(l => l.kategori === kat);
-        if (q) list = list.filter(l => (l.aksi || '').toLowerCase().includes(q) || (l.detail || '').toLowerCase().includes(q) || (l.kategori || '').toLowerCase().includes(q));
+        if (q) list = list.filter(l => (l.aksi || l.judul || '').toLowerCase().includes(q) || (l.detail || '').toLowerCase().includes(q) || (l.kategori || '').toLowerCase().includes(q));
         if (!list.length) {
             cont.innerHTML = '<div style="text-align:center; padding:18px; color:var(--text-muted); font-size:10.5px;">Belum ada riwayat aktivitas pada filter ini.</div>';
             return;
         }
         const badgeColors = {
             ADD: 'background:#DCFCE7; color:#15803D;',
+            TAMBAH: 'background:#DCFCE7; color:#15803D;',
             EDIT: 'background:#FEF9C3; color:#A16207;',
             DELETE: 'background:#FEE2E2; color:#B91C1C;',
+            HAPUS: 'background:#FEE2E2; color:#B91C1C;',
             INFO: 'background:#E0F2FE; color:#0369A1;'
         };
         cont.innerHTML = list.map(item => `
@@ -1458,9 +1935,9 @@
                 <div style="min-width:0; flex:1;">
                     <div style="display:flex; align-items:center; gap:5px; margin-bottom:2px;">
                         <span style="padding:1px 5px; border-radius:4px; font-size:8.5px; font-weight:800; ${badgeColors[item.tipe] || badgeColors.INFO}">${item.kategori}</span>
-                        <span style="font-size:10.5px; font-weight:800;">${item.aksi}</span>
+                        <span style="font-size:10.5px; font-weight:800;">${item.aksi || item.judul || ''}</span>
                     </div>
-                    <div style="font-size:10px; color:var(--text-muted); word-break:break-word;">${item.detail}</div>
+                    <div style="font-size:10px; color:var(--text-muted); word-break:break-word;">${item.detail || ''}</div>
                 </div>
                 <div style="font-size:9px; font-family:monospace; color:var(--text-muted); white-space:nowrap;">${item.waktu}</div>
             </div>
@@ -1489,7 +1966,6 @@
         return getTodayIsoStr();
     }
 
-    // OTOMATIS GABUNGKAN MUTASI 2 BARIS LAMA MENJADI 1 BARIS TRANSFER
     function normalizeTransactions(rawList) {
         const cleaned = (rawList || []).filter(Boolean).map(t => ({
             ...t,
@@ -1527,6 +2003,8 @@
         if (dpJurnal && !dpJurnal.value) dpJurnal.value = today;
         const jTgl = document.getElementById('jadwalTgl');
         if (jTgl && !jTgl.value) jTgl.value = today;
+        const rDateEl = document.getElementById('rekapDatePicker');
+        if (rDateEl && !rDateEl.value) rDateEl.value = today;
         const monthEl = document.getElementById('rekapMonthPicker');
         if (monthEl && !monthEl.value) monthEl.value = today.slice(0, 7);
         const mpJurnal = document.getElementById('monthPickerFilter');
@@ -1578,6 +2056,16 @@
         if (pageId === 'page-jadwal') document.getElementById('bnav-jadwal').classList.add('active');
         if (pageId === 'page-catatan') document.getElementById('bnav-catatan').classList.add('active');
 
+        // A.2: Mode Jadwal & Catatan tampil full sampai bawah header (sembunyikan kartu, strip cek saldo, drawer, dan tombol +)
+        const isSchedOrNotes = (pageId === 'page-jadwal' || pageId === 'page-catatan');
+        const topZone = document.getElementById('topSummaryAndStripZone');
+        const fabBtn = document.getElementById('fabAddTrx');
+        if (topZone) topZone.style.display = isSchedOrNotes ? 'none' : 'block';
+        if (fabBtn) fabBtn.style.display = isSchedOrNotes ? 'none' : 'flex';
+        if (isSchedOrNotes && drawerOpenState) {
+            window.toggleLeftDrawer(false);
+        }
+
         if (optionalSubTabId) {
             const btnMap = {
                 'sub-rekap-harian': document.getElementById('btnSubHarian'),
@@ -1593,6 +2081,39 @@
         document.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(subId).classList.add('active');
         if (btnEl) btnEl.classList.add('active');
+    };
+
+    window.onChangeRekapFilterMode = function() {
+        const mode = document.getElementById('rekapFilterModeSelect')?.value || 'DATE';
+        const dp = document.getElementById('rekapDatePicker');
+        const mp = document.getElementById('rekapMonthPicker');
+        if (mode === 'DATE') {
+            if (dp) dp.style.display = 'inline-block';
+            if (mp) mp.style.display = 'none';
+        } else {
+            if (dp) dp.style.display = 'none';
+            if (mp) mp.style.display = 'inline-block';
+        }
+        renderTables();
+    };
+
+    window.resetFilterDatePembukuan = function() {
+        selectedDateFilterPembukuan = 'ALL';
+        const dp = document.getElementById('datePickerFilterPembukuan');
+        if (dp) dp.value = '';
+        renderTables();
+    };
+
+    window.setTodayFilterDatePembukuan = function() {
+        selectedDateFilterPembukuan = getTodayIsoStr();
+        const dp = document.getElementById('datePickerFilterPembukuan');
+        if (dp) dp.value = selectedDateFilterPembukuan;
+        renderTables();
+    };
+
+    window.filterPembukuanByDatePicker = function(val) {
+        selectedDateFilterPembukuan = val || 'ALL';
+        renderTables();
     };
 
     window.onChangeJenisKasForm = function() {
@@ -1675,7 +2196,6 @@
 
     function saveToFirebase() {
         if (!isInitialLoaded) { alert("Sedang memuat data dari Firebase!"); return false; }
-        // Sanitize payload with JSON.parse(JSON.stringify(...)) so undefined properties never break Firebase set()
         const rawPayload = {
             transaksi: transaksiJurnal,
             piutang: piutangData,
@@ -1702,7 +2222,7 @@
         const due = jadwalData.find(j => !j.selesai && j.alarmAktif && j.tanggal === todayIso && j.jam === hhmm && j.lastTriggeredDate !== key);
         if (due) {
             due.lastTriggeredDate = key;
-            playAlarmSound();
+            playAlarmSound(due.soundType || 'SIRINE');
             if ('Notification' in window && Notification.permission === 'granted') {
                 new Notification(`⏰ JADWAL [${due.kategori}]: ${due.judul}`, { body: due.keterangan || `Jadwal pukul ${due.jam}` });
             }
@@ -1711,80 +2231,461 @@
         }
     }
 
+    // =========================================================================
+    // JADWAL / SCHEDULE (SIMPAN, KLIK BARIS UNTUK EDIT, TOGGLE SELESAI, HAPUS)
+    // =========================================================================
     document.getElementById('formJadwal').addEventListener('submit', function(e) {
         e.preventDefault();
-        jadwalData.unshift({
-            id: Date.now(),
-            judul: document.getElementById('jadwalJudul').value.trim(),
-            kategori: document.getElementById('jadwalKategori').value,
-            tanggal: document.getElementById('jadwalTgl').value || getTodayIsoStr(),
-            jam: document.getElementById('jadwalJam').value || '08:00',
-            repeat: document.getElementById('jadwalRepeat').value,
-            keterangan: document.getElementById('jadwalKet').value.trim(),
-            alarmAktif: true,
-            selesai: false
-        });
-        document.getElementById('formJadwal').reset();
-        setTodayDateInput();
+        const editId = document.getElementById('editJadwalIdInput').value;
+        const judul = document.getElementById('jadwalJudul').value.trim();
+        const kategori = document.getElementById('jadwalKategori').value;
+        const tanggal = document.getElementById('jadwalTgl').value || getTodayIsoStr();
+        const jam = document.getElementById('jadwalJam').value || '08:00';
+        const repeat = document.getElementById('jadwalRepeat').value;
+        const soundType = document.getElementById('jadwalSoundType').value || 'SIRINE';
+        const keterangan = document.getElementById('jadwalKet').value.trim();
+
+        if (editId) {
+            const numId = Number(editId);
+            jadwalData = jadwalData.map(j => j.id === numId ? {
+                ...j,
+                judul,
+                kategori,
+                tanggal,
+                jam,
+                repeat,
+                soundType,
+                customSoundName: soundType === 'CUSTOM' ? customAlarmFileName : undefined,
+                keterangan
+            } : j);
+            addLogEntry('JADWAL', 'Edit Jadwal', `${judul} (${tanggal} ${jam})`, 'EDIT');
+        } else {
+            jadwalData.unshift({
+                id: Date.now(),
+                judul,
+                kategori,
+                tanggal,
+                jam,
+                repeat,
+                soundType,
+                customSoundName: soundType === 'CUSTOM' ? customAlarmFileName : undefined,
+                keterangan,
+                alarmAktif: true,
+                selesai: false
+            });
+            addLogEntry('JADWAL', 'Tambah Jadwal', `${judul} (${tanggal} ${jam})`, 'ADD');
+        }
+        window.cancelEditJadwal();
         saveToFirebase();
     });
 
-    window.deleteJadwal = function(id) {
+    window.editJadwalItem = function(id) {
+        const item = jadwalData.find(j => j.id === id);
+        if (!item) return;
+        document.getElementById('editJadwalIdInput').value = String(item.id);
+        document.getElementById('jadwalJudul').value = item.judul || '';
+        document.getElementById('jadwalKategori').value = item.kategori || 'PRIBADI';
+        document.getElementById('jadwalTgl').value = item.tanggal || getTodayIsoStr();
+        document.getElementById('jadwalJam').value = item.jam || '08:00';
+        document.getElementById('jadwalRepeat').value = item.repeat || 'ONCE';
+        document.getElementById('jadwalSoundType').value = item.soundType || 'SIRINE';
+        document.getElementById('jadwalKet').value = item.keterangan || '';
+        document.getElementById('jadwalFormHeader').innerText = '✏️ Mode Edit Jadwal & Alarm';
+        document.getElementById('btnSubmitJadwal').innerText = '💾 Update Jadwal';
+        document.getElementById('btnCancelEditJadwal').style.display = 'inline-block';
+        renderJadwalAndCatatan();
+    };
+
+    window.cancelEditJadwal = function() {
+        document.getElementById('editJadwalIdInput').value = '';
+        document.getElementById('formJadwal').reset();
+        setTodayDateInput();
+        document.getElementById('jadwalFormHeader').innerText = '⏰ Buat Jadwal & Pengingat Alarm';
+        document.getElementById('btnSubmitJadwal').innerText = '+ Simpan Jadwal & Alarm';
+        document.getElementById('btnCancelEditJadwal').style.display = 'none';
+        renderJadwalAndCatatan();
+    };
+
+    window.toggleSelesaiJadwal = function(id, ev) {
+        if (ev) ev.stopPropagation();
+        jadwalData = jadwalData.map(j => j.id === id ? { ...j, selesai: !j.selesai } : j);
+        saveToFirebase();
+    };
+
+    window.deleteJadwal = function(id, ev) {
+        if (ev) ev.stopPropagation();
+        if (!confirm('Hapus jadwal ini?')) return;
         jadwalData = jadwalData.filter(j => j.id !== id);
         saveToFirebase();
     };
 
+    // =========================================================================
+    // CATATAN HARIAN (SIMPAN, KLIK KARTU UNTUK EDIT, IKON SAJA, SEARCH)
+    // =========================================================================
     document.getElementById('formCatatan').addEventListener('submit', function(e) {
         e.preventDefault();
-        catatanData.unshift({
-            id: Date.now(),
-            judul: document.getElementById('catatanJudul').value.trim(),
-            kategori: document.getElementById('catatanKategori').value,
-            isi: document.getElementById('catatanIsi').value.trim(),
-            warna: 'blue',
-            pinned: false,
-            waktuUpdate: new Date().toLocaleDateString('id-ID')
-        });
-        document.getElementById('formCatatan').reset();
+        const editId = document.getElementById('editCatatanIdInput').value;
+        const judul = document.getElementById('catatanJudul').value.trim();
+        const kategori = document.getElementById('catatanKategori').value;
+        const warna = document.getElementById('catatanWarna').value || 'blue';
+        const isi = document.getElementById('catatanIsi').value.trim();
+        const waktuUpdate = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        if (editId) {
+            const numId = Number(editId);
+            catatanData = catatanData.map(c => c.id === numId ? {
+                ...c,
+                judul,
+                kategori,
+                warna,
+                isi,
+                waktuUpdate
+            } : c);
+            addLogEntry('CATATAN', 'Edit Catatan', judul, 'EDIT');
+        } else {
+            catatanData.unshift({
+                id: Date.now(),
+                judul,
+                kategori,
+                isi,
+                warna,
+                pinned: false,
+                waktuUpdate
+            });
+            addLogEntry('CATATAN', 'Tambah Catatan', judul, 'ADD');
+        }
+        window.cancelEditCatatan();
         saveToFirebase();
     });
 
-    window.deleteCatatan = function(id) {
+    window.editCatatanItem = function(id, ev) {
+        if (ev) ev.stopPropagation();
+        const item = catatanData.find(c => c.id === id);
+        if (!item) return;
+        document.getElementById('editCatatanIdInput').value = String(item.id);
+        document.getElementById('catatanJudul').value = item.judul || '';
+        document.getElementById('catatanKategori').value = item.kategori || 'PRIBADI';
+        document.getElementById('catatanWarna').value = item.warna || 'blue';
+        document.getElementById('catatanIsi').value = item.isi || '';
+        document.getElementById('catatanFormHeader').innerText = '✏️ Mode Edit Catatan Harian';
+        document.getElementById('btnSubmitCatatan').innerText = '💾 Simpan Perubahan';
+        document.getElementById('btnCancelEditCatatan').style.display = 'inline-block';
+        renderJadwalAndCatatan();
+    };
+
+    window.cancelEditCatatan = function() {
+        document.getElementById('editCatatanIdInput').value = '';
+        document.getElementById('formCatatan').reset();
+        document.getElementById('catatanFormHeader').innerText = '📝 Tambah Catatan Harian';
+        document.getElementById('btnSubmitCatatan').innerText = '+ Simpan Catatan';
+        document.getElementById('btnCancelEditCatatan').style.display = 'none';
+        renderJadwalAndCatatan();
+    };
+
+    window.togglePinCatatan = function(id, ev) {
+        if (ev) ev.stopPropagation();
+        catatanData = catatanData.map(c => c.id === id ? { ...c, pinned: !c.pinned } : c);
+        saveToFirebase();
+    };
+
+    window.deleteCatatan = function(id, ev) {
+        if (ev) ev.stopPropagation();
+        if (!confirm('Hapus catatan ini?')) return;
         catatanData = catatanData.filter(c => c.id !== id);
         saveToFirebase();
     };
 
-    function renderJadwalAndCatatan() {
+    window.renderJadwalAndCatatan = function() {
         const jCont = document.getElementById('listJadwalContainer');
+        const filterJKat = document.getElementById('filterJadwalKatSelect')?.value || 'ALL';
+        const editJId = Number(document.getElementById('editJadwalIdInput')?.value || 0);
+
         if (jCont) {
-            jCont.innerHTML = jadwalData.length === 0
+            const listJ = [...jadwalData]
+                .filter(j => filterJKat === 'ALL' ? true : j.kategori === filterJKat)
+                .sort((a, b) => {
+                    if (a.selesai !== b.selesai) return a.selesai ? 1 : -1;
+                    return `${a.tanggal} ${a.jam}`.localeCompare(`${b.tanggal} ${b.jam}`);
+                });
+
+            jCont.innerHTML = listJ.length === 0
                 ? '<div style="text-align:center; padding:14px; color:var(--text-muted);">Belum ada jadwal.</div>'
-                : jadwalData.map(j => `
-                    <div style="padding:8px 10px; border:1px solid var(--border); border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                        <div>
-                            <div style="font-size:10px; font-weight:800; color:#D97706;">⏰ ${j.jam} (${j.tanggal}) • [${j.kategori}] • ${j.repeat}</div>
-                            <div style="font-size:11.5px; font-weight:800;">${j.judul}</div>
-                            <div style="font-size:10px; color:var(--text-muted);">${j.keterangan || ''}</div>
+                : listJ.map(j => {
+                    const isEditing = editJId === j.id;
+                    const soundLbl = j.soundType === 'CUSTOM' ? ('📱 ' + (j.customSoundName || 'Sound HP')) : (j.soundType || 'SIRINE');
+                    return `
+                    <div onclick="editJadwalItem(${j.id})" title="Klik untuk edit jadwal ini" style="padding:9px 11px; border:${isEditing ? '2px solid #F59E0B' : '1px solid var(--border)'}; border-radius:9px; display:flex; justify-content:space-between; align-items:center; gap:8px; cursor:pointer; background:${j.selesai ? 'rgba(148,163,184,0.15)' : 'var(--strip-bg)'}; opacity:${j.selesai ? '0.6' : '1'};">
+                        <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+                            <button type="button" onclick="toggleSelesaiJadwal(${j.id}, event)" title="Tandai Selesai" style="width:22px; height:22px; border-radius:50%; border:2px solid #F59E0B; background:${j.selesai ? '#16A34A' : 'transparent'}; color:#FFF; font-weight:bold; cursor:pointer;">${j.selesai ? '✓' : ''}</button>
+                            <div style="min-width:0;">
+                                <div style="font-size:10px; font-weight:800; color:#D97706;">⏰ ${j.jam} (${j.tanggal}) • [${j.kategori}] • ${j.repeat} • 🔔 ${soundLbl}</div>
+                                <div style="font-size:12px; font-weight:800; ${j.selesai ? 'text-decoration:line-through;' : ''}">${j.judul}</div>
+                                ${j.keterangan ? `<div style="font-size:10.5px; color:var(--text-muted);">${j.keterangan}</div>` : ''}
+                            </div>
                         </div>
-                        <button class="btn-delete" onclick="deleteJadwal(${j.id})">Hapus</button>
+                        <button type="button" class="btn-delete" style="padding:5px 8px;" onclick="deleteJadwal(${j.id}, event)" title="Hapus Jadwal">🗑️</button>
                     </div>
-                `).join('');
+                `}).join('');
         }
+
         const cCont = document.getElementById('listCatatanContainer');
+        const cCountLbl = document.getElementById('catatanCountLabel');
+        if (cCountLbl) cCountLbl.innerText = `${catatanData.length} Catatan`;
+        const filterCKat = document.getElementById('filterCatatanKatSelect')?.value || 'ALL';
+        const qCatatan = (document.getElementById('searchCatatanInput')?.value || '').trim().toLowerCase();
+        const editCId = Number(document.getElementById('editCatatanIdInput')?.value || 0);
+
         if (cCont) {
-            cCont.innerHTML = catatanData.length === 0
-                ? '<div style="text-align:center; padding:14px; color:var(--text-muted);">Belum ada catatan harian.</div>'
-                : catatanData.map(c => `
-                    <div style="padding:10px; border:1px solid var(--border); border-radius:8px; background:var(--strip-bg);">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                            <span style="font-size:11px; font-weight:800;">[${c.kategori}] ${c.judul}</span>
-                            <button class="btn-delete" onclick="deleteCatatan(${c.id})">Hapus</button>
+            const listC = [...catatanData]
+                .filter(c => {
+                    if (filterCKat !== 'ALL' && c.kategori !== filterCKat) return false;
+                    if (qCatatan) {
+                        return (c.judul || '').toLowerCase().includes(qCatatan) || (c.isi || '').toLowerCase().includes(qCatatan);
+                    }
+                    return true;
+                })
+                .sort((a, b) => {
+                    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+                    return b.id - a.id;
+                });
+
+            cCont.innerHTML = listC.length === 0
+                ? '<div style="text-align:center; padding:14px; color:var(--text-muted); grid-column:1/-1;">Belum ada catatan harian yang sesuai.</div>'
+                : listC.map(c => {
+                    const isEditing = editCId === c.id;
+                    return `
+                    <div onclick="editCatatanItem(${c.id}, event)" title="Klik kartu untuk edit catatan ini" style="padding:11px; border:${isEditing ? '2px solid #E11D48' : '1px solid var(--border)'}; border-radius:10px; background:var(--strip-bg); cursor:pointer; display:flex; flex-direction:column; justify-content:space-between; gap:6px;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:6px; margin-bottom:5px;">
+                                <div style="font-size:11.5px; font-weight:800;">
+                                    ${c.pinned ? '<span style="background:#FACC15; color:#000; padding:1px 4px; border-radius:4px; font-size:9px; margin-right:3px;">📌 PIN</span>' : ''}
+                                    <span style="font-size:9.5px; opacity:0.8;">[${c.kategori}]</span> ${c.judul}
+                                </div>
+                                <div style="display:flex; gap:4px; flex-shrink:0;">
+                                    <button type="button" class="btn-edit" style="background:${c.pinned ? '#FACC15' : '#E2E8F0'}; padding:4px 6px;" onclick="togglePinCatatan(${c.id}, event)" title="Pin Catatan">📌</button>
+                                    <button type="button" class="btn-edit" style="padding:4px 6px;" onclick="editCatatanItem(${c.id}, event)" title="Edit Catatan">✏️</button>
+                                    <button type="button" class="btn-delete" style="padding:4px 6px;" onclick="deleteCatatan(${c.id}, event)" title="Hapus Catatan">🗑️</button>
+                                </div>
+                            </div>
+                            <div style="font-size:11px; white-space:pre-wrap; line-height:1.4;">${c.isi}</div>
                         </div>
-                        <div style="font-size:10.5px; white-space:pre-wrap;">${c.isi}</div>
+                        <div style="font-size:9px; font-family:monospace; color:var(--text-muted); text-align:right;">Diperbarui: ${c.waktuUpdate || '-'}</div>
                     </div>
-                `).join('');
+                `}).join('');
         }
-    }
+    };
+
+    // =========================================================================
+    // PIUTANG / UTANG (OTOMATIS SINKRON KE SALDO PIUTANG + FITUR CICIL & EDIT)
+    // =========================================================================
+    document.getElementById('formPiutang').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const editId = document.getElementById('editPiutangId').value;
+        const nama = document.getElementById('piutangNama').value.trim();
+        const nom = parseFloat(document.getElementById('piutangNominal').value) || 0;
+        const sumber = document.getElementById('piutangSumberSaldo').value;
+        const ket = document.getElementById('piutangKet').value.trim();
+
+        if (!nama || nom <= 0) {
+            alert('Masukkan nama peminjam dan nominal utang lebih dari 0!');
+            return;
+        }
+
+        const skrg = new Date();
+        const waktuStr = skrg.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const todayIso = getTodayIsoStr();
+
+        if (editId) {
+            const numId = Number(editId);
+            const oldItem = piutangData.find(p => p.id === numId);
+            if (oldItem) {
+                const sudahDibayar = Number(oldItem.dibayar) || 0;
+                const nextStatus = sudahDibayar >= nom ? 'LUNAS' : 'BELUM LUNAS';
+                piutangData = piutangData.map(p => p.id === numId ? {
+                    ...p,
+                    nama,
+                    nominal: nom,
+                    sumber,
+                    keterangan: ket,
+                    status: nextStatus
+                } : p);
+                transaksiJurnal = transaksiJurnal.map(t => {
+                    if ((oldItem.trxId && t.id === oldItem.trxId) || (t.piutangId === numId && t.jenis === 'PIUTANG')) {
+                        return {
+                            ...t,
+                            keterangan: `[PIUTANG] ${nama}${ket ? ' - ' + ket : ''}`,
+                            jenis: 'PIUTANG',
+                            jenisKas: 'TRANSFER',
+                            akun: sumber,
+                            akunTujuan: 'PIUTANG',
+                            nominal: nom
+                        };
+                    }
+                    return t;
+                });
+                addLogEntry('PIUTANG', `Edit Piutang: ${nama}`, `Nominal: ${formatRp(nom)} • Sumber: ${sumber}`, 'EDIT');
+            }
+        } else {
+            const newPId = Date.now();
+            const newTrxId = newPId + 1;
+            piutangData.unshift({
+                id: newPId,
+                waktu: waktuStr,
+                isoDate: todayIso,
+                nama,
+                nominal: nom,
+                dibayar: 0,
+                cicilan: [],
+                sumber,
+                keterangan: ket,
+                status: 'BELUM LUNAS',
+                trxId: newTrxId
+            });
+            transaksiJurnal.unshift({
+                id: newTrxId,
+                piutangId: newPId,
+                action: 'addTrx',
+                waktu: waktuStr,
+                isoDate: todayIso,
+                keterangan: `[PIUTANG] ${nama}${ket ? ' - ' + ket : ''}`,
+                jenis: 'PIUTANG',
+                jenisKas: 'TRANSFER',
+                akun: sumber,
+                akunTujuan: 'PIUTANG',
+                nominal: nom
+            });
+            addLogEntry('PIUTANG', `Catat Piutang Baru: ${nama}`, `Pinjaman ${formatRp(nom)} dari ${sumber} ➜ Saldo PIUTANG`, 'ADD');
+        }
+
+        window.cancelEditPiutang();
+        saveToFirebase();
+    });
+
+    window.editPiutangItem = function(id) {
+        const item = piutangData.find(p => p.id === id);
+        if (!item) return;
+        document.getElementById('editPiutangId').value = String(item.id);
+        document.getElementById('piutangNama').value = item.nama || '';
+        document.getElementById('piutangNominal').value = String(item.nominal || 0);
+        document.getElementById('piutangNominalDisplay').value = Number(item.nominal || 0).toLocaleString('id-ID');
+        document.getElementById('piutangSumberSaldo').value = item.sumber || 'TUNAI';
+        document.getElementById('piutangKet').value = item.keterangan || '';
+        document.getElementById('piutangFormHeader').innerText = '✏️ Edit Data Utang / Piutang';
+        document.getElementById('btnSubmitPiutang').innerText = '💾 Simpan Perubahan';
+        document.getElementById('btnCancelEditPiutang').style.display = 'inline-block';
+    };
+
+    window.cancelEditPiutang = function() {
+        document.getElementById('editPiutangId').value = '';
+        document.getElementById('formPiutang').reset();
+        document.getElementById('piutangNominal').value = '0';
+        document.getElementById('piutangNominalDisplay').value = '';
+        document.getElementById('piutangFormHeader').innerText = '+ Input Utang / Piutang Baru';
+        document.getElementById('btnSubmitPiutang').innerText = '+ Catat Piutang';
+        document.getElementById('btnCancelEditPiutang').style.display = 'none';
+    };
+
+    let activeCicilSisa = 0;
+    window.openCicilPiutangModal = function(id) {
+        const item = piutangData.find(p => p.id === id);
+        if (!item) return;
+        const totalNom = Number(item.nominal) || 0;
+        const sudahDibayar = Math.min(totalNom, Number(item.dibayar) || 0);
+        const sisa = Math.max(0, totalNom - sudahDibayar);
+        activeCicilSisa = sisa;
+
+        document.getElementById('cicilTargetId').value = String(item.id);
+        document.getElementById('cicilPiutangHeader').innerText = `💵 Cicil / Pelunasan: ${item.nama}`;
+        document.getElementById('cicilInfoBox').innerHTML = `
+            <div>Total Piutang: <b>${formatRp(totalNom)}</b> • Sudah Dibayar: <b class="text-kredit">${formatRp(sudahDibayar)}</b></div>
+            <div style="margin-top:2px;">Sisa Belum Lunas: <b class="text-debit">${formatRp(sisa)}</b></div>
+        `;
+        document.getElementById('cicilNominal').value = String(sisa);
+        document.getElementById('cicilNominalDisplay').value = sisa.toLocaleString('id-ID');
+        document.getElementById('cicilAkunTujuan').value = (item.sumber && item.sumber !== 'PIUTANG') ? item.sumber : 'TUNAI';
+        document.getElementById('cicilKet').value = '';
+        openModal('popupCicilPiutang');
+    };
+
+    window.setCicilNominalQuick = function(ratio) {
+        const val = Math.round(activeCicilSisa * ratio);
+        document.getElementById('cicilNominal').value = String(val);
+        document.getElementById('cicilNominalDisplay').value = val.toLocaleString('id-ID');
+    };
+
+    document.getElementById('formCicilPiutang').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const targetId = Number(document.getElementById('cicilTargetId').value);
+        const item = piutangData.find(p => p.id === targetId);
+        if (!item) return;
+
+        const totalNom = Number(item.nominal) || 0;
+        const sudahDibayar = Math.min(totalNom, Number(item.dibayar) || 0);
+        const sisa = Math.max(0, totalNom - sudahDibayar);
+        const bayarNom = Math.min(sisa, Math.max(0, parseFloat(document.getElementById('cicilNominal').value) || sisa));
+        if (bayarNom <= 0) return;
+
+        const akunTujuan = document.getElementById('cicilAkunTujuan').value;
+        const ketCicil = document.getElementById('cicilKet').value.trim();
+        const newDibayar = sudahDibayar + bayarNom;
+        const isNowLunas = newDibayar >= totalNom;
+
+        const skrg = new Date();
+        const waktuStr = skrg.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+        const todayIso = getTodayIsoStr();
+        const trxId = Date.now();
+
+        const newCicilanEntry = {
+            id: trxId,
+            waktu: waktuStr,
+            isoDate: todayIso,
+            nominal: bayarNom,
+            akun: akunTujuan,
+            keterangan: ketCicil || (isNowLunas ? 'Pelunasan' : `Cicilan ke-${(item.cicilan?.length || 0) + 1}`)
+        };
+
+        piutangData = piutangData.map(p => p.id === targetId ? {
+            ...p,
+            dibayar: newDibayar,
+            status: isNowLunas ? 'LUNAS' : 'BELUM LUNAS',
+            cicilan: [...(p.cicilan || []), newCicilanEntry]
+        } : p);
+
+        transaksiJurnal.unshift({
+            id: trxId,
+            piutangId: targetId,
+            action: 'addTrx',
+            waktu: waktuStr,
+            isoDate: todayIso,
+            keterangan: isNowLunas
+                ? `[PELUNASAN PIUTANG] ${item.nama}${ketCicil ? ' (' + ketCicil + ')' : ''}`
+                : `[CICILAN PIUTANG] ${item.nama} - Sisa ${formatRp(totalNom - newDibayar)}${ketCicil ? ' (' + ketCicil + ')' : ''}`,
+            jenis: 'PINDAH SALDO',
+            jenisKas: 'TRANSFER',
+            akun: 'PIUTANG',
+            akunTujuan: akunTujuan,
+            nominal: bayarNom
+        });
+
+        addLogEntry('PIUTANG', isNowLunas ? `Pelunasan Piutang: ${item.nama}` : `Cicilan Piutang: ${item.nama}`, `Diterima ${formatRp(bayarNom)} ke ${akunTujuan}`, 'EDIT');
+        closeModal('popupCicilPiutang');
+        saveToFirebase();
+    });
+
+    window.deletePiutangItem = function(id) {
+        const target = piutangData.find(p => p.id === id);
+        if (!target || !confirm(`Hapus data piutang "${target.nama}" beserta mutasi jurnalnya?`)) return;
+        const cicilanIds = new Set((target.cicilan || []).map(c => c.id));
+        piutangData = piutangData.filter(p => p.id !== id);
+        transaksiJurnal = transaksiJurnal.filter(t => {
+            if (target.trxId && t.id === target.trxId) return false;
+            if (t.piutangId === id) return false;
+            if (t.id && cicilanIds.has(t.id)) return false;
+            return true;
+        });
+        addLogEntry('PIUTANG', `Hapus Piutang: ${target.nama}`, `Nominal ${formatRp(target.nominal)}`, 'DELETE');
+        saveToFirebase();
+    };
 
     function renderKelolaSaldoList() {
         const tbody = document.getElementById('bodyKelolaSaldoList');
@@ -1894,7 +2795,6 @@
         delete saldoAwalData[oldName];
         akunFastMoney = akunFastMoney.map(a => a === oldName ? newName : a);
 
-        // Update semua transaksi (tanpa membuat akunTujuan: undefined yang menggagalkan Firebase set)
         transaksiJurnal = transaksiJurnal.map(t => {
             const updated = {
                 ...t,
@@ -1968,12 +2868,22 @@
             fKatJurnal.innerHTML += `<option value="${k}">${k}</option>`;
         });
 
-        const ids = ['sumberSaldo', 'akunTujuanTrx', 'v_akun', 'pindahDari', 'pindahKe', 'piutangSumberSaldo'];
+        const ids = ['sumberSaldo', 'akunTujuanTrx', 'v_akun', 'pindahDari', 'pindahKe'];
         ids.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
             el.innerHTML = '';
             saldoList.forEach(s => { el.innerHTML += `<option value="${s}">${s}</option>`; });
+        });
+
+        // Untuk Sumber Piutang & Tujuan Cicilan Piutang: kecualikan akun 'PIUTANG' sendiri
+        ['piutangSumberSaldo', 'cicilAkunTujuan'].forEach(id => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = '';
+            saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG').forEach(s => {
+                el.innerHTML += `<option value="${s}">${s}</option>`;
+            });
         });
 
         const fMasuk = document.getElementById('masukFilterJurnal');
@@ -1998,22 +2908,36 @@
         const gridSaldo = document.getElementById('saldoInputGrid');
         gridSaldo.innerHTML = '';
         saldoList.forEach(s => {
+            const isPiutangAcc = s.trim().toUpperCase() === 'PIUTANG';
             const val = saldoAwalData[s] || 0;
             const formattedVal = val > 0 ? Number(val).toLocaleString('id-ID') : '';
-            gridSaldo.innerHTML += `
-                <div>
-                    <label style="font-size:9px; font-weight:700;">${s}</label>
-                    <input type="text" id="saldoAwalDisplay_${s}" inputmode="numeric" class="form-control" value="${formattedVal}" placeholder="0" oninput="formatSaldoAwalInput(this, 'saldoAwal_${s}')">
-                    <input type="hidden" id="saldoAwal_${s}" value="${val}">
-                </div>
-            `;
+            if (isPiutangAcc) {
+                gridSaldo.innerHTML += `
+                    <div>
+                        <label style="font-size:9px; font-weight:700;">${s}</label>
+                        <div style="padding:6px 8px; font-size:9.5px; font-weight:800; border-radius:6px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE;">🤝 Otomatis dari Rekapan Piutang</div>
+                    </div>
+                `;
+            } else {
+                gridSaldo.innerHTML += `
+                    <div>
+                        <label style="font-size:9px; font-weight:700;">${s}</label>
+                        <input type="text" id="saldoAwalDisplay_${s}" inputmode="numeric" class="form-control" value="${formattedVal}" placeholder="0" oninput="formatSaldoAwalInput(this, 'saldoAwal_${s}')">
+                        <input type="hidden" id="saldoAwal_${s}" value="${val}">
+                    </div>
+                `;
+            }
         });
     }
 
     window.simpanSaldoAwal = function() {
         saldoList.forEach(s => {
-            const inputEl = document.getElementById(`saldoAwal_${s}`);
-            if (inputEl) saldoAwalData[s] = parseFloat(inputEl.value) || 0;
+            if (s.trim().toUpperCase() === 'PIUTANG') {
+                saldoAwalData[s] = 0;
+            } else {
+                const inputEl = document.getElementById(`saldoAwal_${s}`);
+                if (inputEl) saldoAwalData[s] = parseFloat(inputEl.value) || 0;
+            }
         });
         if (saveToFirebase()) closeModal('popupSaldoAwal');
     };
@@ -2213,8 +3137,24 @@
         renderJurnalTable();
     };
 
+    window.jumpToJurnalDate = function(isoDate) {
+        selectedDateFilter = isoDate;
+        const fm = document.getElementById('filterModeJurnal');
+        if (fm) fm.value = 'DATE';
+        const dp = document.getElementById('datePickerFilter');
+        if (dp) {
+            dp.style.display = 'inline-block';
+            dp.value = isoDate;
+        }
+        const mp = document.getElementById('monthPickerFilter');
+        if (mp) mp.style.display = 'none';
+        renderJurnalTable();
+        switchMainPage('page-transaksi');
+    };
+
     window.renderJurnalTable = function() {
         const bJurnal = document.getElementById('bodyJurnal');
+        const fJurnal = document.getElementById('footJurnal');
         const mode = document.getElementById('filterModeJurnal')?.value || 'DATE';
         const katFilter = document.getElementById('katFilterJurnal')?.value || 'ALL';
         const masukFilter = document.getElementById('masukFilterJurnal')?.value || 'ALL';
@@ -2244,16 +3184,23 @@
 
         if (filteredList.length === 0) {
             bJurnal.innerHTML = `<tr><td colspan="10" style="text-align:center; color:var(--text-muted); padding:14px;">Tidak ada transaksi pada tanggal/filter ini.</td></tr>`;
+            if (fJurnal) fJurnal.innerHTML = '';
             return;
         }
 
-        // Nomor urut dinamis sesuai periode filter aktif (Per Hari mulai dari 1, Per Bulan mulai dari 1..Total Bulan)
+        let totMasuk = 0, totKeluar = 0;
+
         bJurnal.innerHTML = filteredList.map((t, filteredIdx) => {
-            const isTransfer = t.jenisKas === 'TRANSFER';
+            const isTransfer = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
             const isMasuk = t.jenisKas === 'MASUK';
             const origIdx = t.originalIndex;
             const nom = Number(t.nominal) || 0;
             const nomorUrutPeriode = filteredList.length - filteredIdx;
+
+            if (!isTransfer) {
+                if (isMasuk) totMasuk += nom;
+                else totKeluar += nom;
+            }
 
             const ketMasuk = isTransfer ? (t.akunTujuan || '-') : (isMasuk ? t.akun : '-');
             const nomMasuk = (isTransfer || isMasuk) ? formatRp(nom) : '-';
@@ -2279,24 +3226,43 @@
                 </tr>
             `;
         }).join('');
+
+        const selisihTotal = totMasuk - totKeluar;
+        if (fJurnal) {
+            fJurnal.innerHTML = `
+                <tr class="total-row">
+                    <td colspan="4" style="text-align:left;">TOTAL (${filteredList.length} TRX • TANPA PINDAH SALDO)</td>
+                    <td style="text-align:center;">-</td>
+                    <td class="text-kredit">${formatRp(totMasuk)}</td>
+                    <td style="text-align:center;">-</td>
+                    <td class="text-debit">${formatRp(totKeluar)}</td>
+                    <td class="${selisihTotal >= 0 ? 'text-kredit' : 'text-debit'}">${formatSelisih(selisihTotal)}</td>
+                    <td></td>
+                </tr>
+            `;
+        }
     };
 
     window.renderTables = function() {
         renderJurnalTable();
         const todayIso = getTodayIsoStr();
-        let hI_Profit = 0, hI_Pengeluaran = 0;
+        let hI_Masuk = 0, hI_Pengeluaran = 0;
         let rekapSaldo = {};
-        saldoList.forEach(s => rekapSaldo[s] = { awal: saldoAwalData[s] || 0, masuk: 0, keluar: 0 });
+        saldoList.forEach(s => {
+            const isPiutangAcc = s.trim().toUpperCase() === 'PIUTANG';
+            rekapSaldo[s] = { awal: isPiutangAcc ? 0 : (saldoAwalData[s] || 0), masuk: 0, keluar: 0 };
+        });
 
         transaksiJurnal.forEach(t => {
             const nom = Number(t.nominal) || 0;
             const cleanIso = extractIsoDate(t.isoDate, t.waktu);
-            if (t.jenisKas === 'TRANSFER') {
+            const isTransfer = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+            if (isTransfer) {
                 if (rekapSaldo[t.akun]) rekapSaldo[t.akun].keluar += nom;
                 if (t.akunTujuan && rekapSaldo[t.akunTujuan]) rekapSaldo[t.akunTujuan].masuk += nom;
             } else {
                 if (cleanIso === todayIso) {
-                    if (t.jenis === 'CUAN KONTER') hI_Profit += nom;
+                    if (t.jenisKas === 'MASUK') hI_Masuk += nom;
                     if (t.jenisKas === 'KELUAR') hI_Pengeluaran += nom;
                 }
                 if (rekapSaldo[t.akun]) {
@@ -2306,10 +3272,27 @@
             }
         });
 
+        // B.3: Sinkronisasi otomatis Saldo PIUTANG 100% dari Rekapan Piutang (Pinjaman - Sudah Dibayar)
+        const piutangAccName = saldoList.find(s => s.trim().toUpperCase() === 'PIUTANG');
+        if (piutangAccName && rekapSaldo[piutangAccName]) {
+            let totalPinjamanPiutang = 0;
+            let totalDibayarPiutang = 0;
+            piutangData.forEach(p => {
+                const nom = Number(p.nominal) || 0;
+                const sudah = p.status === 'LUNAS' ? nom : Math.min(nom, Number(p.dibayar) || 0);
+                totalPinjamanPiutang += nom;
+                totalDibayarPiutang += sudah;
+            });
+            rekapSaldo[piutangAccName] = {
+                awal: 0,
+                masuk: totalPinjamanPiutang,
+                keluar: totalDibayarPiutang
+            };
+        }
+
         let rawSaldo = {};
         saldoList.forEach(s => { rawSaldo[s] = rekapSaldo[s].awal + rekapSaldo[s].masuk - rekapSaldo[s].keluar; });
 
-        // Hitung potongan dana titipan yang berputar di ZEN 1 (Deposito / Deposito Mamah & Bunga Deposito) dan ZEN 2 (M Deded / Uang M Deded)
         let targetIndukByAccount = {};
         let rincianPotonganInduk = {};
         let totalPotonganInduk = {};
@@ -2342,6 +3325,7 @@
             const totalDisplay = displaySaldo[s];
             const targetInduk = targetIndukByAccount[s];
             const isTitipan = Boolean(targetInduk);
+            const isPiutangAcc = s.trim().toUpperCase() === 'PIUTANG';
             const rincianPotongan = rincianPotonganInduk[s] || [];
             const totalPotongan = totalPotonganInduk[s] || 0;
 
@@ -2352,11 +3336,13 @@
             if (akunFastMoney.includes(s)) totalFastMoney += totalDisplay;
 
             let subNoteHtml = '';
-            if (rincianPotongan.length > 0) {
+            if (isPiutangAcc) {
+                subNoteHtml = `<div class="saldo-sub-note" style="color:#9333EA;">🤝 Otomatis dari Rekapan Piutang (Pinjaman - Cicilan/Lunas)</div>`;
+            } else if (rincianPotongan.length > 0) {
                 const listNames = rincianPotongan.map(r => r.akun).join(' + ');
-                subNoteHtml = `<div style="font-size:8px; color:#0284C7; font-weight:700; white-space:normal;">Kotor: ${formatRp(rawVal)} • Dipotong (${listNames}): -${formatRp(totalPotongan)}</div>`;
+                subNoteHtml = `<div class="saldo-sub-note" style="color:#0284C7;">Kotor: ${formatRp(rawVal)} • Dipotong (${listNames}): -${formatRp(totalPotongan)}</div>`;
             } else if (isTitipan) {
-                subNoteHtml = `<div style="font-size:8px; color:#D97706; font-weight:700; white-space:normal;">🔄 Berputar di ${targetInduk} (Memotong ${targetInduk})</div>`;
+                subNoteHtml = `<div class="saldo-sub-note" style="color:#D97706;">🔄 Berputar di ${targetInduk} (Memotong ${targetInduk})</div>`;
             }
 
             rowsSaldoHtml.push(`
@@ -2372,7 +3358,7 @@
             rowsDrawerHtml.push(`
                 <tr style="${isTitipan ? 'opacity:0.7;' : ''}">
                     <td style="text-align:left;"><b>${s}</b>${subNoteHtml}</td>
-                    <td style="font-size:9px;"><span class="text-kredit">+${formatRp(item.masuk)}</span><br><span class="text-debit">-${formatRp(item.keluar)}</span></td>
+                    <td class="drawer-mk-cell"><span class="text-kredit">+${formatRp(item.masuk)}</span><br><span class="text-debit">-${formatRp(item.keluar)}</span></td>
                     <td><b>${formatRp(totalDisplay)}</b></td>
                 </tr>
             `);
@@ -2386,10 +3372,249 @@
         document.getElementById('sSaldoRiilSaya').innerText = formatRp(sumSaldoRiilMurni);
         document.getElementById('dSaldoRiilSaya').innerText = formatRp(sumSaldoRiilMurni);
 
-        document.getElementById('topProfitHariIni').innerText = formatRp(hI_Profit);
+        const hI_Selisih = hI_Masuk - hI_Pengeluaran;
+        const elTopSelisih = document.getElementById('topSelisihHariIni');
+        if (elTopSelisih) elTopSelisih.innerText = formatSelisih(hI_Selisih);
         document.getElementById('topPengeluaranHariIni').innerText = formatRp(hI_Pengeluaran);
         document.getElementById('topFastMoney').innerText = formatRp(totalFastMoney);
         document.getElementById('topTotalSaldoRiil').innerText = formatRp(sumSaldoRiilMurni);
+
+        // =====================================================================
+        // RENDER TABEL PIUTANG (DENGAN KOLOM DIBAYAR/SISA & HISTORY CICILAN)
+        // =====================================================================
+        const bPiutang = document.getElementById('bodyPiutang');
+        const badgeSisaP = document.getElementById('badgeSisaPiutang');
+        let totalSisaPiutangActive = 0;
+        piutangData.forEach(p => {
+            if (p.status !== 'LUNAS') {
+                totalSisaPiutangActive += Math.max(0, (Number(p.nominal) || 0) - (Number(p.dibayar) || 0));
+            }
+        });
+        if (badgeSisaP) badgeSisaP.innerText = `Total Sisa: ${formatRp(totalSisaPiutangActive)}`;
+
+        if (bPiutang) {
+            if (piutangData.length === 0) {
+                bPiutang.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:14px; color:var(--text-muted);">Belum ada catatan utang/piutang. Saldo PIUTANG otomatis Rp0.</td></tr>`;
+            } else {
+                bPiutang.innerHTML = piutangData.map((p, idx) => {
+                    const totalNom = Number(p.nominal) || 0;
+                    const sudahDibayar = p.status === 'LUNAS' ? totalNom : Math.min(totalNom, Number(p.dibayar) || 0);
+                    const sisa = Math.max(0, totalNom - sudahDibayar);
+                    const isLunas = p.status === 'LUNAS' || sisa <= 0;
+                    const listCicilan = Array.isArray(p.cicilan) ? p.cicilan : [];
+                    const historyHtml = listCicilan.length > 0
+                        ? `<div style="margin-top:4px; padding-top:4px; border-top:1px dashed var(--border); font-size:9.5px;">
+                            <div style="font-weight:800; color:#9333EA;">📋 History Cicilan (${listCicilan.length}x):</div>
+                            ${listCicilan.map(c => `<div style="font-family:monospace; color:#15803D;">• ${c.waktu}: <b>+${formatRp(c.nominal)}</b> ➜ ${c.akun}${c.keterangan ? ' (' + c.keterangan + ')' : ''}</div>`).join('')}
+                           </div>`
+                        : '';
+                    return `
+                        <tr>
+                            <td style="text-align:center; font-weight:800;">${piutangData.length - idx}</td>
+                            <td>${p.waktu}</td>
+                            <td style="text-align:left; font-weight:800;">${p.nama}</td>
+                            <td class="text-debit">${formatRp(totalNom)}</td>
+                            <td>
+                                <div class="text-kredit">Bayar: ${formatRp(sudahDibayar)}</div>
+                                <div class="${sisa > 0 ? 'text-debit' : 'text-muted'}">Sisa: ${formatRp(sisa)}</div>
+                            </td>
+                            <td style="text-align:center;">${p.sumber}</td>
+                            <td style="text-align:left; white-space:normal; min-width:180px;">
+                                <div>${p.keterangan || '-'}</div>
+                                ${historyHtml}
+                            </td>
+                            <td style="text-align:center;">
+                                <span class="${isLunas ? 'badge-lunas' : 'badge-belum'}">${isLunas ? 'LUNAS' : (sudahDibayar > 0 ? 'DICICIL' : 'BELUM LUNAS')}</span>
+                            </td>
+                            <td style="text-align:center;">
+                                ${!isLunas ? `<button class="btn-lunas" onclick="openCicilPiutangModal(${p.id})">💵 Cicil/Lunas</button>` : ''}
+                                <button class="btn-edit" onclick="editPiutangItem(${p.id})">Edit</button>
+                                <button class="btn-delete" onclick="deletePiutangItem(${p.id})">Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
+
+        // =====================================================================
+        // A.5: RENDER REKAP HARIAN (DEFAULT PER TANGGAL HARI INI, TANPA CUAN KONTER)
+        // =====================================================================
+        const bRekapHarian = document.getElementById('bodyRekapHarian');
+        const rekapMode = document.getElementById('rekapFilterModeSelect')?.value || 'DATE';
+        const rDateVal = document.getElementById('rekapDatePicker')?.value || todayIso;
+        const rMonthVal = document.getElementById('rekapMonthPicker')?.value || todayIso.slice(0, 7);
+
+        if (bRekapHarian) {
+            let grandPemasukan = 0, grandPengeluaran = 0, grandTrx = 0;
+            const rowsHarian = [];
+
+            if (rekapMode === 'DATE') {
+                const [yStr, mStr, dStr] = rDateVal.split('-');
+                const yr = Number(yStr), mo = Number(mStr), dy = Number(dStr);
+                const dateObj = new Date(yr, mo - 1, dy);
+                const namaHari = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+                const namaBulan = dateObj.toLocaleDateString('id-ID', { month: 'short' });
+                let totalMasuk = 0, totalKeluar = 0, jmlTrx = 0;
+
+                transaksiJurnal.forEach(t => {
+                    if (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') return;
+                    if (extractIsoDate(t.isoDate, t.waktu) === rDateVal) {
+                        const nom = Number(t.nominal) || 0;
+                        jmlTrx += 1;
+                        if (t.jenisKas === 'MASUK') totalMasuk += nom;
+                        if (t.jenisKas === 'KELUAR') totalKeluar += nom;
+                    }
+                });
+                grandPemasukan = totalMasuk;
+                grandPengeluaran = totalKeluar;
+                grandTrx = jmlTrx;
+                const bersih = totalMasuk - totalKeluar;
+                rowsHarian.push(`
+                    <tr onclick="jumpToJurnalDate('${rDateVal}')" style="cursor:pointer;">
+                        <td style="text-align:left; font-weight:700;">${namaHari}, ${dStr} ${namaBulan} ${yStr}</td>
+                        <td style="text-align:center; font-weight:700;">${jmlTrx} Trx</td>
+                        <td class="text-kredit">${formatRp(totalMasuk)}</td>
+                        <td class="text-debit">${formatRp(totalKeluar)}</td>
+                        <td class="${bersih >= 0 ? 'text-kredit' : 'text-debit'}"><b>${formatSelisih(bersih)}</b></td>
+                    </tr>
+                `);
+            } else {
+                const [yStr, mStr] = rMonthVal.split('-');
+                const yr = Number(yStr), mo = Number(mStr);
+                const daysInMonth = new Date(yr, mo, 0).getDate();
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const dd = String(d).padStart(2, '0');
+                    const isoStr = `${yStr}-${mStr}-${dd}`;
+                    const dateObj = new Date(yr, mo - 1, d);
+                    const namaHari = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
+                    const namaBulan = dateObj.toLocaleDateString('id-ID', { month: 'short' });
+                    let totalMasuk = 0, totalKeluar = 0, jmlTrx = 0;
+
+                    transaksiJurnal.forEach(t => {
+                        if (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') return;
+                        if (extractIsoDate(t.isoDate, t.waktu) === isoStr) {
+                            const nom = Number(t.nominal) || 0;
+                            jmlTrx += 1;
+                            if (t.jenisKas === 'MASUK') totalMasuk += nom;
+                            if (t.jenisKas === 'KELUAR') totalKeluar += nom;
+                        }
+                    });
+                    grandPemasukan += totalMasuk;
+                    grandPengeluaran += totalKeluar;
+                    grandTrx += jmlTrx;
+                    const bersih = totalMasuk - totalKeluar;
+                    rowsHarian.push(`
+                        <tr onclick="jumpToJurnalDate('${isoStr}')" style="cursor:pointer;">
+                            <td style="text-align:left; font-weight:700;">${namaHari}, ${dd} ${namaBulan} ${yStr}</td>
+                            <td style="text-align:center;">${jmlTrx > 0 ? jmlTrx + ' Trx' : '0'}</td>
+                            <td class="${totalMasuk > 0 ? 'text-kredit' : 'text-muted'}">${formatRp(totalMasuk)}</td>
+                            <td class="${totalKeluar > 0 ? 'text-debit' : 'text-muted'}">${formatRp(totalKeluar)}</td>
+                            <td class="${bersih > 0 ? 'text-kredit' : (bersih < 0 ? 'text-debit' : 'text-muted')}"><b>${formatSelisih(bersih)}</b></td>
+                        </tr>
+                    `);
+                }
+            }
+
+            bRekapHarian.innerHTML = rowsHarian.join('');
+            const lblTotRekap = document.getElementById('lblTotalRekapHarian');
+            if (lblTotRekap) lblTotRekap.innerText = `TOTAL (${rekapMode === 'DATE' ? rDateVal : rMonthVal})`;
+            document.getElementById('totTrxHarian').innerText = `${grandTrx} Trx`;
+            document.getElementById('totPemasukanHarian').innerText = formatRp(grandPemasukan);
+            document.getElementById('totPengeluaranHarian').innerText = formatRp(grandPengeluaran);
+            const grandBersih = grandPemasukan - grandPengeluaran;
+            const elBersih = document.getElementById('totBersihHarian');
+            elBersih.innerText = formatSelisih(grandBersih);
+            elBersih.className = grandBersih >= 0 ? 'text-kredit' : 'text-debit';
+        }
+
+        // =====================================================================
+        // A.6: RENDER PEMBUKUAN (PER JENIS TRANSAKSI TANPA PINDAH SALDO) + TABEL REKAP PINDAH SALDO
+        // =====================================================================
+        const bPembukuan = document.getElementById('bodyPembukuan');
+        const fPembukuan = document.getElementById('footPembukuan');
+        const bPindahPembukuan = document.getElementById('bodyPembukuanPindahSaldo');
+        const lblFilterP = document.getElementById('lblFilterPembukuan');
+        if (lblFilterP) lblFilterP.innerText = selectedDateFilterPembukuan === 'ALL' ? 'SEMUA TANGGAL' : selectedDateFilterPembukuan;
+
+        const katNonTransfer = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
+        const rekapKat = {};
+        katNonTransfer.forEach(k => { rekapKat[k] = { jml: 0, debit: 0, kredit: 0 }; });
+        const pindahList = [];
+
+        transaksiJurnal.forEach((t, origIdx) => {
+            const cleanIso = extractIsoDate(t.isoDate, t.waktu);
+            const matchFilter = selectedDateFilterPembukuan === 'ALL' || cleanIso === selectedDateFilterPembukuan;
+            if (!matchFilter) return;
+
+            if (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') {
+                if (t.jenis !== 'PIUTANG') {
+                    pindahList.push({ ...t, origIdx });
+                }
+                return;
+            }
+            if (!rekapKat[t.jenis]) rekapKat[t.jenis] = { jml: 0, debit: 0, kredit: 0 };
+            rekapKat[t.jenis].jml += 1;
+            const nom = Number(t.nominal) || 0;
+            if (t.jenisKas === 'KELUAR') rekapKat[t.jenis].debit += nom;
+            else rekapKat[t.jenis].kredit += nom;
+        });
+
+        if (bPembukuan) {
+            let totJml = 0, totDebit = 0, totKredit = 0;
+            bPembukuan.innerHTML = katNonTransfer.map(k => {
+                const item = rekapKat[k];
+                const sel = item.kredit - item.debit;
+                totJml += item.jml;
+                totDebit += item.debit;
+                totKredit += item.kredit;
+                return `
+                    <tr class="${k === 'CUAN KONTER' ? 'highlight-cyan' : ''}">
+                        <td style="text-align:left; font-weight:800;">${k}</td>
+                        <td style="text-align:center;">${item.jml}</td>
+                        <td class="text-debit">${formatRp(item.debit)}</td>
+                        <td class="text-kredit">${formatRp(item.kredit)}</td>
+                        <td class="${sel > 0 ? 'text-kredit' : (sel < 0 ? 'text-debit' : '')}"><b>${formatSelisih(sel)}</b></td>
+                    </tr>
+                `;
+            }).join('');
+
+            if (fPembukuan) {
+                const totSel = totKredit - totDebit;
+                fPembukuan.innerHTML = `
+                    <tr class="total-row">
+                        <td style="text-align:left;">TOTAL PEMBUKUAN (TANPA PINDAH SALDO)</td>
+                        <td style="text-align:center;">${totJml}</td>
+                        <td class="text-debit">${formatRp(totDebit)}</td>
+                        <td class="text-kredit">${formatRp(totKredit)}</td>
+                        <td class="${totSel >= 0 ? 'text-kredit' : 'text-debit'}"><b>${formatSelisih(totSel)}</b></td>
+                    </tr>
+                `;
+            }
+        }
+
+        const lblCountPindah = document.getElementById('lblCountPindahPembukuan');
+        if (lblCountPindah) lblCountPindah.innerText = `🔄 Rekap Pindah Saldo (${pindahList.length} Transaksi)`;
+        if (bPindahPembukuan) {
+            if (pindahList.length === 0) {
+                bPindahPembukuan.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:12px; color:var(--text-muted);">Tidak ada transaksi pindah saldo pada filter ini.</td></tr>`;
+            } else {
+                bPindahPembukuan.innerHTML = pindahList.map((t, idx) => `
+                    <tr>
+                        <td style="text-align:center; font-weight:800;">${pindahList.length - idx}</td>
+                        <td>${t.waktu}</td>
+                        <td style="text-align:left; font-weight:700;">${t.keterangan}</td>
+                        <td class="text-debit" style="text-align:center;">${t.akun}</td>
+                        <td class="text-kredit" style="text-align:center;">${t.akunTujuan || '-'}</td>
+                        <td style="font-family:monospace; font-weight:800; color:#0284C7;">${formatRp(t.nominal)}</td>
+                        <td style="text-align:center;">
+                            <button class="btn-edit" onclick="editTrx(${t.origIdx})">Edit</button>
+                            <button class="btn-delete" onclick="deleteTrx(${t.origIdx})">Hapus</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
     };
 
     updateClock();
