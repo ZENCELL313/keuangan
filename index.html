@@ -2,14 +2,14 @@
 <html lang="id" data-theme="blue">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PEMBUKUAN PRIBADI - Pembukuan Transaksi Harian dan Rekap Saldo</title>
     
-    <!-- PWA STANDALONE FULLSCREEN META TAGS (ANDROID CHROME & IOS SAFARI) -->
-    <meta name="theme-color" content="#12385B">
+    <!-- PWA STANDALONE META TAGS (TANPA HEADER CHROME, BAR NOTIFIKASI & NAVIGASI HP TETAP MUNCUL) -->
+    <meta name="theme-color" content="#12385B" id="metaThemeColor">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Pembukuan">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2845/2845701.png">
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2845/2845701.png">
@@ -25,7 +25,7 @@
                 start_url: cleanUrl,
                 scope: baseScope,
                 display: "standalone",
-                display_override: ["fullscreen", "standalone"],
+                display_override: ["standalone", "minimal-ui"],
                 orientation: "portrait",
                 background_color: "#0F172A",
                 theme_color: "#12385B",
@@ -634,7 +634,6 @@
                     <div class="header-btn-group">
                         <button class="btn-hdr" onclick="openLogModal()" title="Log Aktivitas">📜 Log <span id="hdrLogBadge" style="background:#FACC15; color:#0F172A; padding:0 4px; border-radius:4px; font-size:8px; font-weight:900;">0</span></button>
                         <button class="btn-hdr" onclick="cycleTheme()" id="btnThemeLabel">🎨 Biru</button>
-                        <button class="btn-hdr" onclick="toggleFullScreenApp()" title="Layar Penuh Tanpa Bar Browser">⛶</button>
                         <button class="btn-hdr" onclick="openModal('mgmtDataModal')">⚙ Data</button>
                     </div>
                     <!-- JAM 2 BARIS PERSIS GAMBAR -->
@@ -1329,6 +1328,14 @@
         document.documentElement.setAttribute('data-theme', t);
         const btn = document.getElementById('btnThemeLabel');
         if (btn) btn.innerText = `🎨 ${themeNames[t]}`;
+        const metaTheme = document.getElementById('metaThemeColor');
+        if (metaTheme) {
+            const themeColors = { blue: '#12385B', green: '#0A3622', dark: '#090D16' };
+            metaTheme.setAttribute('content', themeColors[t] || '#12385B');
+        }
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
         localStorage.setItem('zencell_theme_pribadi', t);
     }
     applyTheme(currentTheme);
@@ -1336,14 +1343,6 @@
         const nextIdx = (themes.indexOf(currentTheme) + 1) % themes.length;
         currentTheme = themes[nextIdx];
         applyTheme(currentTheme);
-    };
-
-    window.toggleFullScreenApp = function() {
-        if (!document.fullscreenElement) {
-            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
-        } else {
-            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-        }
     };
 
     // DEFAULT TANGGAL HARI INI SESUAI INSTRUKSI #4
