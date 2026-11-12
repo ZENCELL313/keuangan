@@ -2,14 +2,54 @@
 <html lang="id" data-theme="blue">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>PEMBUKUAN PRIBADI - Pembukuan Transaksi Harian dan Rekap Saldo</title>
     
-    <!-- PWA MANIFEST (INLINE) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"PEMBUKUAN PRIBADI","short_name":"Pembukuan","start_url":".","display":"standalone","background_color":"#1E293B","theme_color":"#1E293B","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/2845/2845701.png","sizes":"512x512","type":"image/png"}]}'>
-    <meta name="theme-color" content="#1E293B">
+    <!-- PWA STANDALONE FULLSCREEN META TAGS (ANDROID CHROME & IOS SAFARI) -->
+    <meta name="theme-color" content="#12385B">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pembukuan">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2845/2845701.png">
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/2845/2845701.png">
+    <script>
+        (function() {
+            var cleanUrl = window.location.href.split('#')[0].split('?')[0];
+            var baseScope = cleanUrl.substring(0, cleanUrl.lastIndexOf('/') + 1);
+            var manifestObj = {
+                id: cleanUrl,
+                name: "PEMBUKUAN PRIBADI - Transaksi & Saldo",
+                short_name: "Pembukuan",
+                description: "Pembukuan Transaksi Harian dan Rekap Saldo Pribadi",
+                start_url: cleanUrl,
+                scope: baseScope,
+                display: "standalone",
+                display_override: ["fullscreen", "standalone"],
+                orientation: "portrait",
+                background_color: "#0F172A",
+                theme_color: "#12385B",
+                icons: [
+                    {
+                        src: "https://cdn-icons-png.flaticon.com/512/2845/2845701.png",
+                        sizes: "192x192",
+                        type: "image/png",
+                        purpose: "any"
+                    },
+                    {
+                        src: "https://cdn-icons-png.flaticon.com/512/2845/2845701.png",
+                        sizes: "512x512",
+                        type: "image/png",
+                        purpose: "any"
+                    }
+                ]
+            };
+            var link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifestObj));
+            document.head.appendChild(link);
+        })();
+    </script>
 
     <!-- SheetJS for Export Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -594,6 +634,7 @@
                     <div class="header-btn-group">
                         <button class="btn-hdr" onclick="openLogModal()" title="Log Aktivitas">📜 Log <span id="hdrLogBadge" style="background:#FACC15; color:#0F172A; padding:0 4px; border-radius:4px; font-size:8px; font-weight:900;">0</span></button>
                         <button class="btn-hdr" onclick="cycleTheme()" id="btnThemeLabel">🎨 Biru</button>
+                        <button class="btn-hdr" onclick="toggleFullScreenApp()" title="Layar Penuh Tanpa Bar Browser">⛶</button>
                         <button class="btn-hdr" onclick="openModal('mgmtDataModal')">⚙ Data</button>
                     </div>
                     <!-- JAM 2 BARIS PERSIS GAMBAR -->
@@ -1295,6 +1336,14 @@
         const nextIdx = (themes.indexOf(currentTheme) + 1) % themes.length;
         currentTheme = themes[nextIdx];
         applyTheme(currentTheme);
+    };
+
+    window.toggleFullScreenApp = function() {
+        if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        }
     };
 
     // DEFAULT TANGGAL HARI INI SESUAI INSTRUKSI #4
