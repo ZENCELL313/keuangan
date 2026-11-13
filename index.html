@@ -1488,13 +1488,13 @@
 <div id="popupVlookup" class="modal-overlay">
     <div class="modal-content-popup">
         <div class="modal-header-popup">
-            <h3>⚙️ Master VLOOKUP</h3>
+            <h3>⚙️ Master VLOOKUP (Auto-Fill)</h3>
             <button class="btn-close-popup" onclick="closeModal('popupVlookup')">&times;</button>
         </div>
         <form id="formVlookup">
             <div class="form-group">
                 <label>Kata Kunci / Keterangan</label>
-                <input type="text" id="v_ket" class="form-control" placeholder="JAJAN, BENSIN, MAKANAN" required>
+                <input type="text" id="v_ket" class="form-control" style="text-transform:uppercase;" placeholder="JAJAN, BENSIN, MAKANAN" required>
             </div>
             <div class="row-2">
                 <div class="form-group">
@@ -1515,6 +1515,24 @@
             </div>
             <button type="submit" class="btn" style="background-color:#16A34A;">Simpan VLOOKUP</button>
         </form>
+        <div style="border-top:1px solid var(--border); margin-top:10px; padding-top:8px;">
+            <div style="font-size:10px; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">
+                Daftar Kata Kunci Aktif:
+            </div>
+            <div class="table-responsive" style="max-height:185px; overflow-y:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">KATA KUNCI</th>
+                            <th>KATEGORI</th>
+                            <th>AKUN</th>
+                            <th>HAPUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyVlookupList"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -2227,7 +2245,7 @@
             piutangData = Array.isArray(data.piutang) ? data.piutang.filter(Boolean) : [];
             saldoAwalData = data.saldoAwal || {};
             potonganSaldoMap = (data.potonganSaldo && typeof data.potonganSaldo === 'object') ? data.potonganSaldo : {};
-            vlookupMaster = Object.assign({}, defaultMaster, data.vlookup || {});
+            vlookupMaster = (data.vlookup && Object.keys(data.vlookup).length > 0) ? data.vlookup : { ...defaultMaster };
             jadwalData = Array.isArray(data.jadwal) ? data.jadwal.filter(Boolean) : [];
             catatanData = Array.isArray(data.catatan) ? data.catatan.filter(Boolean) : [];
             logsData = Array.isArray(data.logs) ? data.logs.filter(Boolean) : [];
@@ -2973,12 +2991,58 @@
 
         const dList = document.getElementById('listVlookup');
         const chipsEl = document.getElementById('vlookupChips');
+        const bVlookup = document.getElementById('bodyVlookupList');
         dList.innerHTML = ''; chipsEl.innerHTML = '';
-        Object.keys(vlookupMaster).forEach(key => {
+        const vKeys = Object.keys(vlookupMaster);
+        vKeys.forEach(key => {
+            const safeKeyAttr = key.replace(/'/g, "\\'");
             dList.innerHTML += `<option value="${key}">`;
-            chipsEl.innerHTML += `<button type="button" class="chip-btn" onclick="applyVlookupChip('${key}')">${key}</button>`;
+            chipsEl.innerHTML += `<button type="button" class="chip-btn" onclick="applyVlookupChip('${safeKeyAttr}')">${key}</button>`;
         });
+        if (bVlookup) {
+            if (vKeys.length === 0) {
+                bVlookup.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:10px; color:var(--text-muted);">Belum ada kata kunci VLOOKUP.</td></tr>`;
+            } else {
+                bVlookup.innerHTML = vKeys.map(key => {
+                    const val = vlookupMaster[key] || {};
+                    const safeKeyAttr = key.replace(/'/g, "\\'");
+                    return `
+                        <tr onclick="fillVlookupForm('${safeKeyAttr}')" style="cursor:pointer;" title="Klik untuk edit kata kunci ini">
+                            <td style="text-align:left; font-weight:800; color:#0284C7;">${key}</td>
+                            <td style="text-align:center;">${val.kat || '-'}</td>
+                            <td style="text-align:center;">${val.akun || '-'}</td>
+                            <td style="text-align:center;">
+                                <button type="button" onclick="event.stopPropagation(); deleteVlookupItem('${safeKeyAttr}')" style="background:transparent; border:none; color:#EF4444; font-weight:900; font-size:11px; cursor:pointer; padding:2px 6px;" title="Hapus VLOOKUP">✕</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        }
     }
+
+    window.fillVlookupForm = function(key) {
+        const item = vlookupMaster[key];
+        if (!item) return;
+        document.getElementById('v_ket').value = key;
+        if (item.kat) document.getElementById('v_kat').value = item.kat;
+        if (item.kas) document.getElementById('v_kas').value = item.kas;
+        if (item.akun) document.getElementById('v_akun').value = item.akun;
+    };
+
+    window.deleteVlookupItem = function(key) {
+        if (!vlookupMaster[key]) return;
+        window.askConfirmDelete(
+            '⚠️ Konfirmasi Hapus VLOOKUP',
+            `Apakah Anda yakin ingin menghapus kata kunci otomatis VLOOKUP "${key}"?`,
+            function() {
+                delete vlookupMaster[key];
+                addLogEntry('SISTEM', `Hapus VLOOKUP: ${key}`, `Menghapus kata kunci otomatis "${key}".`, 'DELETE');
+                initDropdowns();
+                saveToFirebase();
+            }
+        );
+    };
 
     function initSaldoGrid() {
         const gridSaldo = document.getElementById('saldoInputGrid');
@@ -3072,14 +3136,19 @@
     document.getElementById('formVlookup').addEventListener('submit', function(e) {
         e.preventDefault();
         const ket = document.getElementById('v_ket').value.trim().toUpperCase();
+        if (!ket) return;
+        const katVal = document.getElementById('v_kat').value;
+        const kasVal = document.getElementById('v_kas').value;
+        const akunVal = document.getElementById('v_akun').value;
         vlookupMaster[ket] = {
-            kat: document.getElementById('v_kat').value,
-            kas: document.getElementById('v_kas').value,
-            akun: document.getElementById('v_akun').value
+            kat: katVal,
+            kas: kasVal,
+            akun: akunVal
         };
+        addLogEntry('SISTEM', `Simpan VLOOKUP: ${ket}`, `Kata kunci "${ket}" diatur ke Kategori ${katVal}, Arus ${kasVal}, Akun ${akunVal}.`, 'ADD');
+        initDropdowns();
         if (saveToFirebase()) {
             document.getElementById('v_ket').value = '';
-            closeModal('popupVlookup');
         }
     });
 
