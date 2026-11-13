@@ -550,12 +550,11 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.6);
+            background: rgba(15, 23, 42, 0.4);
             z-index: 10000;
             align-items: center;
             justify-content: center;
             padding: 12px;
-            backdrop-filter: blur(2px);
         }
         .modal-overlay.active { display: flex; }
         .modal-content-popup {
@@ -570,6 +569,34 @@
             box-shadow: 0 12px 30px rgba(0,0,0,0.3);
             border: 1px solid var(--border);
         }
+        .popup-drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin: -6px 0 6px 0;
+            padding: 2px 0;
+            border-radius: 8px;
+            cursor: move;
+            user-select: none;
+            touch-action: none;
+            opacity: 0.65;
+            transition: opacity 0.15s;
+        }
+        .popup-drag-handle:hover { opacity: 1; }
+        .popup-drag-line {
+            width: 28px;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.7);
+        }
+        .popup-drag-text {
+            font-size: 8.5px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #94A3B8;
+        }
         .modal-header-popup {
             display: flex;
             justify-content: space-between;
@@ -577,6 +604,9 @@
             margin-bottom: 10px;
             padding-bottom: 6px;
             border-bottom: 1px solid var(--border);
+            cursor: move;
+            user-select: none;
+            touch-action: none;
         }
         .modal-header-popup h3 { font-size: 12.5px; font-weight: 800; text-transform: uppercase; }
         .btn-close-popup { background: var(--strip-bg); border: none; width: 26px; height: 26px; border-radius: 50%; font-size: 15px; font-weight: bold; cursor: pointer; color: var(--text); }
@@ -2089,8 +2119,84 @@
         return '-Rp' + Math.abs(num).toLocaleString('id-ID');
     };
 
-    window.openModal = function(id) { document.getElementById(id).classList.add('active'); };
-    window.closeModal = function(id) { document.getElementById(id).classList.remove('active'); };
+    function resetPopupPosition(modalEl) {
+        if (!modalEl) return;
+        const box = modalEl.querySelector('.modal-content-popup');
+        if (box) {
+            box.dataset.dx = '0';
+            box.dataset.dy = '0';
+            box.style.transform = 'translate3d(0px, 0px, 0px)';
+        }
+    }
+
+    window.openModal = function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        resetPopupPosition(el);
+        el.classList.add('active');
+    };
+    window.closeModal = function(id) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.remove('active');
+        resetPopupPosition(el);
+    };
+
+    function initDraggableModals() {
+        document.querySelectorAll('.modal-content-popup').forEach((box) => {
+            if (box.dataset.dragReady === '1') return;
+            box.dataset.dragReady = '1';
+            box.dataset.dx = '0';
+            box.dataset.dy = '0';
+
+            const handle = document.createElement('div');
+            handle.className = 'popup-drag-handle';
+            handle.setAttribute('data-drag-zone', 'true');
+            handle.title = 'Tahan & geser untuk memindahkan popup (Klik 2x untuk kembali ke tengah)';
+            handle.innerHTML = '<span class="popup-drag-line"></span><span class="popup-drag-text">Geser Popup</span><span class="popup-drag-line"></span>';
+            handle.addEventListener('dblclick', () => {
+                box.dataset.dx = '0';
+                box.dataset.dy = '0';
+                box.style.transform = 'translate3d(0px, 0px, 0px)';
+            });
+            box.insertBefore(handle, box.firstChild);
+
+            let dragging = false;
+            let startX = 0, startY = 0, baseX = 0, baseY = 0;
+
+            box.addEventListener('pointerdown', (e) => {
+                if (e.button !== 0 && e.pointerType === 'mouse') return;
+                const target = e.target;
+                if (!target || typeof target.closest !== 'function') return;
+                if (target.closest('input, select, textarea, button, a, label')) return;
+                if (e.pointerType !== 'mouse' && !target.closest('[data-drag-zone="true"], .modal-header-popup, h3')) return;
+
+                dragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                baseX = Number(box.dataset.dx) || 0;
+                baseY = Number(box.dataset.dy) || 0;
+                try { box.setPointerCapture(e.pointerId); } catch (_) {}
+            });
+
+            box.addEventListener('pointermove', (e) => {
+                if (!dragging) return;
+                const nx = baseX + (e.clientX - startX);
+                const ny = baseY + (e.clientY - startY);
+                box.dataset.dx = String(nx);
+                box.dataset.dy = String(ny);
+                box.style.transform = 'translate3d(' + nx + 'px, ' + ny + 'px, 0px)';
+            });
+
+            const stopDrag = (e) => {
+                if (!dragging) return;
+                dragging = false;
+                try { box.releasePointerCapture(e.pointerId); } catch (_) {}
+            };
+            box.addEventListener('pointerup', stopDrag);
+            box.addEventListener('pointercancel', stopDrag);
+        });
+    }
 
     let drawerOpenState = false;
     window.toggleLeftDrawer = function(forceVal) {
@@ -3832,6 +3938,7 @@
     updateClock();
     setTodayDateInput();
     initDropdowns();
+    initDraggableModals();
 </script>
 </body>
 </html>
