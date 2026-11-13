@@ -984,6 +984,9 @@
                     <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">
                         🏦 Edit Akun Saldo
                     </button>
+                    <button class="btn-strip-action" style="border-color:#F59E0B; color:#B45309;" onclick="openTitipanTab('ALL')">
+                        📘 Rekap Titipan & Bunga 3,5%
+                    </button>
                 </div>
             </div>
         </div>
@@ -1045,63 +1048,209 @@
                 </div>
             </div>
 
-            <!-- HALAMAN 2: PIUTANG / UTANG (SINKRON OTOMATIS KE SALDO PIUTANG + FITUR CICIL & EDIT) -->
+            <!-- HALAMAN 2: PIUTANG / UTANG & REKAP TITIPAN DEPOSITO -->
             <div id="page-piutang" class="page-view">
-                <div class="card">
-                    <div class="card-header card-header-purple">
-                        <span id="piutangFormHeader">+ Input Utang / Piutang Baru</span>
-                        <span style="font-size:9.5px; font-weight:normal; opacity:0.9;">Otomatis masuk ke Saldo PIUTANG</span>
-                    </div>
-                    <form id="formPiutang">
-                        <input type="hidden" id="editPiutangId" value="">
-                        <div class="form-group">
-                            <label>Nama Peminjam</label>
-                            <input type="text" id="piutangNama" class="form-control" placeholder="Budi, Pak RT..." required>
-                        </div>
-                        <div class="row-2">
-                            <div class="form-group">
-                                <label>Nominal Utang (Rp)</label>
-                                <input type="text" id="piutangNominalDisplay" inputmode="numeric" class="form-control" placeholder="0" required oninput="formatNominalCustom(this, 'piutangNominal')">
-                                <input type="hidden" id="piutangNominal" value="0">
-                            </div>
-                            <div class="form-group">
-                                <label>Keluar Dari Saldo (Sumber Pinjaman)</label>
-                                <select id="piutangSumberSaldo" class="form-control" required></select>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>Keterangan</label>
-                            <input type="text" id="piutangKet" class="form-control" placeholder="Talangan, Beli Pulsa, Kasbon...">
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <button type="button" id="btnCancelEditPiutang" class="btn" style="display:none; background:#64748B; width:auto; padding:8px 14px;" onclick="cancelEditPiutang()">Batal Edit</button>
-                            <button type="submit" id="btnSubmitPiutang" class="btn" style="background-color:#9333EA;">+ Catat Piutang</button>
-                        </div>
-                    </form>
+                <div class="sub-tabs" style="margin-bottom:8px;">
+                    <button id="btnSubPiutangList" class="sub-tab-btn active" onclick="switchPiutangSubTab('sub-piutang-list', this)">🤝 Rekap Utang / Piutang</button>
+                    <button id="btnSubTitipanDeposito" class="sub-tab-btn" onclick="switchPiutangSubTab('sub-titipan-deposito', this)">🏦 Rekap Titipan & Deposito (Mamah & M Deded)</button>
                 </div>
 
-                <div class="card">
-                    <div class="card-header card-header-purple">
-                        <span>🤝 Rekapan Utang / Piutang</span>
-                        <span id="badgeSisaPiutang" style="font-size:10px; font-family:monospace; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:5px;">Total Sisa: Rp0</span>
+                <div id="sub-piutang-list">
+                    <div class="card">
+                        <div class="card-header card-header-purple">
+                            <span id="piutangFormHeader">+ Input Utang / Piutang Baru</span>
+                            <span style="font-size:9.5px; font-weight:normal; opacity:0.9;">Otomatis masuk ke Saldo PIUTANG</span>
+                        </div>
+                        <form id="formPiutang">
+                            <input type="hidden" id="editPiutangId" value="">
+                            <div class="form-group">
+                                <label>Nama Peminjam</label>
+                                <input type="text" id="piutangNama" class="form-control" placeholder="Budi, Pak RT..." required>
+                            </div>
+                            <div class="row-2">
+                                <div class="form-group">
+                                    <label>Nominal Utang (Rp)</label>
+                                    <input type="text" id="piutangNominalDisplay" inputmode="numeric" class="form-control" placeholder="0" required oninput="formatNominalCustom(this, 'piutangNominal')">
+                                    <input type="hidden" id="piutangNominal" value="0">
+                                </div>
+                                <div class="form-group">
+                                    <label>Keluar Dari Saldo (Sumber Pinjaman)</label>
+                                    <select id="piutangSumberSaldo" class="form-control" required></select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Keterangan</label>
+                                <input type="text" id="piutangKet" class="form-control" placeholder="Talangan, Beli Pulsa, Kasbon...">
+                            </div>
+                            <div style="display:flex; gap:6px;">
+                                <button type="button" id="btnCancelEditPiutang" class="btn" style="display:none; background:#64748B; width:auto; padding:8px 14px;" onclick="cancelEditPiutang()">Batal Edit</button>
+                                <button type="submit" id="btnSubmitPiutang" class="btn" style="background-color:#9333EA;">+ Catat Piutang</button>
+                            </div>
+                        </form>
                     </div>
-                    <div class="table-responsive">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>NO</th>
-                                    <th>WAKTU</th>
-                                    <th style="text-align:left;">NAMA</th>
-                                    <th>NOMINAL UTANG</th>
-                                    <th>DIBAYAR / SISA</th>
-                                    <th>SUMBER</th>
-                                    <th style="text-align:left;">KET & HISTORY CICILAN</th>
-                                    <th>STATUS</th>
-                                    <th>AKSI</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bodyPiutang"></tbody>
-                        </table>
+
+                    <div class="card">
+                        <div class="card-header card-header-purple">
+                            <span>🤝 Rekapan Utang / Piutang</span>
+                            <span id="badgeSisaPiutang" style="font-size:10px; font-family:monospace; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:5px;">Total Sisa: Rp0</span>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>WAKTU</th>
+                                        <th style="text-align:left;">NAMA</th>
+                                        <th>NOMINAL UTANG</th>
+                                        <th>DIBAYAR / SISA</th>
+                                        <th>SUMBER</th>
+                                        <th style="text-align:left;">KET & HISTORY CICILAN</th>
+                                        <th>STATUS</th>
+                                        <th>AKSI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyPiutang"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB-TAB 2: REKAP KHUSUS PERTANGGUNGJAWABAN TITIPAN & DEPOSITO -->
+                <div id="sub-titipan-deposito" style="display:none;">
+                    <div id="titipanCardsSummaryGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:8px; margin-bottom:8px;"></div>
+
+                    <div class="row-2" style="align-items:stretch;">
+                        <!-- KALKULATOR & POSTING BUNGA DEPOSITO MAMAH 3,5% -->
+                        <div class="card" style="margin-bottom:8px;">
+                            <div class="card-header" style="background:linear-gradient(90deg, #059669 0%, #0D9488 100%);">
+                                <span>🧮 Kalkulator & Posting Bunga Deposito Mamah (3,5% / Thn)</span>
+                            </div>
+                            <form id="formBungaTitipan" onsubmit="submitBungaTitipan(event)">
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Suku Bunga (% / Tahun)</label>
+                                        <input type="text" id="bungaRateInput" class="form-control" value="3.5" oninput="recalcBungaTitipanPreview()">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Potongan Pajak Bunga</label>
+                                        <select id="bungaTaxInput" class="form-control" onchange="recalcBungaTitipanPreview()">
+                                            <option value="0">0% (Belum Pajak / Utuh)</option>
+                                            <option value="20">20% (Pajak Deposito Bank)</option>
+                                            <option value="10">10% (Custom Pajak)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Mode Perhitungan</label>
+                                        <select id="bungaModeInput" class="form-control" onchange="recalcBungaTitipanPreview()">
+                                            <option value="BULANAN">🗓️ Bulanan (Pokok × 3,5% ÷ 12)</option>
+                                            <option value="HARIAN">⏱️ Harian Fleksibel (÷ 365 × Hari)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label id="lblBungaPeriodeOrDays">Label Bulan / Periode</label>
+                                        <input type="text" id="bungaPeriodeInput" class="form-control" placeholder="Bulan Ini">
+                                        <input type="number" id="bungaDaysInput" class="form-control" value="30" min="1" max="366" style="display:none;" oninput="recalcBungaTitipanPreview()">
+                                    </div>
+                                </div>
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Tanggal Pencatatan Bunga</label>
+                                        <input type="date" id="bungaDateInput" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Nominal Bunga Masuk (Rp)</label>
+                                        <input type="text" id="bungaManualNomDisplay" class="form-control" placeholder="Otomatis dari rumus" oninput="formatNominalCustom(this, 'bungaManualNom')">
+                                        <input type="hidden" id="bungaManualNom" value="0">
+                                    </div>
+                                </div>
+                                <div id="bungaPreviewInfoBox" style="padding:7px 9px; border-radius:7px; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); font-size:10px; margin-bottom:8px;"></div>
+                                <button type="submit" class="btn" style="background-color:#059669;">+ Masuk ke Saldo BUNGA DEPOSITO</button>
+                            </form>
+                        </div>
+
+                        <!-- FORM CATAT PENARIKAN / TAMBAH TITIPAN -->
+                        <div class="card" style="margin-bottom:8px;">
+                            <div class="card-header" style="background:linear-gradient(90deg, #0284C7 0%, #4F46E5 100%);">
+                                <span>💸 Catat Penarikan / Tambah Titipan (Fleksibel)</span>
+                            </div>
+                            <form id="formMutasiTitipan" onsubmit="submitMutasiTitipan(event)">
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Pilih Akun Titipan</label>
+                                        <select id="titipanTargetAccSelect" class="form-control"></select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Jenis Mutasi</label>
+                                        <select id="titipanJenisMutasiSelect" class="form-control">
+                                            <option value="AMBIL">📤 DIAMBIL / DITARIK (Mengurangi Titipan)</option>
+                                            <option value="TAMBAH">📥 TAMBAH TITIPAN / SETOR (Menambah Titipan)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Nominal (Rp)</label>
+                                        <input type="text" id="titipanNomDisplay" inputmode="numeric" class="form-control" placeholder="0" required oninput="formatNominalCustom(this, 'titipanNomHidden')">
+                                        <input type="hidden" id="titipanNomHidden" value="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Tanggal Mutasi (Bisa Backdate)</label>
+                                        <input type="date" id="titipanDateInput" class="form-control" required>
+                                    </div>
+                                </div>
+                                <div class="row-2">
+                                    <div class="form-group">
+                                        <label>Dampak ke Kas / Saldo Konter</label>
+                                        <select id="titipanImpactModeSelect" class="form-control" onchange="onChangeTitipanImpactMode()">
+                                            <option value="TITIPAN_ONLY">📌 Hanya Update Saldo Titipan & Potongan ZEN (Tanpa Ubah Kas Lain)</option>
+                                            <option value="WITH_KAS_LAIN">💳 Sekaligus Potong / Tambah dari Kas Lain (TUNAI / SEABANK / dll)</option>
+                                            <option value="WITH_INDUK">🏦 Sekaligus Kurangi / Tambah Saldo Kotor Induk (ZEN 1 / ZEN 2)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group" id="grpTitipanKasLain" style="display:none;">
+                                        <label>Pilih Akun Kas Pembayar / Penerima</label>
+                                        <select id="titipanSumberKasSelect" class="form-control"></select>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Keterangan Pertanggungjawaban</label>
+                                    <input type="text" id="titipanKetInput" class="form-control" placeholder="Contoh: Mamah ambil bunga cash, Mang Deded ambil titipan...">
+                                </div>
+                                <button type="submit" class="btn" style="background-color:#0284C7;">💾 Simpan Mutasi Titipan</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- TABEL BUKU MUTASI & PERTANGGUNGJAWABAN -->
+                    <div class="card">
+                        <div class="card-header" style="background:linear-gradient(90deg, #1E293B 0%, #334155 100%); flex-wrap:wrap; gap:6px;">
+                            <span>📘 Buku Mutasi & Pertanggungjawaban Titipan (Saldo Berjalan)</span>
+                            <div style="display:flex; gap:5px; align-items:center;">
+                                <select id="filterLedgerTitipanSelect" class="filter-select" onchange="renderTitipanSection()">
+                                    <option value="ALL">📘 SEMUA 3 AKUN TITIPAN</option>
+                                </select>
+                                <button type="button" class="btn-strip-action" style="background:#059669; color:#FFF; border-color:#059669;" onclick="copyRekapTitipanWA()">📲 Copy Rekap WA</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>NO</th>
+                                        <th>WAKTU</th>
+                                        <th>AKUN TITIPAN</th>
+                                        <th style="text-align:left;">KETERANGAN MUTASI</th>
+                                        <th class="th-pemasukan">TAMBAH / BUNGA (+)</th>
+                                        <th class="th-pengeluaran">DIAMBIL / TARIK (-)</th>
+                                        <th>SISA SALDO TITIPAN</th>
+                                        <th>AKSI</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bodyTitipanLedger"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1902,7 +2051,7 @@
     let selectedDateFilterPembukuan = 'ALL';
     let isInitialLoaded = false;
 
-    const kategoriList = ['MAKANAN', 'JAJAN', 'BELANJA KONTER', 'HIBURAN', 'BENSIN', 'PERAWATAN DIRI', 'CICILAN', 'TAGIHAN', 'BELANJA', 'PINDAH SALDO', 'PIUTANG', 'LAIN LAIN', 'CUAN KONTER'];
+    const kategoriList = ['MAKANAN', 'JAJAN', 'BELANJA KONTER', 'HIBURAN', 'BENSIN', 'PERAWATAN DIRI', 'CICILAN', 'TAGIHAN', 'BELANJA', 'PINDAH SALDO', 'PIUTANG', 'TITIPAN / DEPOSITO', 'LAIN LAIN', 'CUAN KONTER'];
     const defaultSaldoList = ['TUNAI', 'SEABANK', 'KROM BANK', 'TAB AKMAL', 'ZEN 1', 'ZEN 2', 'BRANKAS', 'PIUTANG', 'REALISASI ZEN 3', 'ACC NEW', 'DEPOSITO', 'BUNGA DEPOSITO', 'M DEDED'];
     const defaultFastMoney = ['TUNAI', 'SEABANK', 'KROM BANK', 'TAB AKMAL', 'BRANKAS'];
 
@@ -2249,10 +2398,39 @@
     };
 
     window.switchReportSubTab = function(subId, btnEl) {
-        document.querySelectorAll('.sub-view').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.sub-tab-btn').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#page-laporan .sub-view').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('#page-laporan .sub-tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(subId).classList.add('active');
         if (btnEl) btnEl.classList.add('active');
+    };
+
+    window.switchPiutangSubTab = function(subId, btnEl) {
+        const pList = document.getElementById('sub-piutang-list');
+        const tList = document.getElementById('sub-titipan-deposito');
+        const b1 = document.getElementById('btnSubPiutangList');
+        const b2 = document.getElementById('btnSubTitipanDeposito');
+        if (subId === 'sub-titipan-deposito') {
+            if (pList) pList.style.display = 'none';
+            if (tList) tList.style.display = 'block';
+            if (b1) b1.classList.remove('active');
+            if (b2) b2.classList.add('active');
+            if (typeof window.renderTitipanSection === 'function') window.renderTitipanSection();
+        } else {
+            if (pList) pList.style.display = 'block';
+            if (tList) tList.style.display = 'none';
+            if (b1) b1.classList.add('active');
+            if (b2) b2.classList.remove('active');
+        }
+    };
+
+    window.openTitipanTab = function(accFilter) {
+        switchMainPage('page-piutang');
+        switchPiutangSubTab('sub-titipan-deposito');
+        const sel = document.getElementById('filterLedgerTitipanSelect');
+        if (sel && accFilter) sel.value = accFilter;
+        const tgt = document.getElementById('titipanTargetAccSelect');
+        if (tgt && accFilter && accFilter !== 'ALL') tgt.value = accFilter;
+        if (typeof window.renderTitipanSection === 'function') window.renderTitipanSection();
     };
 
     window.onChangeRekapFilterMode = function() {
@@ -3534,7 +3712,8 @@
         let totMasuk = 0, totKeluar = 0;
 
         bJurnal.innerHTML = filteredList.map((t, filteredIdx) => {
-            const isTransfer = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+            const isTitipanTrx = t.jenis === 'TITIPAN / DEPOSITO' || Boolean(resolveTargetPotonganSaldo(t.akun)) || Boolean(t.akunTujuan && resolveTargetPotonganSaldo(t.akunTujuan));
+            const isTransfer = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG' || isTitipanTrx;
             const isMasuk = t.jenisKas === 'MASUK';
             const origIdx = t.originalIndex;
             const nom = Number(t.nominal) || 0;
@@ -3545,11 +3724,11 @@
                 else totKeluar += nom;
             }
 
-            const ketMasuk = isTransfer ? (t.akunTujuan || '-') : (isMasuk ? t.akun : '-');
-            const nomMasuk = (isTransfer || isMasuk) ? formatRp(nom) : '-';
-            const ketKeluar = isTransfer ? t.akun : (!isMasuk ? t.akun : '-');
-            const nomKeluar = (isTransfer || !isMasuk) ? formatRp(nom) : '-';
-            const selisihText = isTransfer ? '⇄ Rp0' : (isMasuk ? '+' + formatRp(nom) : '-' + formatRp(nom));
+            const ketMasuk = (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') ? (t.akunTujuan || '-') : (isMasuk ? t.akun : '-');
+            const nomMasuk = ((t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') || isMasuk) ? formatRp(nom) : '-';
+            const ketKeluar = (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') ? t.akun : (!isMasuk ? t.akun : '-');
+            const nomKeluar = ((t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') || !isMasuk) ? formatRp(nom) : '-';
+            const selisihText = (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') ? '⇄ Rp0' : (isTitipanTrx ? '🏦 Titipan' : (isMasuk ? '+' + formatRp(nom) : '-' + formatRp(nom)));
 
             return `
                 <tr>
@@ -3600,11 +3779,12 @@
             const nom = Number(t.nominal) || 0;
             const cleanIso = extractIsoDate(t.isoDate, t.waktu);
             const isTransfer = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+            const isTitipanTrx = t.jenis === 'TITIPAN / DEPOSITO' || Boolean(resolveTargetPotonganSaldo(t.akun)) || Boolean(t.akunTujuan && resolveTargetPotonganSaldo(t.akunTujuan));
             if (isTransfer) {
                 if (rekapSaldo[t.akun]) rekapSaldo[t.akun].keluar += nom;
                 if (t.akunTujuan && rekapSaldo[t.akunTujuan]) rekapSaldo[t.akunTujuan].masuk += nom;
             } else {
-                if (cleanIso === todayIso) {
+                if (cleanIso === todayIso && !isTitipanTrx) {
                     if (t.jenisKas === 'MASUK') hI_Masuk += nom;
                     if (t.jenisKas === 'KELUAR') hI_Pengeluaran += nom;
                 }
@@ -3933,6 +4113,365 @@
                 `).join('');
             }
         }
+
+        if (typeof window.renderTitipanSection === 'function') {
+            window.renderTitipanSection(rawSaldo);
+        }
+    };
+
+    window.getTitipanAccountsInfo = function() {
+        const depAcc = saldoList.find(s => s.toUpperCase().includes('DEPOSITO') && !s.toUpperCase().includes('BUNGA')) || 'DEPOSITO MAMAH';
+        const bungaAcc = saldoList.find(s => s.toUpperCase().includes('BUNGA') && s.toUpperCase().includes('DEPOSITO')) || 'BUNGA DEPOSITO';
+        const dededAcc = saldoList.find(s => s.toUpperCase().includes('DEDED')) || 'UANG M DEDED';
+        const extra = saldoList.filter(s => resolveTargetPotonganSaldo(s) && s !== depAcc && s !== bungaAcc && s !== dededAcc);
+        const allTitipan = Array.from(new Set([depAcc, bungaAcc, dededAcc, ...extra])).filter(s => saldoList.includes(s));
+        return { depAcc, bungaAcc, dededAcc, allTitipan };
+    };
+
+    window.onChangeTitipanImpactMode = function() {
+        const mode = document.getElementById('titipanImpactModeSelect')?.value || 'TITIPAN_ONLY';
+        const grp = document.getElementById('grpTitipanKasLain');
+        if (grp) grp.style.display = mode === 'WITH_KAS_LAIN' ? 'block' : 'none';
+    };
+
+    window.recalcBungaTitipanPreview = function() {
+        const { depAcc } = window.getTitipanAccountsInfo();
+        let depVal = Number(saldoAwalData[depAcc]) || 0;
+        transaksiJurnal.forEach(t => {
+            const nom = Number(t.nominal) || 0;
+            const isT = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+            if (isT) {
+                if (t.akun === depAcc) depVal -= nom;
+                if (t.akunTujuan === depAcc) depVal += nom;
+            } else if (t.akun === depAcc) {
+                if (t.jenisKas === 'KELUAR') depVal -= nom;
+                else depVal += nom;
+            }
+        });
+        const rate = parseFloat(String(document.getElementById('bungaRateInput')?.value || '3.5').replace(',', '.')) || 3.5;
+        const tax = parseFloat(document.getElementById('bungaTaxInput')?.value || '0') || 0;
+        const mode = document.getElementById('bungaModeInput')?.value || 'BULANAN';
+        const days = Math.max(1, parseInt(document.getElementById('bungaDaysInput')?.value || '30', 10) || 30);
+
+        const pInput = document.getElementById('bungaPeriodeInput');
+        const dInput = document.getElementById('bungaDaysInput');
+        const lbl = document.getElementById('lblBungaPeriodeOrDays');
+        if (mode === 'HARIAN') {
+            if (pInput) pInput.style.display = 'none';
+            if (dInput) dInput.style.display = 'block';
+            if (lbl) lbl.innerText = 'Jumlah Hari Mengendap';
+        } else {
+            if (pInput) pInput.style.display = 'block';
+            if (dInput) dInput.style.display = 'none';
+            if (lbl) lbl.innerText = 'Label Bulan / Periode';
+        }
+
+        const gross = mode === 'BULANAN' ? (depVal * (rate / 100)) / 12 : (depVal * (rate / 100) * days) / 365;
+        const taxNom = gross * (tax / 100);
+        const net = Math.round(gross - taxNom);
+        const box = document.getElementById('bungaPreviewInfoBox');
+        if (box) {
+            box.innerHTML = `Pokok <b>${depAcc}</b>: <b>${formatRp(depVal)}</b> • Bunga ${rate}%/thn (${mode === 'BULANAN' ? 'Bulanan ÷ 12' : days + ' Hari ÷ 365'}): <b style="color:#059669;">+${formatRp(net)}</b> ${tax > 0 ? '(Setelah Pajak ' + tax + '%)' : '(Belum Pajak / Utuh)'}`;
+        }
+        return { depAcc, depVal, rate, tax, mode, days, net };
+    };
+
+    window.renderTitipanSection = function() {
+        const { depAcc, bungaAcc, dededAcc, allTitipan } = window.getTitipanAccountsInfo();
+        const bDate = document.getElementById('bungaDateInput');
+        if (bDate && !bDate.value) bDate.value = getTodayIsoStr();
+        const tDate = document.getElementById('titipanDateInput');
+        if (tDate && !tDate.value) tDate.value = getTodayIsoStr();
+        const bPeriode = document.getElementById('bungaPeriodeInput');
+        if (bPeriode && !bPeriode.value) bPeriode.value = new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+        const tgtSel = document.getElementById('titipanTargetAccSelect');
+        if (tgtSel) {
+            const cur = tgtSel.value;
+            tgtSel.innerHTML = allTitipan.map(a => `<option value="${a}">${a}</option>`).join('');
+            if (cur && allTitipan.includes(cur)) tgtSel.value = cur;
+        }
+        const fltSel = document.getElementById('filterLedgerTitipanSelect');
+        if (fltSel) {
+            const curF = fltSel.value || 'ALL';
+            fltSel.innerHTML = `<option value="ALL">📘 SEMUA AKUN TITIPAN (${allTitipan.length})</option>` + allTitipan.map(a => `<option value="${a}">🏦 ${a}</option>`).join('');
+            if (curF === 'ALL' || allTitipan.includes(curF)) fltSel.value = curF;
+        }
+        const kasSel = document.getElementById('titipanSumberKasSelect');
+        if (kasSel) {
+            const curK = kasSel.value;
+            const nonTitipan = saldoList.filter(s => !resolveTargetPotonganSaldo(s) && s.trim().toUpperCase() !== 'PIUTANG');
+            kasSel.innerHTML = nonTitipan.map(s => `<option value="${s}">${s}</option>`).join('');
+            if (curK && nonTitipan.includes(curK)) kasSel.value = curK;
+        }
+
+        window.recalcBungaTitipanPreview();
+
+        // Build chronological ledger per Titipan account
+        const chronological = transaksiJurnal
+            .map((t, idx) => ({ ...t, origIdx: idx }))
+            .reverse();
+
+        const ledgerByAcc = {};
+        const summaryByAcc = {};
+
+        allTitipan.forEach(acc => {
+            const awal = Number(saldoAwalData[acc]) || 0;
+            let running = awal;
+            let totMasuk = 0;
+            let totKeluar = 0;
+            const items = [];
+            if (awal !== 0) {
+                items.push({
+                    origIdx: -1,
+                    waktu: 'Saldo Awal',
+                    akunTitipan: acc,
+                    keterangan: `[SALDO AWAL] Posisi Saldo Awal ${acc}`,
+                    masuk: awal > 0 ? awal : 0,
+                    keluar: awal < 0 ? Math.abs(awal) : 0,
+                    saldoBerjalan: running,
+                    isSaldoAwal: true
+                });
+            }
+            chronological.forEach(t => {
+                const nom = Number(t.nominal) || 0;
+                const isT = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+                let masuk = 0, keluar = 0, touched = false;
+                if (isT) {
+                    if (t.akunTujuan === acc) { masuk = nom; touched = true; }
+                    else if (t.akun === acc) { keluar = nom; touched = true; }
+                } else if (t.akun === acc) {
+                    if (t.jenisKas === 'MASUK') { masuk = nom; touched = true; }
+                    else if (t.jenisKas === 'KELUAR') { keluar = nom; touched = true; }
+                }
+                if (touched) {
+                    running = running + masuk - keluar;
+                    totMasuk += masuk;
+                    totKeluar += keluar;
+                    items.push({
+                        origIdx: t.origIdx,
+                        waktu: t.waktu,
+                        akunTitipan: acc,
+                        keterangan: t.keterangan,
+                        masuk,
+                        keluar,
+                        saldoBerjalan: running,
+                        isSaldoAwal: false
+                    });
+                }
+            });
+            ledgerByAcc[acc] = items.reverse();
+            summaryByAcc[acc] = {
+                awal,
+                masuk: totMasuk,
+                keluar: totKeluar,
+                saldoAkhir: running,
+                induk: resolveTargetPotonganSaldo(acc) || '-',
+                jmlMutasi: items.filter(x => !x.isSaldoAwal).length
+            };
+        });
+
+        const gridEl = document.getElementById('titipanCardsSummaryGrid');
+        if (gridEl) {
+            gridEl.innerHTML = allTitipan.map(acc => {
+                const info = summaryByAcc[acc] || { awal: 0, masuk: 0, keluar: 0, saldoAkhir: 0, induk: '-', jmlMutasi: 0 };
+                return `
+                    <div style="padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:var(--card); box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                            <span style="font-size:11px; font-weight:900;">🏦 ${acc}</span>
+                            <span style="font-size:9px; font-weight:800; padding:2px 6px; border-radius:4px; background:rgba(245,158,11,0.15); color:#D97706;">Induk: ${info.induk}</span>
+                        </div>
+                        <div style="font-size:15px; font-weight:900; font-family:monospace; color:#0284C7; margin-bottom:6px;">${formatRp(info.saldoAkhir)}</div>
+                        <div style="font-size:9.5px; color:var(--text-muted); display:flex; justify-content:space-between; border-top:1px dashed var(--border); padding-top:4px;">
+                            <span>Awal: <b>${formatRp(info.awal)}</b></span>
+                            <span class="text-kredit">+${formatRp(info.masuk)}</span>
+                            <span class="text-debit">-${formatRp(info.keluar)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const filterAcc = document.getElementById('filterLedgerTitipanSelect')?.value || 'ALL';
+        const bLedger = document.getElementById('bodyTitipanLedger');
+        if (bLedger) {
+            let rows = [];
+            if (filterAcc !== 'ALL' && ledgerByAcc[filterAcc]) {
+                rows = ledgerByAcc[filterAcc];
+            } else {
+                allTitipan.forEach(acc => {
+                    (ledgerByAcc[acc] || []).forEach(r => rows.push(r));
+                });
+            }
+            if (rows.length === 0) {
+                bLedger.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:14px; color:var(--text-muted);">Belum ada riwayat mutasi untuk akun titipan ini.</td></tr>`;
+            } else {
+                bLedger.innerHTML = rows.map((r, idx) => `
+                    <tr>
+                        <td style="text-align:center; font-weight:800;">${rows.length - idx}</td>
+                        <td>${r.waktu}</td>
+                        <td style="text-align:center; font-weight:800;">${r.akunTitipan}</td>
+                        <td style="text-align:left; font-weight:700;">${r.keterangan}</td>
+                        <td class="td-pemasukan text-kredit">${r.masuk > 0 ? '+' + formatRp(r.masuk) : '-'}</td>
+                        <td class="td-pengeluaran text-debit">${r.keluar > 0 ? '-' + formatRp(r.keluar) : '-'}</td>
+                        <td style="font-family:monospace; font-weight:900; color:#0284C7;">${formatRp(r.saldoBerjalan)}</td>
+                        <td style="text-align:center;">
+                            ${r.isSaldoAwal
+                                ? `<button class="btn-edit" onclick="openModal('popupSaldoAwal')">Ubah Awal</button>`
+                                : `<button class="btn-edit" onclick="editTrx(${r.origIdx})">Edit</button> <button class="btn-delete" onclick="deleteTrx(${r.origIdx})">Hapus</button>`
+                            }
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+    };
+
+    window.submitBungaTitipan = function(e) {
+        e.preventDefault();
+        const calc = window.recalcBungaTitipanPreview();
+        const { bungaAcc } = window.getTitipanAccountsInfo();
+        const manualVal = Number(document.getElementById('bungaManualNom')?.value || 0);
+        const finalNom = manualVal > 0 ? manualVal : calc.net;
+        if (!finalNom || finalNom <= 0) return;
+
+        const iso = document.getElementById('bungaDateInput')?.value || getTodayIsoStr();
+        const now = new Date();
+        const dObj = new Date(iso + 'T12:00:00');
+        const hari = dObj.toLocaleDateString('id-ID', { weekday: 'short' });
+        const tgl = dObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const periodeStr = document.getElementById('bungaPeriodeInput')?.value || 'Bulan Ini';
+        const detailCalc = calc.mode === 'BULANAN'
+            ? `${periodeStr} (${calc.rate}%/thn dari Pokok ${formatRp(calc.depVal)})`
+            : `${calc.days} Hari (${calc.rate}%/thn dari Pokok ${formatRp(calc.depVal)})`;
+
+        transaksiJurnal.unshift({
+            id: Date.now(),
+            waktu: `${hari}, ${tgl} ${jam}`,
+            isoDate: iso,
+            keterangan: `[BUNGA DEPOSITO] ${detailCalc}`,
+            jenis: 'TITIPAN / DEPOSITO',
+            jenisKas: 'MASUK',
+            akun: bungaAcc,
+            nominal: finalNom
+        });
+        addLogEntry('SALDO', `Input Bunga Deposito: ${bungaAcc}`, `+${formatRp(finalNom)} (${detailCalc})`, 'ADD');
+        document.getElementById('bungaManualNom').value = '0';
+        document.getElementById('bungaManualNomDisplay').value = '';
+        saveToFirebase();
+    };
+
+    window.submitMutasiTitipan = function(e) {
+        e.preventDefault();
+        const targetAcc = document.getElementById('titipanTargetAccSelect')?.value;
+        const jenisMutasi = document.getElementById('titipanJenisMutasiSelect')?.value || 'AMBIL';
+        const nom = Number(document.getElementById('titipanNomHidden')?.value || 0);
+        if (!targetAcc || !nom || nom <= 0) return;
+
+        const iso = document.getElementById('titipanDateInput')?.value || getTodayIsoStr();
+        const impactMode = document.getElementById('titipanImpactModeSelect')?.value || 'TITIPAN_ONLY';
+        const sumberKas = document.getElementById('titipanSumberKasSelect')?.value || 'TUNAI';
+        const ketCustom = (document.getElementById('titipanKetInput')?.value || '').trim();
+
+        const now = new Date();
+        const dObj = new Date(iso + 'T12:00:00');
+        const hari = dObj.toLocaleDateString('id-ID', { weekday: 'short' });
+        const tgl = dObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+        const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        const waktuStr = `${hari}, ${tgl} ${jam}`;
+        const isAmbil = jenisMutasi === 'AMBIL';
+        const baseId = Date.now();
+        const prefix = isAmbil ? `[AMBIL TITIPAN ${targetAcc}]` : `[TAMBAH TITIPAN ${targetAcc}]`;
+        const defaultDesc = isAmbil ? `Penarikan / Diambil dari ${targetAcc}` : `Setoran / Tambahan ke ${targetAcc}`;
+        const finalKet = ketCustom ? `${prefix} ${ketCustom}` : `${prefix} ${defaultDesc}`;
+
+        transaksiJurnal.unshift({
+            id: baseId,
+            waktu: waktuStr,
+            isoDate: iso,
+            keterangan: finalKet,
+            jenis: 'TITIPAN / DEPOSITO',
+            jenisKas: isAmbil ? 'KELUAR' : 'MASUK',
+            akun: targetAcc,
+            nominal: nom
+        });
+
+        if (impactMode === 'WITH_KAS_LAIN' && sumberKas && sumberKas !== targetAcc) {
+            transaksiJurnal.unshift({
+                id: baseId + 1,
+                waktu: waktuStr,
+                isoDate: iso,
+                keterangan: isAmbil ? `[KAS KELUAR TITIPAN] Bayar ${targetAcc} via ${sumberKas}` : `[KAS MASUK TITIPAN] Terima ${targetAcc} ke ${sumberKas}`,
+                jenis: 'TITIPAN / DEPOSITO',
+                jenisKas: isAmbil ? 'KELUAR' : 'MASUK',
+                akun: sumberKas,
+                nominal: nom
+            });
+        } else if (impactMode === 'WITH_INDUK') {
+            const indukAcc = resolveTargetPotonganSaldo(targetAcc);
+            if (indukAcc && indukAcc !== targetAcc) {
+                transaksiJurnal.unshift({
+                    id: baseId + 1,
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    keterangan: isAmbil ? `[POTONG INDUK ${indukAcc}] Penarikan ${targetAcc}` : `[TAMBAH INDUK ${indukAcc}] Setoran ${targetAcc}`,
+                    jenis: 'TITIPAN / DEPOSITO',
+                    jenisKas: isAmbil ? 'KELUAR' : 'MASUK',
+                    akun: indukAcc,
+                    nominal: nom
+                });
+            }
+        }
+
+        addLogEntry('SALDO', `${isAmbil ? 'Penarikan' : ' Penambahan'} Titipan: ${targetAcc}`, `${finalKet} (${formatRp(nom)})`, isAmbil ? 'EDIT' : 'ADD');
+        document.getElementById('titipanNomHidden').value = '0';
+        document.getElementById('titipanNomDisplay').value = '';
+        document.getElementById('titipanKetInput').value = '';
+        saveToFirebase();
+    };
+
+    window.copyRekapTitipanWA = function() {
+        const { allTitipan } = window.getTitipanAccountsInfo();
+        const filterAcc = document.getElementById('filterLedgerTitipanSelect')?.value || 'ALL';
+        const targets = filterAcc === 'ALL' ? allTitipan : [filterAcc];
+        const lines = ['*📘 REKAP PERTANGGUNGJAWABAN TITIPAN & DEPOSITO*', `Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}`, ''];
+        targets.forEach(acc => {
+            const awal = Number(saldoAwalData[acc]) || 0;
+            let running = awal, totM = 0, totK = 0;
+            const muts = [];
+            transaksiJurnal.slice().reverse().forEach(t => {
+                const nom = Number(t.nominal) || 0;
+                const isT = t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG';
+                let m = 0, k = 0, ok = false;
+                if (isT) {
+                    if (t.akunTujuan === acc) { m = nom; ok = true; }
+                    else if (t.akun === acc) { k = nom; ok = true; }
+                } else if (t.akun === acc) {
+                    if (t.jenisKas === 'MASUK') { m = nom; ok = true; }
+                    else if (t.jenisKas === 'KELUAR') { k = nom; ok = true; }
+                }
+                if (ok) {
+                    running = running + m - k;
+                    totM += m; totK += k;
+                    muts.push({ waktu: t.waktu, ket: t.keterangan, m, k, s: running });
+                }
+            });
+            lines.push(`*🏦 ${acc}* (Berputar di ${resolveTargetPotonganSaldo(acc) || '-'})`);
+            lines.push(`• Saldo Awal: ${formatRp(awal)}`);
+            lines.push(`• Total Masuk/Bunga: +${formatRp(totM)}`);
+            lines.push(`• Total Diambil/Keluar: -${formatRp(totK)}`);
+            lines.push(`• *SISA SALDO SAAT INI: ${formatRp(running)}*`);
+            if (muts.length > 0) {
+                lines.push('  _Riwayat Mutasi Terakhir:_');
+                muts.slice(-10).forEach(x => {
+                    const sign = x.m > 0 ? `+${formatRp(x.m)}` : `-${formatRp(x.k)}`;
+                    lines.push(`  - ${x.waktu}: ${sign} (${x.ket}) ➜ Sisa: ${formatRp(x.s)}`);
+                });
+            }
+            lines.push('');
+        });
+        navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
     };
 
     updateClock();
