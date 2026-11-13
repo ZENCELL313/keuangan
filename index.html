@@ -1087,35 +1087,31 @@
                 <div id="sub-rekap-harian" class="sub-view active">
                     <div class="card">
                         <div class="card-header card-header-blue" style="flex-wrap:wrap; gap:6px;">
-                            <span>📅 Rekap Arus Kas Harian (Tanpa Pindah Saldo)</span>
+                            <span id="hdrTitleRekapHarian">📅 Rekap Harian (Tgl 1 s/d Akhir Bulan)</span>
                             <div style="display:flex; flex-wrap:wrap; align-items:center; gap:5px;">
-                                <select id="rekapFilterModeSelect" class="filter-select" onchange="onChangeRekapFilterMode()">
-                                    <option value="DATE">📅 PER TANGGAL (HARI INI)</option>
-                                    <option value="MONTH">🗓️ SEMUA HARI (PER BULAN)</option>
-                                </select>
-                                <input type="date" id="rekapDatePicker" class="filter-input" onchange="renderTables()">
-                                <input type="month" id="rekapMonthPicker" class="filter-input" style="display:none;" onchange="renderTables()">
+                                <span style="font-size:10px; font-weight:800;">🗓️ Pilih Bulan:</span>
+                                <input type="month" id="rekapMonthPicker" class="filter-input" onchange="renderTables()">
                             </div>
                         </div>
                         <div class="table-responsive">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th style="text-align:left;">TANGGAL</th>
+                                        <th id="thTanggalRekapHarian" style="text-align:left;">TANGGAL (1 s/d Akhir)</th>
                                         <th>JML TRX</th>
                                         <th>PEMASUKAN</th>
                                         <th>PENGELUARAN</th>
-                                        <th>SELISIH BERSIH</th>
+                                        <th>SELISIH</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bodyRekapHarian"></tbody>
                                 <tfoot>
-                                    <tr class="total-row">
-                                        <td id="lblTotalRekapHarian" style="text-align:left;">TOTAL</td>
-                                        <td id="totTrxHarian" style="text-align:center;">0 Trx</td>
-                                        <td id="totPemasukanHarian" class="text-kredit">Rp0</td>
-                                        <td id="totPengeluaranHarian" class="text-debit">Rp0</td>
-                                        <td id="totBersihHarian">Rp0</td>
+                                    <tr class="total-row-highlight">
+                                        <td id="lblTotalRekapHarian" style="text-align:left; font-weight:800;">TOTAL BULAN INI</td>
+                                        <td id="totTrxHarian" style="text-align:center; font-weight:800;">0 Trx</td>
+                                        <td id="totPemasukanHarian" class="text-kredit" style="font-weight:900;">Rp0</td>
+                                        <td id="totPengeluaranHarian" class="text-debit" style="font-weight:900;">Rp0</td>
+                                        <td id="totBersihHarian" style="font-weight:900;">Rp0</td>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -3610,87 +3606,62 @@
         }
 
         // =====================================================================
-        // A.5: RENDER REKAP HARIAN (DEFAULT PER TANGGAL HARI INI, TANPA CUAN KONTER)
+        // A.5: RENDER REKAP HARIAN (MULAI TGL 1 s/d TGL AKHIR BULAN + TOTAL DI BAWAH)
         // =====================================================================
         const bRekapHarian = document.getElementById('bodyRekapHarian');
-        const rekapMode = document.getElementById('rekapFilterModeSelect')?.value || 'DATE';
-        const rDateVal = document.getElementById('rekapDatePicker')?.value || todayIso;
         const rMonthVal = document.getElementById('rekapMonthPicker')?.value || todayIso.slice(0, 7);
 
         if (bRekapHarian) {
             let grandPemasukan = 0, grandPengeluaran = 0, grandTrx = 0;
             const rowsHarian = [];
+            const [yStr, mStr] = rMonthVal.split('-');
+            const yr = Number(yStr) || new Date().getFullYear();
+            const mo = Number(mStr) || (new Date().getMonth() + 1);
+            const daysInMonth = new Date(yr, mo, 0).getDate();
+            const namaBulanPenuh = new Date(yr, mo - 1, 1).toLocaleDateString('id-ID', { month: 'long' });
 
-            if (rekapMode === 'DATE') {
-                const [yStr, mStr, dStr] = rDateVal.split('-');
-                const yr = Number(yStr), mo = Number(mStr), dy = Number(dStr);
-                const dateObj = new Date(yr, mo - 1, dy);
-                const namaHari = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
-                const namaBulan = dateObj.toLocaleDateString('id-ID', { month: 'short' });
+            const hdrTitleRekap = document.getElementById('hdrTitleRekapHarian');
+            if (hdrTitleRekap) hdrTitleRekap.innerText = `📅 Rekap Harian (Tgl 1 s/d ${daysInMonth} ${namaBulanPenuh} ${yr})`;
+            const thTglRekap = document.getElementById('thTanggalRekapHarian');
+            if (thTglRekap) thTglRekap.innerText = `TANGGAL (1 s/d ${daysInMonth})`;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dd = String(d).padStart(2, '0');
+                const mm = String(mo).padStart(2, '0');
+                const isoStr = `${yr}-${mm}-${dd}`;
+                const isToday = isoStr === todayIso;
+                const dateObj = new Date(yr, mo - 1, d);
+                const namaHari = dateObj.toLocaleDateString('id-ID', { weekday: 'long' });
                 let totalMasuk = 0, totalKeluar = 0, jmlTrx = 0;
 
                 transaksiJurnal.forEach(t => {
                     if (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') return;
-                    if (extractIsoDate(t.isoDate, t.waktu) === rDateVal) {
+                    if (extractIsoDate(t.isoDate, t.waktu) === isoStr) {
                         const nom = Number(t.nominal) || 0;
                         jmlTrx += 1;
                         if (t.jenisKas === 'MASUK') totalMasuk += nom;
                         if (t.jenisKas === 'KELUAR') totalKeluar += nom;
                     }
                 });
-                grandPemasukan = totalMasuk;
-                grandPengeluaran = totalKeluar;
-                grandTrx = jmlTrx;
+                grandPemasukan += totalMasuk;
+                grandPengeluaran += totalKeluar;
+                grandTrx += jmlTrx;
                 const bersih = totalMasuk - totalKeluar;
+                const badgeToday = isToday ? ` <span style="background:#0284C7; color:#FFF; font-size:8px; font-weight:800; padding:1px 5px; border-radius:4px; margin-left:4px;">HARI INI</span>` : '';
                 rowsHarian.push(`
-                    <tr onclick="jumpToJurnalDate('${rDateVal}')" style="cursor:pointer;">
-                        <td style="text-align:left; font-weight:700;">${namaHari}, ${dStr} ${namaBulan} ${yStr}</td>
-                        <td style="text-align:center; font-weight:700;">${jmlTrx} Trx</td>
-                        <td class="text-kredit">${formatRp(totalMasuk)}</td>
-                        <td class="text-debit">${formatRp(totalKeluar)}</td>
-                        <td class="${bersih >= 0 ? 'text-kredit' : 'text-debit'}"><b>${formatSelisih(bersih)}</b></td>
+                    <tr onclick="jumpToJurnalDate('${isoStr}')" style="cursor:pointer; ${isToday ? 'background:rgba(2,132,199,0.12);' : ''}">
+                        <td style="text-align:left; font-weight:700;">Tgl ${d} • ${namaHari}, ${dd}/${mm}/${yr}${badgeToday}</td>
+                        <td style="text-align:center; font-weight:700;">${jmlTrx > 0 ? jmlTrx + ' Trx' : '0'}</td>
+                        <td class="${totalMasuk > 0 ? 'text-kredit' : 'text-muted'}">${formatRp(totalMasuk)}</td>
+                        <td class="${totalKeluar > 0 ? 'text-debit' : 'text-muted'}">${formatRp(totalKeluar)}</td>
+                        <td class="${bersih > 0 ? 'text-kredit' : (bersih < 0 ? 'text-debit' : 'text-muted')}"><b>${formatSelisih(bersih)}</b></td>
                     </tr>
                 `);
-            } else {
-                const [yStr, mStr] = rMonthVal.split('-');
-                const yr = Number(yStr), mo = Number(mStr);
-                const daysInMonth = new Date(yr, mo, 0).getDate();
-                for (let d = 1; d <= daysInMonth; d++) {
-                    const dd = String(d).padStart(2, '0');
-                    const isoStr = `${yStr}-${mStr}-${dd}`;
-                    const dateObj = new Date(yr, mo - 1, d);
-                    const namaHari = dateObj.toLocaleDateString('id-ID', { weekday: 'short' });
-                    const namaBulan = dateObj.toLocaleDateString('id-ID', { month: 'short' });
-                    let totalMasuk = 0, totalKeluar = 0, jmlTrx = 0;
-
-                    transaksiJurnal.forEach(t => {
-                        if (t.jenisKas === 'TRANSFER' || t.jenis === 'PINDAH SALDO' || t.jenis === 'PIUTANG') return;
-                        if (extractIsoDate(t.isoDate, t.waktu) === isoStr) {
-                            const nom = Number(t.nominal) || 0;
-                            jmlTrx += 1;
-                            if (t.jenisKas === 'MASUK') totalMasuk += nom;
-                            if (t.jenisKas === 'KELUAR') totalKeluar += nom;
-                        }
-                    });
-                    grandPemasukan += totalMasuk;
-                    grandPengeluaran += totalKeluar;
-                    grandTrx += jmlTrx;
-                    const bersih = totalMasuk - totalKeluar;
-                    rowsHarian.push(`
-                        <tr onclick="jumpToJurnalDate('${isoStr}')" style="cursor:pointer;">
-                            <td style="text-align:left; font-weight:700;">${namaHari}, ${dd} ${namaBulan} ${yStr}</td>
-                            <td style="text-align:center;">${jmlTrx > 0 ? jmlTrx + ' Trx' : '0'}</td>
-                            <td class="${totalMasuk > 0 ? 'text-kredit' : 'text-muted'}">${formatRp(totalMasuk)}</td>
-                            <td class="${totalKeluar > 0 ? 'text-debit' : 'text-muted'}">${formatRp(totalKeluar)}</td>
-                            <td class="${bersih > 0 ? 'text-kredit' : (bersih < 0 ? 'text-debit' : 'text-muted')}"><b>${formatSelisih(bersih)}</b></td>
-                        </tr>
-                    `);
-                }
             }
 
             bRekapHarian.innerHTML = rowsHarian.join('');
             const lblTotRekap = document.getElementById('lblTotalRekapHarian');
-            if (lblTotRekap) lblTotRekap.innerText = `TOTAL (${rekapMode === 'DATE' ? rDateVal : rMonthVal})`;
+            if (lblTotRekap) lblTotRekap.innerText = `TOTAL TGL 1 s/d ${daysInMonth} ${namaBulanPenuh.toUpperCase()} ${yr}`;
             document.getElementById('totTrxHarian').innerText = `${grandTrx} Trx`;
             document.getElementById('totPemasukanHarian').innerText = formatRp(grandPemasukan);
             document.getElementById('totPengeluaranHarian').innerText = formatRp(grandPengeluaran);
