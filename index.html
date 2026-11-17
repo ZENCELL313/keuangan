@@ -460,11 +460,33 @@
         }
         .drawer-body { flex: 1; overflow-y: auto; padding: 8px; }
 
-        /* FLOATING ACTION BUTTON (+) COMPACT */
-        .fab-add-trx {
+        /* FLOATING ACTION BUTTONS (MIC AI & +) COMPACT */
+        .fab-group {
             position: fixed;
             bottom: 62px;
             right: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 6000;
+        }
+        .fab-mic-ai {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4F46E5 0%, #9333EA 100%);
+            color: #FFFFFF;
+            border: 2px solid rgba(255,255,255,0.85);
+            font-size: 19px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.45);
+            transition: transform 0.2s;
+        }
+        .fab-mic-ai:active { transform: scale(0.9); }
+        .fab-add-trx {
             width: 46px;
             height: 46px;
             border-radius: 50%;
@@ -477,7 +499,6 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 6000;
             box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
             transition: transform 0.2s;
         }
@@ -986,6 +1007,9 @@
                     </button>
                     <button class="btn-strip-action" style="border-color:#F59E0B; color:#B45309;" onclick="openTitipanTab('ALL')">
                         📘 Rekap Titipan & Bunga 3,5%
+                    </button>
+                    <button class="btn-strip-action" style="border-color:#6366F1; color:#4338CA; background:#EEF2FF;" onclick="openVoiceAiModal()">
+                        🎙️ Suara AI
                     </button>
                 </div>
             </div>
@@ -1537,8 +1561,11 @@
             </div>
         </div>
 
-        <!-- FLOATING ACTION BUTTON (+) COMPACT (DISEMBUNYIKAN SAAT MODE JADWAL / CATATAN) -->
-        <button id="fabAddTrx" class="fab-add-trx" onclick="openNewTrxPopup()" title="Input Transaksi Baru">+</button>
+        <!-- FLOATING ACTION BUTTONS (MIC AI & +) COMPACT (DISEMBUNYIKAN SAAT MODE JADWAL / CATATAN) -->
+        <div id="fabGroup" class="fab-group">
+            <button id="fabVoiceAi" class="fab-mic-ai" onclick="openVoiceAiModal()" title="Catat Transaksi, Pindah Saldo & Hutang via Suara AI">🎙️</button>
+            <button id="fabAddTrx" class="fab-add-trx" onclick="openNewTrxPopup()" title="Input Transaksi Baru">+</button>
+        </div>
 
         <!-- BOTTOM NAVIGATION BAR (URUTAN: TRANSAKSI, PIUTANG, LAPORAN, JADWAL, CATATAN) -->
         <nav class="bottom-nav">
@@ -1856,6 +1883,59 @@
         <div style="display:flex; justify-content:flex-end; gap:8px; padding-top:10px; border-top:1px solid var(--border);">
             <button type="button" class="btn" style="width:auto; background:#E2E8F0; color:#0F172A; padding:7px 14px;" onclick="closeModal('confirmDeleteModal')">Batal</button>
             <button type="button" class="btn" style="width:auto; background:#DC2626; color:#FFFFFF; padding:7px 14px;" onclick="executePendingDelete()">🗑️ Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
+<!-- POPUP 10: ASISTEN SUARA AI (TRANSAKSI, PINDAH SALDO, PIUTANG & CICILAN) -->
+<div id="popupVoiceAiModal" class="modal-overlay">
+    <div class="modal-content-popup" style="max-width:480px;">
+        <div class="modal-header-popup">
+            <div style="display:flex; align-items:center; gap:8px;">
+                <span style="width:28px; height:28px; border-radius:8px; background:linear-gradient(135deg,#4F46E5,#0EA5E9); color:#FFF; display:inline-flex; align-items:center; justify-content:center; font-size:14px;">✨</span>
+                <div>
+                    <h3 style="margin:0; font-size:12px;">🎙️ Asisten Suara AI (Konfirmasi Dulu)</h3>
+                    <div style="font-size:9px; color:var(--text-muted); font-weight:600;">Transaksi, pindah saldo, &amp; hutang/cicilan via suara</div>
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <button type="button" id="btnToggleVoiceTts" class="btn-strip-action" style="padding:4px 8px; font-size:9.5px;" onclick="toggleVoiceTts()">🔊 Suara ON</button>
+                <button class="btn-close-popup" onclick="closeVoiceAiModal()">&times;</button>
+            </div>
+        </div>
+
+        <div style="padding:12px; border-radius:10px; border:1px solid var(--border); background:var(--strip-bg); text-align:center; margin-bottom:10px;">
+            <button type="button" id="btnVoiceRecordMain" onclick="toggleVoiceRecording()" style="width:62px; height:62px; border-radius:50%; border:none; background:linear-gradient(135deg,#4F46E5,#0EA5E9); color:#FFF; font-size:24px; cursor:pointer; box-shadow:0 6px 16px rgba(79,70,229,0.4);">🎙️</button>
+            <div id="voiceStatusText" style="font-size:11px; font-weight:800; margin-top:6px;">Tekan Mikrofon Lalu Ucapkan Perintah</div>
+            <div style="font-size:9.5px; color:var(--text-muted); margin-top:2px;">Contoh: "Pindah saldo dari tunai ke seabank dua ratus ribu"</div>
+            <div id="voiceExampleChips" style="display:flex; flex-wrap:wrap; justify-content:center; gap:4px; margin-top:8px;"></div>
+        </div>
+
+        <form id="formVoiceTextCmd" onsubmit="submitVoiceTextCommand(event)" style="display:flex; gap:6px; margin-bottom:10px;">
+            <input type="text" id="voiceTextCmdInput" class="form-control" style="flex:1;" placeholder="Atau ketik perintah (misal: Budi ngutang 100rb dari tunai)...">
+            <button type="submit" id="btnVoiceTextSend" class="btn" style="width:auto; padding:0 12px; background:#4F46E5;">Proses</button>
+        </form>
+
+        <div id="voiceErrorBox" style="display:none; padding:8px 10px; border-radius:8px; background:#FEE2E2; border:1px solid #FCA5A5; color:#B91C1C; font-size:10px; font-weight:700; margin-bottom:8px;"></div>
+
+        <div id="voiceReplyBox" style="display:none; padding:8px 10px; border-radius:9px; background:rgba(79,70,229,0.08); border:1px solid rgba(79,70,229,0.28); margin-bottom:10px;">
+            <div id="voiceTranscriptLine" style="font-size:10px; margin-bottom:4px;"></div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                <div id="voiceReplyLine" style="font-size:10.5px; font-weight:800; color:#4338CA;"></div>
+                <button type="button" id="btnVoiceReplayTts" class="btn-strip-action" style="display:none; padding:3px 7px; font-size:9px;" onclick="replayVoiceTts()">🔊 Putar</button>
+            </div>
+        </div>
+
+        <div id="voiceDraftSection" style="display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span id="voiceDraftTitle" style="font-size:10px; font-weight:900; color:#15803D;">📋 Draf Untuk Dikonfirmasi</span>
+                <button type="button" class="btn-strip-action" style="padding:2px 8px; font-size:9.5px;" onclick="resetVoiceAiDraft()">🔄 Reset</button>
+            </div>
+            <div id="voiceDraftCardsList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:10px;"></div>
+            <div id="voiceConfirmButtonsRow" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <button type="button" class="btn" style="background:#E2E8F0; color:#0F172A;" onclick="resetVoiceAiDraft()">🔄 Ulangi / Batal</button>
+                <button type="button" class="btn" style="background:#16A34A;" onclick="confirmVoiceAiItems()">✅ Konfirmasi &amp; Simpan</button>
+            </div>
         </div>
     </div>
 </div>
@@ -2377,12 +2457,12 @@
         if (pageId === 'page-jadwal') document.getElementById('bnav-jadwal').classList.add('active');
         if (pageId === 'page-catatan') document.getElementById('bnav-catatan').classList.add('active');
 
-        // A.2: Mode Jadwal & Catatan tampil full sampai bawah header (sembunyikan kartu, strip cek saldo, drawer, dan tombol +)
+        // A.2: Mode Jadwal & Catatan tampil full sampai bawah header (sembunyikan kartu, strip cek saldo, drawer, dan tombol +/mic)
         const isSchedOrNotes = (pageId === 'page-jadwal' || pageId === 'page-catatan');
         const topZone = document.getElementById('topSummaryAndStripZone');
-        const fabBtn = document.getElementById('fabAddTrx');
+        const fabGroup = document.getElementById('fabGroup');
         if (topZone) topZone.style.display = isSchedOrNotes ? 'none' : 'block';
-        if (fabBtn) fabBtn.style.display = isSchedOrNotes ? 'none' : 'flex';
+        if (fabGroup) fabGroup.style.display = isSchedOrNotes ? 'none' : 'flex';
         if (isSchedOrNotes && drawerOpenState) {
             window.toggleLeftDrawer(false);
         }
@@ -4472,6 +4552,629 @@
             lines.push('');
         });
         navigator.clipboard.writeText(lines.join('\n')).catch(() => {});
+    };
+
+    // =========================================================================
+    // ASISTEN SUARA AI (TRANSAKSI, PINDAH SALDO, PIUTANG & CICILAN)
+    // =========================================================================
+    const AI_DOWNLOADED_ORIGIN = "https://ais-dev-i7x3g2wskr6tbzqsospvyx-474771713885.asia-northeast1.run.app";
+    function getAiApiBase() {
+        if (window.location.protocol.startsWith('http')) {
+            return '';
+        }
+        return AI_DOWNLOADED_ORIGIN;
+    }
+
+    const VOICE_EXAMPLES = [
+        'Beli bensin 50rb pakai tunai',
+        'Cuan konter 350rb masuk seabank',
+        'Pindah saldo tunai ke seabank 200rb',
+        'Budi ngutang 100rb ambil dari tunai',
+        'Budi bayar hutang 50rb masuk seabank'
+    ];
+    let voiceTtsEnabled = localStorage.getItem('zencell_ai_tts_enabled') !== '0';
+    let voiceIsRecording = false;
+    let voiceIsProcessing = false;
+    let voiceRecSeconds = 0;
+    let voiceRecTimer = null;
+    let voiceMediaRecorder = null;
+    let voiceMediaStream = null;
+    let voiceChunks = [];
+    let voiceSpeechRec = null;
+    let voiceAudioEl = null;
+    let voiceLastTtsB64 = '';
+    let voiceDraftItems = [];
+
+    function updateVoiceTtsBtn() {
+        const btn = document.getElementById('btnToggleVoiceTts');
+        if (!btn) return;
+        btn.innerText = voiceTtsEnabled ? '🔊 Suara ON' : '🔇 Suara OFF';
+        btn.style.background = voiceTtsEnabled ? '#DCFCE7' : '#F1F5F9';
+        btn.style.color = voiceTtsEnabled ? '#15803D' : '#64748B';
+    }
+
+    function stopVoiceTtsAudio() {
+        if (voiceAudioEl) {
+            voiceAudioEl.pause();
+            voiceAudioEl.currentTime = 0;
+            voiceAudioEl = null;
+        }
+    }
+
+    function stopVoiceMicHardware() {
+        if (voiceRecTimer) {
+            clearInterval(voiceRecTimer);
+            voiceRecTimer = null;
+        }
+        if (voiceMediaStream) {
+            voiceMediaStream.getTracks().forEach(t => t.stop());
+            voiceMediaStream = null;
+        }
+        if (voiceSpeechRec) {
+            try { voiceSpeechRec.stop(); } catch (_) {}
+            voiceSpeechRec = null;
+        }
+    }
+
+    function updateVoiceRecordUi() {
+        const btn = document.getElementById('btnVoiceRecordMain');
+        const st = document.getElementById('voiceStatusText');
+        const chips = document.getElementById('voiceExampleChips');
+        if (btn) {
+            if (voiceIsProcessing) {
+                btn.innerText = '⏳';
+                btn.style.background = '#64748B';
+            } else if (voiceIsRecording) {
+                btn.innerText = '⏹️';
+                btn.style.background = '#DC2626';
+            } else {
+                btn.innerText = '🎙️';
+                btn.style.background = 'linear-gradient(135deg,#4F46E5,#0EA5E9)';
+            }
+        }
+        if (st) {
+            if (voiceIsProcessing) {
+                st.innerText = '⏳ AI sedang memahami perintah Anda...';
+            } else if (voiceIsRecording) {
+                const mm = String(Math.floor(voiceRecSeconds / 60)).padStart(2, '0');
+                const ss = String(voiceRecSeconds % 60).padStart(2, '0');
+                st.innerText = `🔴 Merekam Suara (${mm}:${ss}) — Klik untuk Selesai`;
+            } else {
+                st.innerText = 'Tekan Mikrofon Lalu Ucapkan Perintah';
+            }
+        }
+        if (chips) {
+            chips.style.display = (!voiceIsRecording && !voiceIsProcessing && voiceDraftItems.length === 0) ? 'flex' : 'none';
+        }
+    }
+
+    window.openVoiceAiModal = function() {
+        updateVoiceTtsBtn();
+        const chips = document.getElementById('voiceExampleChips');
+        if (chips) {
+            chips.innerHTML = VOICE_EXAMPLES.map(ex =>
+                `<button type="button" class="btn-strip-action" style="font-size:9px; padding:3px 7px;" onclick="runVoiceExample('${ex}')">✨ ${ex}</button>`
+            ).join('');
+        }
+        updateVoiceRecordUi();
+        openModal('popupVoiceAiModal');
+    };
+
+    window.closeVoiceAiModal = function() {
+        stopVoiceMicHardware();
+        stopVoiceTtsAudio();
+        voiceIsRecording = false;
+        closeModal('popupVoiceAiModal');
+    };
+
+    window.toggleVoiceTts = function() {
+        voiceTtsEnabled = !voiceTtsEnabled;
+        localStorage.setItem('zencell_ai_tts_enabled', voiceTtsEnabled ? '1' : '0');
+        updateVoiceTtsBtn();
+        if (!voiceTtsEnabled) stopVoiceTtsAudio();
+    };
+
+    window.runVoiceExample = function(txt) {
+        const inp = document.getElementById('voiceTextCmdInput');
+        if (inp) inp.value = txt;
+        window.sendVoiceCommandToAi({ textCommand: txt });
+    };
+
+    window.submitVoiceTextCommand = function(e) {
+        e.preventDefault();
+        const inp = document.getElementById('voiceTextCmdInput');
+        const txt = (inp?.value || '').trim();
+        if (!txt || voiceIsProcessing) return;
+        window.sendVoiceCommandToAi({ textCommand: txt });
+    };
+
+    window.replayVoiceTts = function() {
+        if (!voiceLastTtsB64) return;
+        stopVoiceTtsAudio();
+        voiceAudioEl = new Audio('data:audio/wav;base64,' + voiceLastTtsB64);
+        voiceAudioEl.play().catch(() => {});
+    };
+
+    window.resetVoiceAiDraft = function() {
+        stopVoiceTtsAudio();
+        voiceDraftItems = [];
+        voiceLastTtsB64 = '';
+        const err = document.getElementById('voiceErrorBox');
+        const rep = document.getElementById('voiceReplyBox');
+        const drf = document.getElementById('voiceDraftSection');
+        if (err) err.style.display = 'none';
+        if (rep) rep.style.display = 'none';
+        if (drf) drf.style.display = 'none';
+        updateVoiceRecordUi();
+    };
+
+    window.toggleVoiceRecording = async function() {
+        if (voiceIsProcessing) return;
+        const errBox = document.getElementById('voiceErrorBox');
+        if (errBox) errBox.style.display = 'none';
+        stopVoiceTtsAudio();
+
+        if (voiceIsRecording) {
+            if (voiceMediaRecorder && voiceMediaRecorder.state !== 'inactive') {
+                voiceMediaRecorder.stop();
+            } else if (voiceSpeechRec) {
+                try { voiceSpeechRec.stop(); } catch (_) {}
+            }
+            return;
+        }
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia && typeof MediaRecorder !== 'undefined') {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                voiceMediaStream = stream;
+                const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
+                const chosen = candidates.find(t => MediaRecorder.isTypeSupported(t)) || '';
+                const rec = chosen ? new MediaRecorder(stream, { mimeType: chosen }) : new MediaRecorder(stream);
+                voiceChunks = [];
+                rec.ondataavailable = (ev) => {
+                    if (ev.data && ev.data.size > 0) voiceChunks.push(ev.data);
+                };
+                rec.onstop = () => {
+                    const mimeType = rec.mimeType || chosen || 'audio/webm';
+                    const blob = new Blob(voiceChunks, { type: mimeType });
+                    stopVoiceMicHardware();
+                    voiceIsRecording = false;
+                    updateVoiceRecordUi();
+                    if (blob.size < 800) {
+                        if (errBox) {
+                            errBox.innerText = '⚠️ Rekaman terlalu singkat. Tekan mic, bicara jelas, lalu tekan Selesai.';
+                            errBox.style.display = 'block';
+                        }
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const resStr = String(reader.result || '');
+                        const b64 = resStr.includes(',') ? resStr.split(',')[1] : '';
+                        if (b64) window.sendVoiceCommandToAi({ audioBase64: b64, mimeType });
+                    };
+                    reader.readAsDataURL(blob);
+                };
+                voiceMediaRecorder = rec;
+                voiceRecSeconds = 0;
+                voiceIsRecording = true;
+                updateVoiceRecordUi();
+                rec.start();
+                voiceRecTimer = setInterval(() => {
+                    voiceRecSeconds += 1;
+                    updateVoiceRecordUi();
+                }, 1000);
+                return;
+            } catch (_) {
+                stopVoiceMicHardware();
+            }
+        }
+
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRec) {
+            try {
+                const sr = new SpeechRec();
+                sr.lang = 'id-ID';
+                sr.interimResults = false;
+                sr.maxAlternatives = 1;
+                voiceSpeechRec = sr;
+                voiceRecSeconds = 0;
+                voiceIsRecording = true;
+                updateVoiceRecordUi();
+                voiceRecTimer = setInterval(() => {
+                    voiceRecSeconds += 1;
+                    updateVoiceRecordUi();
+                }, 1000);
+                sr.onresult = (ev) => {
+                    const txt = ev.results?.[0]?.[0]?.transcript || '';
+                    stopVoiceMicHardware();
+                    voiceIsRecording = false;
+                    updateVoiceRecordUi();
+                    if (txt.trim()) {
+                        const inp = document.getElementById('voiceTextCmdInput');
+                        if (inp) inp.value = txt.trim();
+                        window.sendVoiceCommandToAi({ textCommand: txt.trim() });
+                    }
+                };
+                sr.onerror = () => {
+                    stopVoiceMicHardware();
+                    voiceIsRecording = false;
+                    updateVoiceRecordUi();
+                    if (errBox) {
+                        errBox.innerText = '⚠️ Izin mikrofon diblokir pada mode file ini. Silakan ketik perintah di kolom teks di atas.';
+                        errBox.style.display = 'block';
+                    }
+                };
+                sr.onend = () => {
+                    stopVoiceMicHardware();
+                    voiceIsRecording = false;
+                    updateVoiceRecordUi();
+                };
+                sr.start();
+                return;
+            } catch (_) {}
+        }
+
+        if (errBox) {
+            errBox.innerText = '⚠️ Mikrofon tidak tersedia/diizinkan di viewer file ini. Ketik perintah di kolom teks atau buka link aplikasi utama di Chrome.';
+            errBox.style.display = 'block';
+        }
+    };
+
+    window.sendVoiceCommandToAi = async function(payload) {
+        const errBox = document.getElementById('voiceErrorBox');
+        const repBox = document.getElementById('voiceReplyBox');
+        const drfSec = document.getElementById('voiceDraftSection');
+        if (errBox) errBox.style.display = 'none';
+
+        voiceIsProcessing = true;
+        updateVoiceRecordUi();
+
+        const openPiutangList = piutangData
+            .filter(p => p.status !== 'LUNAS')
+            .map(p => {
+                const total = Number(p.nominal) || 0;
+                const dibayar = Math.min(total, Number(p.dibayar) || 0);
+                return {
+                    id: p.id,
+                    nama: p.nama,
+                    nominal: total,
+                    dibayar,
+                    sisa: Math.max(0, total - dibayar),
+                    keterangan: p.keterangan || ''
+                };
+            });
+
+        try {
+            const resp = await fetch(getAiApiBase() + '/api/ai/voice-command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ...payload,
+                    context: {
+                        todayIso: getTodayIsoStr(),
+                        saldoList,
+                        kategoriList,
+                        vlookupMaster,
+                        openPiutangList
+                    }
+                })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data?.error || 'Gagal memproses perintah AI.');
+
+            const trLine = document.getElementById('voiceTranscriptLine');
+            const rpLine = document.getElementById('voiceReplyLine');
+            const btnReplay = document.getElementById('btnVoiceReplayTts');
+            if (trLine) trLine.innerHTML = '🗣️ <i>"' + (data.transcript || payload.textCommand || '') + '"</i>';
+            if (rpLine) rpLine.innerText = '🤖 ' + (data.replyText || '');
+            if (repBox) repBox.style.display = 'block';
+            if (btnReplay) btnReplay.style.display = 'none';
+            voiceLastTtsB64 = '';
+
+            const nonP = saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG');
+            const defAkun = nonP[0] || saldoList[0] || 'TUNAI';
+            const defTuj = nonP[1] || nonP[0] || 'SEABANK';
+            const katNonT = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
+
+            voiceDraftItems = (Array.isArray(data.items) ? data.items : []).map(raw => {
+                const validT = ['TRANSAKSI', 'PINDAH_SALDO', 'PIUTANG_BARU', 'CICIL_PIUTANG'];
+                const at = validT.includes(String(raw.actionType || '').toUpperCase()) ? String(raw.actionType).toUpperCase() : 'TRANSAKSI';
+                let pid = Number(raw.piutangId) || 0;
+                let nm = String(raw.nama || '').trim();
+                if (at === 'CICIL_PIUTANG') {
+                    const matchP = openPiutangList.find(p => p.id === pid) || (nm ? openPiutangList.find(p => p.nama.toLowerCase().includes(nm.toLowerCase())) : openPiutangList[0]);
+                    if (matchP) { pid = matchP.id; if (!nm) nm = matchP.nama; }
+                }
+                return {
+                    actionType: at,
+                    isoDate: /^\d{4}-\d{2}-\d{2}$/.test(String(raw.isoDate || '')) ? String(raw.isoDate) : getTodayIsoStr(),
+                    nominal: Math.max(0, Math.round(Number(raw.nominal) || 0)),
+                    keterangan: String(raw.keterangan || '').trim() || 'Transaksi Suara',
+                    jenisKas: String(raw.jenisKas || '').toUpperCase() === 'MASUK' ? 'MASUK' : 'KELUAR',
+                    kategori: katNonT.find(k => k.toUpperCase() === String(raw.kategori || '').toUpperCase()) || katNonT[0] || 'LAIN LAIN',
+                    akun: saldoList.find(s => s.toUpperCase() === String(raw.akun || '').toUpperCase()) || defAkun,
+                    akunAsal: saldoList.find(s => s.toUpperCase() === String(raw.akunAsal || '').toUpperCase()) || defAkun,
+                    akunTujuan: saldoList.find(s => s.toUpperCase() === String(raw.akunTujuan || '').toUpperCase()) || defTuj,
+                    nama: nm,
+                    piutangId: pid || ''
+                };
+            });
+
+            renderVoiceAiDraftCards(Boolean(data.needsClarification));
+            if (drfSec) drfSec.style.display = voiceDraftItems.length > 0 ? 'block' : 'none';
+
+            if (voiceTtsEnabled && data.replyText) {
+                fetch(getAiApiBase() + '/api/ai/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: data.replyText })
+                }).then(r => r.ok ? r.json() : null).then(ttsData => {
+                    if (ttsData && ttsData.audioBase64) {
+                        voiceLastTtsB64 = ttsData.audioBase64;
+                        if (btnReplay) btnReplay.style.display = 'inline-block';
+                        window.replayVoiceTts();
+                    }
+                }).catch(() => {});
+            }
+        } catch (err) {
+            if (errBox) {
+                errBox.innerText = '⚠️ ' + (err?.message || 'Gagal menghubungi server AI. Pastikan internet aktif.');
+                errBox.style.display = 'block';
+            }
+        } finally {
+            voiceIsProcessing = false;
+            updateVoiceRecordUi();
+        }
+    };
+
+    function renderVoiceAiDraftCards(needsClarify) {
+        const cont = document.getElementById('voiceDraftCardsList');
+        const titleEl = document.getElementById('voiceDraftTitle');
+        const btnRow = document.getElementById('voiceConfirmButtonsRow');
+        if (!cont) return;
+        if (titleEl) titleEl.innerText = `📋 Draf Untuk Dikonfirmasi (${voiceDraftItems.length} Item)`;
+        if (btnRow) btnRow.style.display = (!needsClarify && voiceDraftItems.length > 0) ? 'grid' : 'none';
+
+        const nonP = saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG');
+        const katNonT = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
+        const openP = piutangData.filter(p => p.status !== 'LUNAS');
+
+        cont.innerHTML = voiceDraftItems.map((it, idx) => {
+            const badgeMap = {
+                PINDAH_SALDO: { bg: '#0284C7', lbl: '🔄 PINDAH SALDO' },
+                PIUTANG_BARU: { bg: '#9333EA', lbl: '🤝 HUTANG BARU' },
+                CICIL_PIUTANG: { bg: '#D97706', lbl: '💵 CICIL / LUNAS HUTANG' },
+                TRANSAKSI: it.jenisKas === 'MASUK' ? { bg: '#16A34A', lbl: '💰 PEMASUKAN' } : { bg: '#DC2626', lbl: '💸 PENGELUARAN' }
+            };
+            const bd = badgeMap[it.actionType] || badgeMap.TRANSAKSI;
+            const saldoOpts = (sel) => saldoList.map(s => `<option value="${s}" ${sel === s ? 'selected' : ''}>${s}</option>`).join('');
+            const nonPOpts = (sel) => nonP.map(s => `<option value="${s}" ${sel === s ? 'selected' : ''}>${s}</option>`).join('');
+            const katOpts = (sel) => katNonT.map(k => `<option value="${k}" ${sel === k ? 'selected' : ''}>${k}</option>`).join('');
+            const piutangOpts = openP.map(p => {
+                const sisa = Math.max(0, (Number(p.nominal) || 0) - (Number(p.dibayar) || 0));
+                return `<option value="${p.id}" ${Number(it.piutangId) === p.id ? 'selected' : ''}>${p.nama} (Sisa ${formatRp(sisa)})</option>`;
+            }).join('');
+
+            let specificHtml = '';
+            if (it.actionType === 'TRANSAKSI') {
+                specificHtml = `
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-bottom:6px;">
+                        <div><label>Arus Kas</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'jenisKas',this.value)"><option value="KELUAR" ${it.jenisKas === 'KELUAR' ? 'selected' : ''}>KELUAR (-)</option><option value="MASUK" ${it.jenisKas === 'MASUK' ? 'selected' : ''}>MASUK (+)</option></select></div>
+                        <div><label>Kategori</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'kategori',this.value)">${katOpts(it.kategori)}</select></div>
+                        <div><label>Akun Saldo</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'akun',this.value)">${saldoOpts(it.akun)}</select></div>
+                    </div>`;
+            } else if (it.actionType === 'PINDAH_SALDO') {
+                specificHtml = `
+                    <div class="row-2" style="margin-bottom:6px;">
+                        <div><label>Keluar Dari</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'akunAsal',this.value)">${saldoOpts(it.akunAsal)}</select></div>
+                        <div><label>Masuk Ke</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'akunTujuan',this.value)">${saldoOpts(it.akunTujuan)}</select></div>
+                    </div>`;
+            } else if (it.actionType === 'PIUTANG_BARU') {
+                specificHtml = `
+                    <div class="row-2" style="margin-bottom:6px;">
+                        <div><label>Nama Peminjam</label><input type="text" class="form-control" value="${it.nama || ''}" oninput="updateVoiceDraftField(${idx},'nama',this.value)"></div>
+                        <div><label>Sumber Saldo</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'akunAsal',this.value)">${nonPOpts(it.akunAsal)}</select></div>
+                    </div>`;
+            } else if (it.actionType === 'CICIL_PIUTANG') {
+                specificHtml = `
+                    <div class="row-2" style="margin-bottom:6px;">
+                        <div><label>Penghutang</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'piutangId',Number(this.value))"><option value="">-- Pilih --</option>${piutangOpts}</select></div>
+                        <div><label>Masuk Ke Saldo</label><select class="form-control" onchange="updateVoiceDraftField(${idx},'akunTujuan',this.value)">${nonPOpts(it.akunTujuan)}</select></div>
+                    </div>`;
+            }
+
+            return `
+                <div style="padding:10px; border-radius:10px; border:1px solid var(--border); background:var(--card);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; gap:6px; margin-bottom:8px;">
+                        <span style="padding:2px 8px; border-radius:5px; font-size:9.5px; font-weight:800; color:#FFF; background:${bd.bg};">${bd.lbl}</span>
+                        <select class="filter-select" onchange="updateVoiceDraftField(${idx},'actionType',this.value)">
+                            <option value="TRANSAKSI" ${it.actionType === 'TRANSAKSI' ? 'selected' : ''}>Transaksi Biasa</option>
+                            <option value="PINDAH_SALDO" ${it.actionType === 'PINDAH_SALDO' ? 'selected' : ''}>Pindah Saldo</option>
+                            <option value="PIUTANG_BARU" ${it.actionType === 'PIUTANG_BARU' ? 'selected' : ''}>Catat Hutang Baru</option>
+                            <option value="CICIL_PIUTANG" ${it.actionType === 'CICIL_PIUTANG' ? 'selected' : ''}>Cicil / Lunas Hutang</option>
+                        </select>
+                    </div>
+                    <div class="row-2" style="margin-bottom:6px;">
+                        <div><label>Tanggal</label><input type="date" class="form-control" value="${it.isoDate}" onchange="updateVoiceDraftField(${idx},'isoDate',this.value)"></div>
+                        <div><label>Nominal (Rp)</label><input type="text" inputmode="numeric" class="form-control" value="${it.nominal > 0 ? it.nominal.toLocaleString('id-ID') : ''}" oninput="updateVoiceDraftNominal(${idx}, this)"></div>
+                    </div>
+                    ${specificHtml}
+                    <div><label>Keterangan</label><input type="text" class="form-control" value="${it.keterangan || ''}" oninput="updateVoiceDraftField(${idx},'keterangan',this.value)"></div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    window.updateVoiceDraftField = function(idx, field, val) {
+        if (!voiceDraftItems[idx]) return;
+        voiceDraftItems[idx][field] = val;
+        if (field === 'actionType' || field === 'jenisKas') {
+            renderVoiceAiDraftCards(false);
+        }
+    };
+
+    window.updateVoiceDraftNominal = function(idx, el) {
+        if (!voiceDraftItems[idx]) return;
+        const clean = el.value.replace(/\D/g, '');
+        const num = parseInt(clean, 10) || 0;
+        voiceDraftItems[idx].nominal = num;
+        el.value = clean ? num.toLocaleString('id-ID') : '';
+    };
+
+    window.confirmVoiceAiItems = function() {
+        const errBox = document.getElementById('voiceErrorBox');
+        if (errBox) errBox.style.display = 'none';
+        if (!voiceDraftItems.length) return;
+
+        for (let i = 0; i < voiceDraftItems.length; i++) {
+            const it = voiceDraftItems[i];
+            if (!it.nominal || it.nominal <= 0) {
+                if (errBox) { errBox.innerText = `⚠️ Nominal item #${i + 1} harus lebih dari Rp0.`; errBox.style.display = 'block'; }
+                return;
+            }
+            if (it.actionType === 'PINDAH_SALDO' && it.akunAsal === it.akunTujuan) {
+                if (errBox) { errBox.innerText = `⚠️ Akun asal dan tujuan pindah saldo tidak boleh sama.`; errBox.style.display = 'block'; }
+                return;
+            }
+            if (it.actionType === 'PIUTANG_BARU' && !(it.nama || '').trim()) {
+                if (errBox) { errBox.innerText = `⚠️ Nama peminjam wajib diisi.`; errBox.style.display = 'block'; }
+                return;
+            }
+        }
+
+        const baseNow = Date.now();
+        let savedCount = 0;
+        voiceDraftItems.forEach((it, idx) => {
+            const nom = Math.max(0, Math.round(Number(it.nominal) || 0));
+            const iso = it.isoDate || getTodayIsoStr();
+            const dObj = new Date(iso + 'T12:00:00');
+            const now = new Date();
+            const hari = dObj.toLocaleDateString('id-ID', { weekday: 'short' });
+            const tgl = dObj.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+            const jam = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const waktuStr = `${hari}, ${tgl} ${jam}`;
+            const uid = baseNow + idx * 10;
+
+            if (it.actionType === 'PINDAH_SALDO') {
+                const asal = it.akunAsal || saldoList[0] || 'TUNAI';
+                const tuj = it.akunTujuan || saldoList[1] || 'SEABANK';
+                if (asal === tuj) return;
+                const note = it.keterangan && !it.keterangan.toUpperCase().includes('PINDAH SALDO') ? ` (${it.keterangan.trim()})` : '';
+                transaksiJurnal.unshift({
+                    id: uid,
+                    action: 'addTrx',
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    keterangan: `[PINDAH SALDO] ${asal} ➜ ${tuj}${note}`,
+                    jenis: 'PINDAH SALDO',
+                    jenisKas: 'TRANSFER',
+                    akun: asal,
+                    akunTujuan: tuj,
+                    nominal: nom
+                });
+                addLogEntry('SALDO', `Pindah Saldo AI: ${asal} ➜ ${tuj}`, `Via Suara AI: ${formatRp(nom)}`, 'PINDAH');
+                savedCount++;
+            } else if (it.actionType === 'PIUTANG_BARU') {
+                const nama = (it.nama || '').trim();
+                const sumber = it.akunAsal || saldoList[0] || 'TUNAI';
+                const ket = (it.keterangan || '').trim() || 'Hutang / Piutang';
+                const pid = uid;
+                const tid = uid + 1;
+                piutangData.unshift({
+                    id: pid,
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    nama,
+                    nominal: nom,
+                    dibayar: 0,
+                    cicilan: [],
+                    sumber,
+                    keterangan: ket,
+                    status: 'BELUM LUNAS',
+                    trxId: tid
+                });
+                transaksiJurnal.unshift({
+                    id: tid,
+                    piutangId: pid,
+                    action: 'addTrx',
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    keterangan: `[PIUTANG] ${nama} - ${ket}`,
+                    jenis: 'PIUTANG',
+                    jenisKas: 'TRANSFER',
+                    akun: sumber,
+                    akunTujuan: 'PIUTANG',
+                    nominal: nom
+                });
+                addLogEntry('PIUTANG', `Catat Piutang AI: ${nama}`, `Via Suara AI: ${formatRp(nom)} dari ${sumber}`, 'ADD');
+                savedCount++;
+            } else if (it.actionType === 'CICIL_PIUTANG') {
+                const pIdx = piutangData.findIndex(p => Number(it.piutangId) === p.id || (it.nama && p.status !== 'LUNAS' && p.nama.toLowerCase().includes(it.nama.toLowerCase())));
+                if (pIdx < 0) return;
+                const target = piutangData[pIdx];
+                const tot = Number(target.nominal) || 0;
+                const sudah = target.status === 'LUNAS' ? tot : Math.min(tot, Number(target.dibayar) || 0);
+                const bayar = Math.min(Math.max(0, tot - sudah), nom);
+                if (bayar <= 0) return;
+                const tuj = it.akunTujuan || saldoList[0] || 'TUNAI';
+                const newDibayar = sudah + bayar;
+                const isLunas = newDibayar >= tot;
+                const tid = uid;
+                piutangData[pIdx] = {
+                    ...target,
+                    dibayar: newDibayar,
+                    status: isLunas ? 'LUNAS' : 'BELUM LUNAS',
+                    cicilan: [...(target.cicilan || []), {
+                        id: uid + 1,
+                        waktu: waktuStr,
+                        isoDate: iso,
+                        nominal: bayar,
+                        akun: tuj,
+                        keterangan: it.keterangan || (isLunas ? 'Pelunasan (Suara AI)' : 'Cicilan (Suara AI)')
+                    }]
+                };
+                transaksiJurnal.unshift({
+                    id: tid,
+                    piutangId: target.id,
+                    action: 'addTrx',
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    keterangan: isLunas ? `[PELUNASAN PIUTANG] ${target.nama}` : `[CICILAN PIUTANG] ${target.nama} - Sisa ${formatRp(tot - newDibayar)}`,
+                    jenis: 'PIUTANG',
+                    jenisKas: 'TRANSFER',
+                    akun: 'PIUTANG',
+                    akunTujuan: tuj,
+                    nominal: bayar
+                });
+                addLogEntry('PIUTANG', `${isLunas ? 'Pelunasan' : 'Cicilan'} AI: ${target.nama}`, `${formatRp(bayar)} ke ${tuj}`, 'EDIT');
+                savedCount++;
+            } else {
+                const jKas = it.jenisKas === 'MASUK' ? 'MASUK' : 'KELUAR';
+                const akun = it.akun || saldoList[0] || 'TUNAI';
+                const kat = it.kategori || kategoriList[0];
+                const ket = (it.keterangan || '').trim() || kat;
+                transaksiJurnal.unshift({
+                    id: uid,
+                    action: 'addTrx',
+                    waktu: waktuStr,
+                    isoDate: iso,
+                    keterangan: ket,
+                    jenis: kat,
+                    jenisKas: jKas,
+                    akun,
+                    nominal: nom
+                });
+                addLogEntry('TRANSAKSI', `Input Suara AI: ${ket}`, `${ket} [${kat}] • ${jKas} ${akun} (${formatRp(nom)})`, 'ADD');
+                savedCount++;
+            }
+        });
+
+        if (savedCount > 0) {
+            saveToFirebase();
+            window.resetVoiceAiDraft();
+            window.closeVoiceAiModal();
+        }
     };
 
     updateClock();
