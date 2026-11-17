@@ -4558,11 +4558,29 @@
     // ASISTEN SUARA AI (TRANSAKSI, PINDAH SALDO, PIUTANG & CICILAN)
     // =========================================================================
     const AI_DOWNLOADED_ORIGIN = "https://ais-dev-i7x3g2wskr6tbzqsospvyx-474771713885.asia-northeast1.run.app";
+    let voiceBackendUnavailable = false;
     function getAiApiBase() {
         if (window.location.protocol.startsWith('http')) {
             return '';
         }
         return AI_DOWNLOADED_ORIGIN;
+    }
+    function isStaticStandaloneHost() {
+        if (voiceBackendUnavailable) return true;
+        const proto = window.location.protocol || '';
+        const host = (window.location.hostname || '').toLowerCase();
+        if (proto === 'file:' || proto === 'content:' || proto === 'blob:') return true;
+        if (
+            host.endsWith('.github.io') ||
+            host.endsWith('.netlify.app') ||
+            host.endsWith('.vercel.app') ||
+            host.endsWith('.pages.dev') ||
+            host.endsWith('.web.app') ||
+            host.endsWith('.firebaseapp.com')
+        ) {
+            return true;
+        }
+        return false;
     }
 
     const VOICE_EXAMPLES = [
@@ -4583,6 +4601,7 @@
     let voiceSpeechRec = null;
     let voiceAudioEl = null;
     let voiceLastTtsB64 = '';
+    let voiceLastReplyText = '';
     let voiceDraftItems = [];
 
     function updateVoiceTtsBtn() {
@@ -4598,6 +4617,26 @@
             voiceAudioEl.pause();
             voiceAudioEl.currentTime = 0;
             voiceAudioEl = null;
+        }
+        if ('speechSynthesis' in window) {
+            try { window.speechSynthesis.cancel(); } catch (_) {}
+        }
+    }
+
+    function speakBrowserId(text) {
+        if (!text || !('speechSynthesis' in window)) return false;
+        try {
+            window.speechSynthesis.cancel();
+            const utter = new SpeechSynthesisUtterance(text);
+            utter.lang = 'id-ID';
+            utter.rate = 1.03;
+            const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+            const idVoice = voices.find(v => (v.lang || '').toLowerCase().startsWith('id'));
+            if (idVoice) utter.voice = idVoice;
+            window.speechSynthesis.speak(utter);
+            return true;
+        } catch (_) {
+            return false;
         }
     }
 
@@ -4616,7 +4655,7 @@
         }
     }
 
-    function updateVoiceRecordUi() {
+    function updateVoiceRecordUi(customStatus) {
         const btn = document.getElementById('btnVoiceRecordMain');
         const st = document.getElementById('voiceStatusText');
         const chips = document.getElementById('voiceExampleChips');
@@ -4633,12 +4672,14 @@
             }
         }
         if (st) {
-            if (voiceIsProcessing) {
-                st.innerText = '⏳ AI sedang memahami perintah Anda...';
+            if (customStatus) {
+                st.innerText = customStatus;
+            } else if (voiceIsProcessing) {
+                st.innerText = '⏳ Sedang memahami perintah Anda...';
             } else if (voiceIsRecording) {
                 const mm = String(Math.floor(voiceRecSeconds / 60)).padStart(2, '0');
                 const ss = String(voiceRecSeconds % 60).padStart(2, '0');
-                st.innerText = `🔴 Merekam Suara (${mm}:${ss}) — Klik untuk Selesai`;
+                st.innerText = `🔴 Mendengarkan (${mm}:${ss}) — Ucapkan Perintah Lalu Stop`;
             } else {
                 st.innerText = 'Tekan Mikrofon Lalu Ucapkan Perintah';
             }
@@ -4646,6 +4687,319 @@
         if (chips) {
             chips.style.display = (!voiceIsRecording && !voiceIsProcessing && voiceDraftItems.length === 0) ? 'flex' : 'none';
         }
+    }
+
+    function offsetIsoDateDays(baseIso, deltaDays) {
+        const d = new Date(baseIso + 'T12:00:00');
+        d.setDate(d.getDate() + deltaDays);
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function extractNominalFromText(rawText) {
+        const txt = String(rawText || '').toLowerCase();
+        // 1. Numeric with unit: 1,5jt / 2.5 juta / 50rb / 50 ribu / 50k / 500 perak
+        const unitRegex = /(\d+(?:[.,]\d+)?)\s*(miliar|milyar|juta|jt|ribu|rb|k|ratus|perak)\b/gi;
+        let totalUnit = 0;
+        let matchedUnit = false;
+        let m;
+        while ((m = unitRegex.exec(txt)) !== null) {
+            const rawNum = m[1];
+            const unit = m[2].toLowerCase();
+            let val = 0;
+            if ((unit === 'juta' || unit === 'jt' || unit === 'miliar' || unit === 'milyar') && /^[\d]+[.,][\d]{1,2}$/.test(rawNum)) {
+                val = parseFloat(rawNum.replace(',', '.'));
+            } else if (/^\d{1,3}(\.\d{3})+$/.test(rawNum)) {
+                val = parseInt(rawNum.replace(/\./g, ''), 10);
+            } else {
+                val = parseFloat(rawNum.replace(',', '.'));
+            }
+            if (!isNaN(val) && val > 0) {
+                matchedUnit = true;
+                if (unit === 'miliar' || unit === 'milyar') totalUnit += val * 1000000000;
+                else if (unit === 'juta' || unit === 'jt') totalUnit += val * 1000000;
+                else if (unit === 'ribu' || unit === 'rb' || unit === 'k') totalUnit += val * 1000;
+                else if (unit === 'ratus') totalUnit += val * 100;
+                else totalUnit += val;
+            }
+        }
+        if (matchedUnit && totalUnit > 0) return Math.round(totalUnit);
+
+        // 2. Spoken Indonesian number words (e.g. "dua ratus lima puluh ribu", "setengah juta", "gocap")
+        const slangMap = {
+            cepek: 100000, gocap: 50000, goban: 50000, noban: 20000, seceng: 1000, goceng: 5000, ceban: 10000
+        };
+        for (const [k, v] of Object.entries(slangMap)) {
+            if (new RegExp('\\b' + k + '\\b', 'i').test(txt)) return v;
+        }
+        if (/\bsetengah\s+(?:juta|jt)\b/i.test(txt)) return 500000;
+
+        const wordVals = {
+            nol: 0, kosong: 0, satu: 1, dua: 2, tiga: 3, empat: 4, lima: 5,
+            enam: 6, tujuh: 7, delapan: 8, sembilan: 9, sepuluh: 10, sebelas: 11,
+            seratus: 100, seribu: 1000, sejuta: 1000000
+        };
+        const tokens = txt.replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+        let wordTotal = 0;
+        let current = 0;
+        let hasWordNum = false;
+        for (let i = 0; i < tokens.length; i++) {
+            const w = tokens[i];
+            if (wordVals[w] !== undefined) {
+                hasWordNum = true;
+                if (w === 'seratus') current += 100;
+                else if (w === 'seribu') { wordTotal += (current > 0 ? current : 1) * 1000; current = 0; }
+                else if (w === 'sejuta') { wordTotal += 1000000; current = 0; }
+                else current += wordVals[w];
+            } else if (w === 'belas' && hasWordNum) {
+                current += 10;
+            } else if (w === 'puluh' && hasWordNum) {
+                current = (current === 0 ? 1 : current) * 10;
+            } else if (w === 'ratus' && hasWordNum) {
+                current = (current === 0 ? 1 : current) * 100;
+            } else if ((w === 'ribu' || w === 'rb') && hasWordNum) {
+                wordTotal += (current === 0 ? 1 : current) * 1000;
+                current = 0;
+            } else if ((w === 'juta' || w === 'jt') && hasWordNum) {
+                wordTotal += (current === 0 ? 1 : current) * 1000000;
+                current = 0;
+            } else if (w === 'setengah' && (tokens[i + 1] === 'juta' || tokens[i + 1] === 'jt')) {
+                hasWordNum = true;
+                wordTotal += 500000;
+                i++;
+            } else if (hasWordNum && (wordTotal > 0 || current > 0)) {
+                break;
+            }
+        }
+        if (hasWordNum && (wordTotal + current) >= 100) {
+            return Math.round(wordTotal + current);
+        }
+
+        // 3. Plain formatted numbers (e.g. 50.000 / 200000 / 7500)
+        const numMatches = txt.match(/\b\d{1,3}(?:[.,]\d{3})+\b|\b\d{3,10}\b/g);
+        if (numMatches && numMatches.length > 0) {
+            for (const cand of numMatches) {
+                // Skip tiny numbers like "zen 1" or "zen 2" unless >= 100
+                const cleaned = parseInt(cand.replace(/[^\d]/g, ''), 10);
+                if (cleaned >= 100) return cleaned;
+            }
+        }
+        return 0;
+    }
+
+    function findAccountMentionsInOrder(rawText) {
+        const lower = String(rawText || '').toLowerCase();
+        const aliasMap = {};
+        saldoList.forEach(acc => {
+            const up = acc.toUpperCase();
+            const keys = [acc.toLowerCase()];
+            if (up === 'TUNAI') keys.push('tunai', 'cash', 'kas', 'dompet', 'laci');
+            if (up.includes('SEABANK')) keys.push('seabank', 'sea bank', 'si bank');
+            if (up.includes('ZEN 1')) keys.push('zen 1', 'zen1');
+            if (up.includes('ZEN 2')) keys.push('zen 2', 'zen2');
+            if (up.includes('DEPOSITO') && up.includes('MAMAH')) keys.push('deposito mamah', 'deposito', 'mamah');
+            if (up.includes('BUNGA')) keys.push('bunga deposito', 'bunga');
+            if (up.includes('DEDED')) keys.push('uang m deded', 'mang deded', 'deded');
+            aliasMap[acc] = keys;
+        });
+
+        const hits = [];
+        Object.entries(aliasMap).forEach(([acc, aliases]) => {
+            aliases.forEach(al => {
+                if (!al || al.length < 2) return;
+                const esc = al.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const re = new RegExp('\\b' + esc + '\\b', 'gi');
+                let m;
+                while ((m = re.exec(lower)) !== null) {
+                    hits.push({ acc, index: m.index, len: al.length });
+                }
+            });
+        });
+
+        hits.sort((a, b) => a.index - b.index || b.len - a.len);
+        const ordered = [];
+        hits.forEach(h => {
+            if (!ordered.includes(h.acc)) ordered.push(h.acc);
+        });
+        return ordered;
+    }
+
+    function parseSingleIndonesianClause(clauseText, openPiutangList) {
+        const raw = String(clauseText || '').trim();
+        const lower = raw.toLowerCase();
+        const todayIso = getTodayIsoStr();
+        let isoDate = todayIso;
+        if (/\bkemarin\s+lusa\b/i.test(lower)) isoDate = offsetIsoDateDays(todayIso, -2);
+        else if (/\bkemarin\b/i.test(lower)) isoDate = offsetIsoDateDays(todayIso, -1);
+
+        const nonP = saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG');
+        const defAkun = nonP[0] || saldoList[0] || 'TUNAI';
+        const defTuj = nonP[1] || nonP[0] || 'SEABANK';
+        const katNonT = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
+
+        const mentionedAccs = findAccountMentionsInOrder(raw);
+        let nominal = extractNominalFromText(raw);
+
+        const isTransfer = /\b(pindah\s*saldo|pindahin|mindahin|pindah|transfer|tf|geser|oper|tarik\s*tunai|setor\s*tunai)\b/i.test(lower)
+            || (mentionedAccs.length >= 2 && /\bke\b/i.test(lower) && !/\b(ngutang|hutang|utang|pinjam|kasbon|bayar|cicil|lunas)\b/i.test(lower));
+        const isCicil = /\b(bayar\s*(?:hutang|utang|piutang|kasbon)|cicil|nyicil|angsur|angsuran|pelunasan|lunasi|lunas|balikin)\b/i.test(lower);
+        const isHutangBaru = !isCicil && /\b(ngutang|hutang|utang|pinjam|pinjem|minjem|kasbon|piutang|ngebon)\b/i.test(lower);
+
+        // Clean description helper
+        const cleanDesc = raw
+            .replace(/\b(hari ini|kemarin lusa|kemarin)\b/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+        const niceKet = cleanDesc ? cleanDesc.charAt(0).toUpperCase() + cleanDesc.slice(1) : 'Transaksi Suara';
+
+        if (isTransfer) {
+            let asal = mentionedAccs[0] || defAkun;
+            let tuj = mentionedAccs[1] || (asal === defTuj ? defAkun : defTuj);
+            if (/\btarik\s+tunai\b/i.test(lower)) {
+                tuj = saldoList.find(s => s.toUpperCase() === 'TUNAI') || defAkun;
+                asal = mentionedAccs.find(a => a !== tuj) || defTuj;
+            } else if (/\bsetor\s+tunai\b/i.test(lower)) {
+                asal = saldoList.find(s => s.toUpperCase() === 'TUNAI') || defAkun;
+                tuj = mentionedAccs.find(a => a !== asal) || defTuj;
+            }
+            return {
+                actionType: 'PINDAH_SALDO',
+                isoDate,
+                nominal,
+                keterangan: 'Pindah Saldo ' + asal + ' ke ' + tuj,
+                jenisKas: 'KELUAR',
+                kategori: katNonT[0] || 'LAIN LAIN',
+                akun: asal,
+                akunAsal: asal,
+                akunTujuan: tuj,
+                nama: '',
+                piutangId: ''
+            };
+        }
+
+        if (isCicil) {
+            const matchP = openPiutangList.find(p => lower.includes(String(p.nama || '').toLowerCase())) || openPiutangList[0] || null;
+            let nama = matchP ? matchP.nama : '';
+            if (!nama) {
+                const nmMatch = raw.match(/^([a-zA-Z.\s]{2,25}?)\s+(?:bayar|cicil|nyicil|lunas|lunasi|angsur)/i);
+                if (nmMatch) nama = nmMatch[1].trim();
+            }
+            if (nominal === 0 && matchP && /\b(lunas|lunasi|pelunasan)\b/i.test(lower)) {
+                nominal = matchP.sisa;
+            }
+            const tuj = mentionedAccs.find(a => a.toUpperCase() !== 'PIUTANG') || defAkun;
+            return {
+                actionType: 'CICIL_PIUTANG',
+                isoDate,
+                nominal,
+                keterangan: (/\blunas/i.test(lower) ? 'Pelunasan ' : 'Cicilan ') + (nama || 'Piutang'),
+                jenisKas: 'MASUK',
+                kategori: katNonT[0] || 'LAIN LAIN',
+                akun: tuj,
+                akunAsal: 'PIUTANG',
+                akunTujuan: tuj,
+                nama: nama || '',
+                piutangId: matchP ? matchP.id : ''
+            };
+        }
+
+        if (isHutangBaru) {
+            let nama = '';
+            const mBefore = raw.match(/^([a-zA-Z.\s]{2,28}?)\s+(?:ngutang|hutang|utang|pinjam|pinjem|minjem|kasbon|ngebon)/i);
+            const mAfter = raw.match(/(?:ke|sama|si|atas nama)\s+([a-zA-Z.\s]{2,24})/i);
+            if (mBefore) nama = mBefore[1].trim();
+            else if (mAfter) nama = mAfter[1].replace(/\b(sebesar|senilai|uang|rp|dari|pakai).*$/i, '').trim();
+            if (nama) {
+                nama = nama.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            }
+            const asal = mentionedAccs.find(a => a.toUpperCase() !== 'PIUTANG') || defAkun;
+            return {
+                actionType: 'PIUTANG_BARU',
+                isoDate,
+                nominal,
+                keterangan: 'Hutang ' + (nama || 'Pelanggan'),
+                jenisKas: 'KELUAR',
+                kategori: katNonT[0] || 'LAIN LAIN',
+                akun: asal,
+                akunAsal: asal,
+                akunTujuan: 'PIUTANG',
+                nama: nama || 'Pelanggan',
+                piutangId: ''
+            };
+        }
+
+        // Regular TRANSAKSI (MASUK / KELUAR)
+        let jenisKas = 'KELUAR';
+        let matchedKat = '';
+        if (Array.isArray(vlookupMaster)) {
+            const vMatch = vlookupMaster.find(v => v.keyword && lower.includes(String(v.keyword).toLowerCase()));
+            if (vMatch) {
+                matchedKat = vMatch.kategori || '';
+                if (vMatch.jenis === 'MASUK' || vMatch.jenis === 'KELUAR') jenisKas = vMatch.jenis;
+            }
+        }
+        const isMasukWord = /\b(cuan|laba|untung|omset|omzet|pemasukan|masuk|terima|dapat|dapet|gaji|komisi|bonus|penjualan|jual|bunga|profit|fee|setoran)\b/i.test(lower);
+        const isKeluarWord = /\b(beli|bayar|keluar|pengeluaran|belanja|jajan|makan|minum|bensin|token|listrik|pulsa|kuota|paket|ongkir|parkir|servis|service|biaya|tagihan|sewa|sedekah|kasih)\b/i.test(lower);
+        if (isMasukWord && !isKeluarWord) jenisKas = 'MASUK';
+        else if (isKeluarWord && !isMasukWord) jenisKas = 'KELUAR';
+        else if (/\bmasuk\s+[a-z]/i.test(lower) && !/\b(beli|bayar|keluar|belanja)\b/i.test(lower)) jenisKas = 'MASUK';
+
+        if (!matchedKat) {
+            matchedKat = katNonT.find(k => lower.includes(k.toLowerCase())) || '';
+        }
+        if (!matchedKat) {
+            if (jenisKas === 'MASUK') {
+                matchedKat = katNonT.find(k => /CUAN|LABA|OMSET|PEMASUKAN|KONTER|PENJUALAN/i.test(k)) || katNonT[0] || 'LAIN LAIN';
+            } else {
+                matchedKat = katNonT.find(k => /PRIBADI|OPERASIONAL|BELANJA|BENSIN|LAIN/i.test(k)) || katNonT[0] || 'LAIN LAIN';
+            }
+        }
+
+        const akun = mentionedAccs.find(a => a.toUpperCase() !== 'PIUTANG') || defAkun;
+        return {
+            actionType: 'TRANSAKSI',
+            isoDate,
+            nominal,
+            keterangan: niceKet,
+            jenisKas,
+            kategori: matchedKat,
+            akun,
+            akunAsal: akun,
+            akunTujuan: defTuj,
+            nama: '',
+            piutangId: ''
+        };
+    }
+
+    function parseIndonesianVoiceCommandLocal(rawText, openPiutangList) {
+        const clauses = String(rawText || '')
+            .split(/\s*(?:;|\n|\b(?:lalu|terus|kemudian)\b)\s*/i)
+            .map(s => s.trim())
+            .filter(Boolean);
+        const list = (clauses.length ? clauses : [String(rawText || '').trim()])
+            .map(c => parseSingleIndonesianClause(c, openPiutangList));
+        const hasMissingNom = list.some(x => !x.nominal || x.nominal <= 0);
+        const first = list[0];
+        let replyText = '';
+        if (hasMissingNom) {
+            replyText = 'Nominal belum terbaca jelas. Silakan isi atau koreksi nominal di kartu draf di bawah.';
+        } else if (list.length > 1) {
+            replyText = `Siap, saya siapkan ${list.length} draf perintah. Silakan periksa lalu klik Konfirmasi & Simpan.`;
+        } else if (first.actionType === 'PINDAH_SALDO') {
+            replyText = `Siap, draf pindah saldo ${formatRp(first.nominal)} dari ${first.akunAsal} ke ${first.akunTujuan} sudah siap dikonfirmasi.`;
+        } else if (first.actionType === 'PIUTANG_BARU') {
+            replyText = `Siap, draf hutang baru ${first.nama} sebesar ${formatRp(first.nominal)} dari ${first.akunAsal} sudah siap dikonfirmasi.`;
+        } else if (first.actionType === 'CICIL_PIUTANG') {
+            replyText = `Siap, draf bayar hutang ${first.nama || ''} sebesar ${formatRp(first.nominal)} masuk ke ${first.akunTujuan} sudah siap dikonfirmasi.`;
+        } else {
+            const arah = first.jenisKas === 'MASUK' ? 'pemasukan ke ' + first.akun : 'pengeluaran dari ' + first.akun;
+            replyText = `Siap, draf ${arah} sebesar ${formatRp(first.nominal)} untuk ${first.keterangan} sudah siap dikonfirmasi.`;
+        }
+        return {
+            transcript: String(rawText || '').trim(),
+            replyText,
+            needsClarification: false,
+            items: list
+        };
     }
 
     window.openVoiceAiModal = function() {
@@ -4689,16 +5043,24 @@
     };
 
     window.replayVoiceTts = function() {
-        if (!voiceLastTtsB64) return;
         stopVoiceTtsAudio();
-        voiceAudioEl = new Audio('data:audio/wav;base64,' + voiceLastTtsB64);
-        voiceAudioEl.play().catch(() => {});
+        if (voiceLastTtsB64) {
+            voiceAudioEl = new Audio('data:audio/wav;base64,' + voiceLastTtsB64);
+            voiceAudioEl.play().catch(() => {
+                if (voiceLastReplyText) speakBrowserId(voiceLastReplyText);
+            });
+            return;
+        }
+        if (voiceLastReplyText) {
+            speakBrowserId(voiceLastReplyText);
+        }
     };
 
     window.resetVoiceAiDraft = function() {
         stopVoiceTtsAudio();
         voiceDraftItems = [];
         voiceLastTtsB64 = '';
+        voiceLastReplyText = '';
         const err = document.getElementById('voiceErrorBox');
         const rep = document.getElementById('voiceReplyBox');
         const drf = document.getElementById('voiceDraftSection');
@@ -4707,6 +5069,83 @@
         if (drf) drf.style.display = 'none';
         updateVoiceRecordUi();
     };
+
+    function startBrowserSpeechRecognition(errBox) {
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) return false;
+        try {
+            const sr = new SpeechRec();
+            sr.lang = 'id-ID';
+            sr.interimResults = true;
+            sr.maxAlternatives = 1;
+            let capturedFinal = '';
+            let handled = false;
+            voiceSpeechRec = sr;
+            voiceRecSeconds = 0;
+            voiceIsRecording = true;
+            updateVoiceRecordUi('🔴 Mendengarkan (id-ID)... Ucapkan perintah Anda');
+            voiceRecTimer = setInterval(() => {
+                voiceRecSeconds += 1;
+                if (!capturedFinal) updateVoiceRecordUi();
+            }, 1000);
+            sr.onresult = (ev) => {
+                let interim = '';
+                let finals = '';
+                for (let i = 0; i < ev.results.length; i++) {
+                    const part = ev.results[i][0]?.transcript || '';
+                    if (ev.results[i].isFinal) finals += ' ' + part;
+                    else interim += ' ' + part;
+                }
+                const liveText = (finals + ' ' + interim).trim();
+                if (liveText) {
+                    const inp = document.getElementById('voiceTextCmdInput');
+                    if (inp) inp.value = liveText;
+                    updateVoiceRecordUi('🗣️ "' + liveText + '"');
+                }
+                if (finals.trim()) {
+                    capturedFinal = finals.trim();
+                    handled = true;
+                    stopVoiceMicHardware();
+                    voiceIsRecording = false;
+                    updateVoiceRecordUi();
+                    window.sendVoiceCommandToAi({ textCommand: capturedFinal });
+                }
+            };
+            sr.onerror = (ev) => {
+                stopVoiceMicHardware();
+                voiceIsRecording = false;
+                updateVoiceRecordUi();
+                if (errBox && !handled) {
+                    const code = ev?.error || '';
+                    if (code === 'not-allowed' || code === 'service-not-allowed') {
+                        errBox.innerText = '⚠️ Izin mikrofon ditolak browser. Aktifkan izin Mikrofon di pengaturan situs Chrome, atau ketik perintah langsung di kolom teks.';
+                    } else if (code === 'no-speech') {
+                        errBox.innerText = '⚠️ Tidak ada suara terdeteksi. Tekan mic lalu bicara lebih dekat dan jelas.';
+                    } else {
+                        errBox.innerText = '⚠️ Gagal menangkap suara (' + (code || 'error') + '). Silakan coba lagi atau ketik di kolom perintah.';
+                    }
+                    errBox.style.display = 'block';
+                }
+            };
+            sr.onend = () => {
+                const inpVal = (document.getElementById('voiceTextCmdInput')?.value || '').trim();
+                stopVoiceMicHardware();
+                voiceIsRecording = false;
+                updateVoiceRecordUi();
+                if (!handled && inpVal) {
+                    handled = true;
+                    window.sendVoiceCommandToAi({ textCommand: inpVal });
+                }
+            };
+            sr.start();
+            return true;
+        } catch (_) {
+            stopVoiceMicHardware();
+            voiceIsRecording = false;
+            updateVoiceRecordUi();
+            return false;
+        }
+    }
 
     window.toggleVoiceRecording = async function() {
         if (voiceIsProcessing) return;
@@ -4719,6 +5158,16 @@
                 voiceMediaRecorder.stop();
             } else if (voiceSpeechRec) {
                 try { voiceSpeechRec.stop(); } catch (_) {}
+            }
+            return;
+        }
+
+        // Pada GitHub Pages / file statis tanpa server Node.js, gunakan SpeechRecognition browser secara langsung
+        if (isStaticStandaloneHost()) {
+            if (startBrowserSpeechRecognition(errBox)) return;
+            if (errBox) {
+                errBox.innerText = '⚠️ Fitur rekam suara browser tidak tersedia di viewer ini. Gunakan Chrome di Android/Desktop atau ketik perintah di kolom teks di bawah.';
+                errBox.style.display = 'block';
             }
             return;
         }
@@ -4770,50 +5219,7 @@
             }
         }
 
-        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (SpeechRec) {
-            try {
-                const sr = new SpeechRec();
-                sr.lang = 'id-ID';
-                sr.interimResults = false;
-                sr.maxAlternatives = 1;
-                voiceSpeechRec = sr;
-                voiceRecSeconds = 0;
-                voiceIsRecording = true;
-                updateVoiceRecordUi();
-                voiceRecTimer = setInterval(() => {
-                    voiceRecSeconds += 1;
-                    updateVoiceRecordUi();
-                }, 1000);
-                sr.onresult = (ev) => {
-                    const txt = ev.results?.[0]?.[0]?.transcript || '';
-                    stopVoiceMicHardware();
-                    voiceIsRecording = false;
-                    updateVoiceRecordUi();
-                    if (txt.trim()) {
-                        const inp = document.getElementById('voiceTextCmdInput');
-                        if (inp) inp.value = txt.trim();
-                        window.sendVoiceCommandToAi({ textCommand: txt.trim() });
-                    }
-                };
-                sr.onerror = () => {
-                    stopVoiceMicHardware();
-                    voiceIsRecording = false;
-                    updateVoiceRecordUi();
-                    if (errBox) {
-                        errBox.innerText = '⚠️ Izin mikrofon diblokir pada mode file ini. Silakan ketik perintah di kolom teks di atas.';
-                        errBox.style.display = 'block';
-                    }
-                };
-                sr.onend = () => {
-                    stopVoiceMicHardware();
-                    voiceIsRecording = false;
-                    updateVoiceRecordUi();
-                };
-                sr.start();
-                return;
-            } catch (_) {}
-        }
+        if (startBrowserSpeechRecognition(errBox)) return;
 
         if (errBox) {
             errBox.innerText = '⚠️ Mikrofon tidak tersedia/diizinkan di viewer file ini. Ketik perintah di kolom teks atau buka link aplikasi utama di Chrome.';
@@ -4821,10 +5227,95 @@
         }
     };
 
-    window.sendVoiceCommandToAi = async function(payload) {
-        const errBox = document.getElementById('voiceErrorBox');
+    function applyVoiceAiResponse(data, payloadText, useBrowserTts) {
         const repBox = document.getElementById('voiceReplyBox');
         const drfSec = document.getElementById('voiceDraftSection');
+        const trLine = document.getElementById('voiceTranscriptLine');
+        const rpLine = document.getElementById('voiceReplyLine');
+        const btnReplay = document.getElementById('btnVoiceReplayTts');
+
+        const openPiutangList = piutangData
+            .filter(p => p.status !== 'LUNAS')
+            .map(p => {
+                const total = Number(p.nominal) || 0;
+                const dibayar = Math.min(total, Number(p.dibayar) || 0);
+                return {
+                    id: p.id,
+                    nama: p.nama,
+                    nominal: total,
+                    dibayar,
+                    sisa: Math.max(0, total - dibayar),
+                    keterangan: p.keterangan || ''
+                };
+            });
+
+        if (trLine) trLine.innerHTML = '🗣️ <i>"' + (data.transcript || payloadText || '') + '"</i>';
+        if (rpLine) rpLine.innerText = '🤖 ' + (data.replyText || '');
+        if (repBox) repBox.style.display = 'block';
+        voiceLastTtsB64 = '';
+        voiceLastReplyText = data.replyText || '';
+        if (btnReplay) btnReplay.style.display = voiceLastReplyText ? 'inline-block' : 'none';
+
+        const nonP = saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG');
+        const defAkun = nonP[0] || saldoList[0] || 'TUNAI';
+        const defTuj = nonP[1] || nonP[0] || 'SEABANK';
+        const katNonT = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
+
+        voiceDraftItems = (Array.isArray(data.items) ? data.items : []).map(raw => {
+            const validT = ['TRANSAKSI', 'PINDAH_SALDO', 'PIUTANG_BARU', 'CICIL_PIUTANG'];
+            const at = validT.includes(String(raw.actionType || '').toUpperCase()) ? String(raw.actionType).toUpperCase() : 'TRANSAKSI';
+            let pid = Number(raw.piutangId) || 0;
+            let nm = String(raw.nama || '').trim();
+            if (at === 'CICIL_PIUTANG') {
+                const matchP = openPiutangList.find(p => p.id === pid) || (nm ? openPiutangList.find(p => p.nama.toLowerCase().includes(nm.toLowerCase())) : openPiutangList[0]);
+                if (matchP) { pid = matchP.id; if (!nm) nm = matchP.nama; }
+            }
+            return {
+                actionType: at,
+                isoDate: /^\d{4}-\d{2}-\d{2}$/.test(String(raw.isoDate || '')) ? String(raw.isoDate) : getTodayIsoStr(),
+                nominal: Math.max(0, Math.round(Number(raw.nominal) || 0)),
+                keterangan: String(raw.keterangan || '').trim() || 'Transaksi Suara',
+                jenisKas: String(raw.jenisKas || '').toUpperCase() === 'MASUK' ? 'MASUK' : 'KELUAR',
+                kategori: katNonT.find(k => k.toUpperCase() === String(raw.kategori || '').toUpperCase()) || katNonT[0] || 'LAIN LAIN',
+                akun: saldoList.find(s => s.toUpperCase() === String(raw.akun || '').toUpperCase()) || defAkun,
+                akunAsal: saldoList.find(s => s.toUpperCase() === String(raw.akunAsal || '').toUpperCase()) || defAkun,
+                akunTujuan: saldoList.find(s => s.toUpperCase() === String(raw.akunTujuan || '').toUpperCase()) || defTuj,
+                nama: nm,
+                piutangId: pid || ''
+            };
+        });
+
+        renderVoiceAiDraftCards(Boolean(data.needsClarification));
+        if (drfSec) drfSec.style.display = voiceDraftItems.length > 0 ? 'block' : 'none';
+
+        if (voiceTtsEnabled && data.replyText) {
+            if (useBrowserTts) {
+                speakBrowserId(data.replyText);
+            } else {
+                fetch(getAiApiBase() + '/api/ai/tts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: data.replyText })
+                }).then(async r => {
+                    const ct = r.headers.get('content-type') || '';
+                    return (r.ok && ct.includes('application/json')) ? r.json() : null;
+                }).then(ttsData => {
+                    if (ttsData && ttsData.audioBase64) {
+                        voiceLastTtsB64 = ttsData.audioBase64;
+                        if (btnReplay) btnReplay.style.display = 'inline-block';
+                        window.replayVoiceTts();
+                    } else {
+                        speakBrowserId(data.replyText);
+                    }
+                }).catch(() => {
+                    speakBrowserId(data.replyText);
+                });
+            }
+        }
+    }
+
+    window.sendVoiceCommandToAi = async function(payload) {
+        const errBox = document.getElementById('voiceErrorBox');
         if (errBox) errBox.style.display = 'none';
 
         voiceIsProcessing = true;
@@ -4846,6 +5337,15 @@
             });
 
         try {
+            if (isStaticStandaloneHost()) {
+                if (payload.textCommand) {
+                    const localResult = parseIndonesianVoiceCommandLocal(payload.textCommand, openPiutangList);
+                    applyVoiceAiResponse(localResult, payload.textCommand, true);
+                    return;
+                }
+                throw new Error('Mode web statis memerlukan input suara browser atau teks perintah.');
+            }
+
             const resp = await fetch(getAiApiBase() + '/api/ai/voice-command', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -4860,66 +5360,23 @@
                     }
                 })
             });
+            const ct = resp.headers.get('content-type') || '';
+            if (!ct.includes('application/json')) {
+                // Host statis mengembalikan HTML (misal 404 GitHub Pages) -> aktifkan mode lokal
+                voiceBackendUnavailable = true;
+                if (payload.textCommand) {
+                    const localResult = parseIndonesianVoiceCommandLocal(payload.textCommand, openPiutangList);
+                    applyVoiceAiResponse(localResult, payload.textCommand, true);
+                    return;
+                }
+                throw new Error('Hosting statis tidak memiliki backend AI. Gunakan tombol Mic (di Chrome) atau ketik perintah di kolom teks.');
+            }
             const data = await resp.json();
             if (!resp.ok) throw new Error(data?.error || 'Gagal memproses perintah AI.');
-
-            const trLine = document.getElementById('voiceTranscriptLine');
-            const rpLine = document.getElementById('voiceReplyLine');
-            const btnReplay = document.getElementById('btnVoiceReplayTts');
-            if (trLine) trLine.innerHTML = '🗣️ <i>"' + (data.transcript || payload.textCommand || '') + '"</i>';
-            if (rpLine) rpLine.innerText = '🤖 ' + (data.replyText || '');
-            if (repBox) repBox.style.display = 'block';
-            if (btnReplay) btnReplay.style.display = 'none';
-            voiceLastTtsB64 = '';
-
-            const nonP = saldoList.filter(s => s.trim().toUpperCase() !== 'PIUTANG');
-            const defAkun = nonP[0] || saldoList[0] || 'TUNAI';
-            const defTuj = nonP[1] || nonP[0] || 'SEABANK';
-            const katNonT = kategoriList.filter(k => k !== 'PINDAH SALDO' && k !== 'PIUTANG');
-
-            voiceDraftItems = (Array.isArray(data.items) ? data.items : []).map(raw => {
-                const validT = ['TRANSAKSI', 'PINDAH_SALDO', 'PIUTANG_BARU', 'CICIL_PIUTANG'];
-                const at = validT.includes(String(raw.actionType || '').toUpperCase()) ? String(raw.actionType).toUpperCase() : 'TRANSAKSI';
-                let pid = Number(raw.piutangId) || 0;
-                let nm = String(raw.nama || '').trim();
-                if (at === 'CICIL_PIUTANG') {
-                    const matchP = openPiutangList.find(p => p.id === pid) || (nm ? openPiutangList.find(p => p.nama.toLowerCase().includes(nm.toLowerCase())) : openPiutangList[0]);
-                    if (matchP) { pid = matchP.id; if (!nm) nm = matchP.nama; }
-                }
-                return {
-                    actionType: at,
-                    isoDate: /^\d{4}-\d{2}-\d{2}$/.test(String(raw.isoDate || '')) ? String(raw.isoDate) : getTodayIsoStr(),
-                    nominal: Math.max(0, Math.round(Number(raw.nominal) || 0)),
-                    keterangan: String(raw.keterangan || '').trim() || 'Transaksi Suara',
-                    jenisKas: String(raw.jenisKas || '').toUpperCase() === 'MASUK' ? 'MASUK' : 'KELUAR',
-                    kategori: katNonT.find(k => k.toUpperCase() === String(raw.kategori || '').toUpperCase()) || katNonT[0] || 'LAIN LAIN',
-                    akun: saldoList.find(s => s.toUpperCase() === String(raw.akun || '').toUpperCase()) || defAkun,
-                    akunAsal: saldoList.find(s => s.toUpperCase() === String(raw.akunAsal || '').toUpperCase()) || defAkun,
-                    akunTujuan: saldoList.find(s => s.toUpperCase() === String(raw.akunTujuan || '').toUpperCase()) || defTuj,
-                    nama: nm,
-                    piutangId: pid || ''
-                };
-            });
-
-            renderVoiceAiDraftCards(Boolean(data.needsClarification));
-            if (drfSec) drfSec.style.display = voiceDraftItems.length > 0 ? 'block' : 'none';
-
-            if (voiceTtsEnabled && data.replyText) {
-                fetch(getAiApiBase() + '/api/ai/tts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: data.replyText })
-                }).then(r => r.ok ? r.json() : null).then(ttsData => {
-                    if (ttsData && ttsData.audioBase64) {
-                        voiceLastTtsB64 = ttsData.audioBase64;
-                        if (btnReplay) btnReplay.style.display = 'inline-block';
-                        window.replayVoiceTts();
-                    }
-                }).catch(() => {});
-            }
+            applyVoiceAiResponse(data, payload.textCommand || '', false);
         } catch (err) {
             if (errBox) {
-                errBox.innerText = '⚠️ ' + (err?.message || 'Gagal menghubungi server AI. Pastikan internet aktif.');
+                errBox.innerText = '⚠️ ' + (err?.message || 'Gagal memproses perintah.');
                 errBox.style.display = 'block';
             }
         } finally {
