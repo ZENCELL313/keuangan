@@ -1457,8 +1457,8 @@
                             </div>
                             <div class="form-group">
                                 <label>Pilih Nada / Sound Alarm HP</label>
-                                <div style="display:flex; gap:4px; align-items:center;">
-                                    <select id="jadwalSoundType" class="form-control" style="flex:1;">
+                                <div style="display:flex; gap:4px; align-items:center; flex-wrap:wrap;">
+                                    <select id="jadwalSoundType" class="form-control" style="flex:1; min-width:140px;">
                                         <option value="SIRINE">🚨 Sirine Nyaring (Default)</option>
                                         <option value="BEEP">📟 Beep Digital Cepat</option>
                                         <option value="MELODI">🎵 Melodi Musik Lembut</option>
@@ -1467,6 +1467,7 @@
                                         <option value="CUSTOM" id="optCustomSound">📱 File Sound HP</option>
                                     </select>
                                     <button type="button" class="btn-strip-action" style="background:#0F172A; color:#FACC15;" onclick="testSelectedAlarmSound()">🔊 Tes</button>
+                                    <button type="button" class="btn-strip-action" style="background:#E11D48; color:#FFF;" onclick="stopAlarmSound()">⏹️ Stop</button>
                                     <label class="btn-strip-action" style="background:#0284C7; color:#FFF; margin:0; cursor:pointer;">
                                         📂 Sound HP
                                         <input type="file" accept="audio/*" style="display:none;" onchange="uploadCustomAlarmSound(event)">
@@ -1940,6 +1941,35 @@
     </div>
 </div>
 
+<!-- POPUP 11: ALARM JADWAL BERBUNYI (TUNDA 5 MENIT / MATIKAN ALARM) -->
+<div id="popupRingingAlarmModal" class="modal-overlay" style="z-index:10050;">
+    <div class="modal-content-popup" style="max-width:360px; border:2px solid #F59E0B; text-align:center; padding:18px 16px;">
+        <div class="modal-header-popup" style="justify-content:center; border-bottom:none; padding-bottom:4px; margin-bottom:4px;">
+            <div style="width:54px; height:54px; border-radius:50%; background:#FEF3C7; color:#D97706; display:flex; align-items:center; justify-content:center; font-size:26px; margin:0 auto; box-shadow:0 0 0 6px rgba(245,158,11,0.18);">
+                ⏰
+            </div>
+        </div>
+        <div id="ringingAlarmKatBadge" style="font-size:10.5px; font-weight:900; color:#D97706; letter-spacing:0.6px; text-transform:uppercase; margin-bottom:4px;">
+            ⏰ ALARM JADWAL (PRIBADI)
+        </div>
+        <h3 id="ringingAlarmJudulText" style="margin:0 0 6px 0; font-size:16px; font-weight:900; color:var(--text-main);">
+            Jadwal Kegiatan
+        </h3>
+        <div id="ringingAlarmKetText" style="font-size:11.5px; color:var(--text-muted); margin-bottom:8px; display:none;"></div>
+        <div id="ringingAlarmWaktuText" style="font-size:11px; font-family:monospace; font-weight:800; color:var(--text-muted); margin-bottom:14px;">
+            Waktu: 08:00 • 2026-11-22
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button type="button" class="btn" style="background:#E2E8F0; color:#0F172A; font-weight:800; padding:10px 8px; border-radius:10px;" onclick="snoozeRingingAlarm()">
+                💤 Tunda 5 Menit
+            </button>
+            <button type="button" class="btn" style="background:#059669; color:#FFFFFF; font-weight:800; padding:10px 8px; border-radius:10px;" onclick="dismissRingingAlarm()">
+                ✅ Matikan Alarm
+            </button>
+        </div>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
     import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-database.js";
@@ -1986,6 +2016,26 @@
     let customAlarmDataUrl = localStorage.getItem('zencell_custom_alarm_audio') || '';
     let customAlarmFileName = localStorage.getItem('zencell_custom_alarm_name') || '';
     let activeAudioEl = null;
+    let activeRingingJadwal = null;
+    let activeRingingInterval = null;
+
+    window.stopAlarmSound = function() {
+        if (activeRingingInterval) {
+            clearInterval(activeRingingInterval);
+            activeRingingInterval = null;
+        }
+        if (activeAudioEl) {
+            try {
+                activeAudioEl.loop = false;
+                activeAudioEl.pause();
+                activeAudioEl.currentTime = 0;
+            } catch (e) {}
+            activeAudioEl = null;
+        }
+        if ('vibrate' in navigator) {
+            try { navigator.vibrate(0); } catch (e) {}
+        }
+    };
 
     function updateCustomSoundOptionLabel() {
         const opt = document.getElementById('optCustomSound');
@@ -2012,23 +2062,39 @@
             } catch (err) {}
             updateCustomSoundOptionLabel();
             document.getElementById('jadwalSoundType').value = 'CUSTOM';
-            playAlarmSound('CUSTOM');
+            playAlarmSound('CUSTOM', false);
         };
         reader.readAsDataURL(file);
     };
 
-    window.playAlarmSound = function(soundType = 'SIRINE') {
+    window.playAlarmSound = function(soundType = 'SIRINE', isLoopingAlarm = false) {
         try {
-            if (activeAudioEl) {
-                activeAudioEl.pause();
-                activeAudioEl.currentTime = 0;
-                activeAudioEl = null;
-            }
             if (soundType === 'CUSTOM' && customAlarmDataUrl) {
+                if (isLoopingAlarm && activeAudioEl && !activeAudioEl.paused) {
+                    if ('vibrate' in navigator) navigator.vibrate([300, 120, 300, 120, 500]);
+                    return;
+                }
+                if (activeAudioEl) {
+                    try {
+                        activeAudioEl.loop = false;
+                        activeAudioEl.pause();
+                        activeAudioEl.currentTime = 0;
+                    } catch (e) {}
+                    activeAudioEl = null;
+                }
                 activeAudioEl = new Audio(customAlarmDataUrl);
+                activeAudioEl.loop = Boolean(isLoopingAlarm);
                 activeAudioEl.play().catch(() => {});
                 if ('vibrate' in navigator) navigator.vibrate([300, 120, 300, 120, 500]);
                 return;
+            }
+            if (activeAudioEl) {
+                try {
+                    activeAudioEl.loop = false;
+                    activeAudioEl.pause();
+                    activeAudioEl.currentTime = 0;
+                } catch (e) {}
+                activeAudioEl = null;
             }
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
             if (!AudioCtx) return;
@@ -2088,7 +2154,7 @@
 
     window.testSelectedAlarmSound = function() {
         const st = document.getElementById('jadwalSoundType')?.value || 'SIRINE';
-        playAlarmSound(st);
+        playAlarmSound(st, false);
     };
 
     window.requestPhoneNotif = async function() {
@@ -2644,6 +2710,82 @@
         return true;
     }
 
+    function advanceScheduleIsoDate(isoDate, repeat) {
+        const parts = String(isoDate || '').split('-').map(Number);
+        const dt = new Date(parts[0] || 2026, (parts[1] || 1) - 1, parts[2] || 1);
+        if (repeat === 'DAILY') dt.setDate(dt.getDate() + 1);
+        else if (repeat === 'WEEKLY') dt.setDate(dt.getDate() + 7);
+        else if (repeat === 'MONTHLY') dt.setMonth(dt.getMonth() + 1);
+        return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+    }
+
+    function openRingingAlarmPopup(due) {
+        activeRingingJadwal = due;
+        const katEl = document.getElementById('ringingAlarmKatBadge');
+        const jdlEl = document.getElementById('ringingAlarmJudulText');
+        const ketEl = document.getElementById('ringingAlarmKetText');
+        const wktEl = document.getElementById('ringingAlarmWaktuText');
+
+        if (katEl) katEl.innerText = `⏰ ALARM JADWAL (${due.kategori || 'PRIBADI'})`;
+        if (jdlEl) jdlEl.innerText = due.judul || 'Jadwal Kegiatan';
+        if (ketEl) {
+            if (due.keterangan) {
+                ketEl.innerText = due.keterangan;
+                ketEl.style.display = 'block';
+            } else {
+                ketEl.style.display = 'none';
+            }
+        }
+        if (wktEl) wktEl.innerText = `Waktu: ${due.jam} • ${due.tanggal}`;
+
+        openModal('popupRingingAlarmModal');
+
+        const sType = due.soundType || 'SIRINE';
+        playAlarmSound(sType, true);
+        if (activeRingingInterval) clearInterval(activeRingingInterval);
+        activeRingingInterval = setInterval(() => {
+            if (!activeRingingJadwal) {
+                window.stopAlarmSound();
+                return;
+            }
+            playAlarmSound(activeRingingJadwal.soundType || 'SIRINE', true);
+        }, 4500);
+    }
+
+    window.dismissRingingAlarm = function() {
+        window.stopAlarmSound();
+        closeModal('popupRingingAlarmModal');
+        if (!activeRingingJadwal) return;
+        const targetId = activeRingingJadwal.id;
+        const rep = activeRingingJadwal.repeat || 'ONCE';
+        const curTgl = activeRingingJadwal.tanggal || getTodayIsoStr();
+        activeRingingJadwal = null;
+
+        if (rep !== 'ONCE') {
+            const nextDate = advanceScheduleIsoDate(curTgl, rep);
+            jadwalData = jadwalData.map(j => j.id === targetId ? { ...j, tanggal: nextDate, selesai: false } : j);
+        } else {
+            jadwalData = jadwalData.map(j => j.id === targetId ? { ...j, selesai: true } : j);
+        }
+        renderJadwalAndCatatan();
+        saveToFirebase();
+    };
+
+    window.snoozeRingingAlarm = function() {
+        window.stopAlarmSound();
+        closeModal('popupRingingAlarmModal');
+        if (!activeRingingJadwal) return;
+        const targetId = activeRingingJadwal.id;
+        activeRingingJadwal = null;
+
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 5);
+        const snoozeHHMM = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        jadwalData = jadwalData.map(j => j.id === targetId ? { ...j, jam: snoozeHHMM } : j);
+        renderJadwalAndCatatan();
+        saveToFirebase();
+    };
+
     function checkScheduleAlarms(now) {
         if (!jadwalData.length) return;
         const todayIso = getTodayIsoStr();
@@ -2652,11 +2794,12 @@
         const due = jadwalData.find(j => !j.selesai && j.alarmAktif && j.tanggal === todayIso && j.jam === hhmm && j.lastTriggeredDate !== key);
         if (due) {
             due.lastTriggeredDate = key;
-            playAlarmSound(due.soundType || 'SIRINE');
-            if ('Notification' in window && Notification.permission === 'granted') {
-                new Notification(`⏰ JADWAL [${due.kategori}]: ${due.judul}`, { body: due.keterangan || `Jadwal pukul ${due.jam}` });
-            }
-            alert(`⏰ ALARM JADWAL [${due.kategori}]\n${due.judul}\n${due.keterangan || ''}`);
+            try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                    new Notification(`⏰ JADWAL [${due.kategori}]: ${due.judul}`, { body: due.keterangan || `Jadwal pukul ${due.jam}` });
+                }
+            } catch (e) {}
+            openRingingAlarmPopup(due);
             saveToFirebase();
         }
     }
