@@ -253,6 +253,22 @@
         .grad-card-blue  { background: linear-gradient(135deg, #2848C7 0%, #4269F5 100%); }
         .grad-card-teal  { background: linear-gradient(135deg, #138A72 0%, #20B899 100%); }
         .grad-card-cyan  { background: linear-gradient(135deg, #1676B8 0%, #289CE8 100%); }
+        .grad-card-emerald { background: linear-gradient(135deg, #059669 0%, #10B981 100%); }
+        .grad-card-amber { background: linear-gradient(135deg, #B45309 0%, #D97706 100%); }
+        .grad-card-sky { background: linear-gradient(135deg, #0369A1 0%, #0284C7 100%); }
+        .grad-card-purple { background: linear-gradient(135deg, #7E22CE 0%, #9333EA 100%); }
+        .th-col-filter {
+            width: 100%;
+            margin-top: 3px;
+            padding: 2px 4px;
+            font-size: 9px;
+            font-weight: 700;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--card);
+            color: var(--text);
+            outline: none;
+        }
 
         .grad-icon-box {
             width: 28px;
@@ -991,6 +1007,45 @@
                     </div>
                 </div>
 
+                <!-- 4 KARTU INFORMASI SALDO (1. TUNAI, 2. BRANKAS, 3. SEABANK & KROM BANK TERPISAH, 4. PIUTANG) -->
+                <div class="top-summary-grid" style="margin-top:5px;">
+                    <div class="grad-card grad-card-emerald" onclick="quickFilterJurnalByAccountCard('TUNAI')" title="Klik untuk filter mutasi TUNAI">
+                        <div class="grad-icon-box">💵</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl" id="lblCardSaldoTunai">SALDO TUNAI</div>
+                            <div class="grad-val" id="valCardSaldoTunai">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-amber" onclick="quickFilterJurnalByAccountCard('BRANKAS')" title="Klik untuk filter mutasi BRANKAS">
+                        <div class="grad-icon-box">🗄️</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl" id="lblCardSaldoBrankas">SALDO BRANKAS</div>
+                            <div class="grad-val" id="valCardSaldoBrankas">Rp0</div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-sky" style="padding:4px 8px; cursor:default;">
+                        <div class="grad-icon-box">🏧</div>
+                        <div class="grad-info" style="display:flex; flex-direction:column; gap:2px;">
+                            <div onclick="quickFilterJurnalByAccountCard('SEABANK')" title="Klik untuk filter mutasi SEABANK" style="display:flex; justify-content:space-between; align-items:center; gap:4px; cursor:pointer; padding:1px 3px; border-radius:4px;">
+                                <span id="lblCardSaldoSeabank" style="font-size:8px; font-weight:900; color:#FDE68A; text-transform:uppercase;">SEABANK</span>
+                                <span id="valCardSaldoSeabank" style="font-size:10.5px; font-weight:900; font-family:monospace;">Rp0</span>
+                            </div>
+                            <div style="border-top:1px solid rgba(255,255,255,0.22);"></div>
+                            <div onclick="quickFilterJurnalByAccountCard('KROM BANK')" title="Klik untuk filter mutasi KROM BANK" style="display:flex; justify-content:space-between; align-items:center; gap:4px; cursor:pointer; padding:1px 3px; border-radius:4px;">
+                                <span id="lblCardSaldoKrom" style="font-size:8px; font-weight:900; color:#CFFAFE; text-transform:uppercase;">KROM BANK</span>
+                                <span id="valCardSaldoKrom" style="font-size:10.5px; font-weight:900; font-family:monospace;">Rp0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grad-card grad-card-purple" onclick="switchMainPage('page-piutang', 'sub-piutang-list')" title="Klik untuk buka Rekapan Utang / Piutang">
+                        <div class="grad-icon-box">🤝</div>
+                        <div class="grad-info">
+                            <div class="grad-lbl">SALDO PIUTANG</div>
+                            <div class="grad-val" id="valCardSaldoPiutang">Rp0</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- STRIP MENU DI BAWAH KARTU -->
                 <div class="action-strip-box">
                     <button class="btn-cek-saldo" id="btnToggleSaldo" onclick="toggleLeftDrawer()">
@@ -1021,49 +1076,57 @@
             <div id="page-transaksi" class="page-view active">
                 <div class="jurnal-plain-header">
                     <span>📖 JURNAL TRANSAKSI HARIAN</span>
-                    <span id="jurnalCountBadge" style="font-size:10px; font-weight:800;">0 TRX</span>
-                </div>
-
-                <!-- Bar Filter Lengkap (Default: PER HARI / TANGGAL HARI INI, ditambah PER BULAN) -->
-                <div class="jurnal-filter-bar">
-                    <span class="filter-label">🔍 FILTER:</span>
-                    <select id="filterModeJurnal" class="filter-select" onchange="onChangeFilterModeJurnal()">
-                        <option value="DATE">📅 PER HARI (TANGGAL)</option>
-                        <option value="MONTH">🗓️ PER BULAN</option>
-                        <option value="ALL">📅 SEMUA TANGGAL</option>
-                    </select>
-                    <input type="date" id="datePickerFilter" class="filter-input" onchange="filterJurnalByDatePicker(this.value)">
-                    <input type="month" id="monthPickerFilter" class="filter-input" style="display:none;" onchange="filterJurnalByMonthPicker(this.value)">
-                    <select id="katFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
-                        <option value="ALL">-- ALL KATEGORI --</option>
-                    </select>
-                    <select id="masukFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
-                        <option value="ALL">-- ALL MASUK --</option>
-                    </select>
-                    <select id="keluarFilterJurnal" class="filter-select" onchange="renderJurnalTable()">
-                        <option value="ALL">-- ALL KELUAR --</option>
-                    </select>
-                    <input type="text" id="searchJurnalInput" class="filter-search-input" placeholder="🔍 CARI KET / NAMA / NOMINAL..." oninput="renderJurnalTable()">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span id="jurnalCountBadge" style="font-size:10px; font-weight:800;">0 TRX</span>
+                        <button type="button" id="btnResetJurnalFilter" onclick="resetJurnalFiltersToToday()" style="display:none; background:#F43F5E; color:#FFF; border:none; padding:2px 8px; border-radius:4px; font-size:9px; font-weight:800; cursor:pointer;">Reset Hari Ini</button>
+                    </div>
                 </div>
 
                 <div class="table-responsive" style="background: var(--card);">
                     <table>
                         <thead>
                             <tr>
-                                <th rowspan="2">NO</th>
-                                <th rowspan="2">WAKTU</th>
-                                <th rowspan="2" style="text-align:left;">KETERANGAN</th>
-                                <th rowspan="2">KATEGORI</th>
+                                <th rowspan="2" style="vertical-align:middle;">NO</th>
+                                <th rowspan="2" style="vertical-align:top; min-width:118px;">
+                                    <div>WAKTU</div>
+                                    <select id="filterModeJurnal" class="th-col-filter" onchange="onChangeFilterModeJurnal()">
+                                        <option value="DATE">📅 Per Hari</option>
+                                        <option value="MONTH">🗓️ Per Bulan</option>
+                                        <option value="ALL">📅 Semua Tgl</option>
+                                    </select>
+                                    <input type="date" id="datePickerFilter" class="th-col-filter" onchange="filterJurnalByDatePicker(this.value)">
+                                    <input type="month" id="monthPickerFilter" class="th-col-filter" style="display:none;" onchange="filterJurnalByMonthPicker(this.value)">
+                                </th>
+                                <th rowspan="2" style="text-align:left; vertical-align:top; min-width:155px;">
+                                    <div>KETERANGAN</div>
+                                    <input type="text" id="searchJurnalInput" class="th-col-filter" placeholder="🔍 Cari ket / nominal..." oninput="renderJurnalTable()">
+                                </th>
+                                <th rowspan="2" style="vertical-align:top; min-width:105px;">
+                                    <div>KATEGORI</div>
+                                    <select id="katFilterJurnal" class="th-col-filter" onchange="renderJurnalTable()">
+                                        <option value="ALL">Semua Kategori</option>
+                                    </select>
+                                </th>
                                 <th colspan="2" class="th-pemasukan">PEMASUKAN</th>
                                 <th colspan="2" class="th-pengeluaran">PENGELUARAN</th>
-                                <th rowspan="2">SELISIH</th>
-                                <th rowspan="2">AKSI</th>
+                                <th rowspan="2" style="vertical-align:middle;">SELISIH</th>
+                                <th rowspan="2" style="vertical-align:middle;">AKSI</th>
                             </tr>
                             <tr>
-                                <th class="th-pemasukan">KET</th>
-                                <th class="th-pemasukan">NOMINAL</th>
-                                <th class="th-pengeluaran">KET</th>
-                                <th class="th-pengeluaran">NOMINAL</th>
+                                <th class="th-pemasukan" style="vertical-align:top; min-width:92px;">
+                                    <div>KET</div>
+                                    <select id="masukFilterJurnal" class="th-col-filter" style="background:#FFF; color:#0F172A;" onchange="renderJurnalTable()">
+                                        <option value="ALL">All Masuk</option>
+                                    </select>
+                                </th>
+                                <th class="th-pemasukan" style="vertical-align:middle;">NOMINAL</th>
+                                <th class="th-pengeluaran" style="vertical-align:top; min-width:92px;">
+                                    <div>KET</div>
+                                    <select id="keluarFilterJurnal" class="th-col-filter" style="background:#FFF; color:#0F172A;" onchange="renderJurnalTable()">
+                                        <option value="ALL">All Keluar</option>
+                                    </select>
+                                </th>
+                                <th class="th-pengeluaran" style="vertical-align:middle;">NOMINAL</th>
                             </tr>
                         </thead>
                         <tbody id="bodyJurnal"></tbody>
@@ -3584,13 +3647,15 @@
         const selKat = document.getElementById('kategori');
         const vKat = document.getElementById('v_kat');
         const fKatJurnal = document.getElementById('katFilterJurnal');
+        const prevKatVal = fKatJurnal ? fKatJurnal.value : 'ALL';
         selKat.innerHTML = ''; vKat.innerHTML = '';
-        fKatJurnal.innerHTML = '<option value="ALL">-- ALL KATEGORI --</option>';
+        fKatJurnal.innerHTML = '<option value="ALL">Semua Kategori</option>';
         kategoriList.forEach(k => {
             selKat.innerHTML += `<option value="${k}">${k}</option>`;
             vKat.innerHTML += `<option value="${k}">${k}</option>`;
             fKatJurnal.innerHTML += `<option value="${k}">${k}</option>`;
         });
+        if (fKatJurnal && prevKatVal) fKatJurnal.value = prevKatVal;
 
         const ids = ['sumberSaldo', 'akunTujuanTrx', 'v_akun', 'pindahDari', 'pindahKe'];
         ids.forEach(id => {
@@ -3612,12 +3677,16 @@
 
         const fMasuk = document.getElementById('masukFilterJurnal');
         const fKeluar = document.getElementById('keluarFilterJurnal');
-        fMasuk.innerHTML = '<option value="ALL">-- ALL MASUK --</option>';
-        fKeluar.innerHTML = '<option value="ALL">-- ALL KELUAR --</option>';
+        const prevM = fMasuk ? fMasuk.value : 'ALL';
+        const prevK = fKeluar ? fKeluar.value : 'ALL';
+        fMasuk.innerHTML = '<option value="ALL">All Masuk</option>';
+        fKeluar.innerHTML = '<option value="ALL">All Keluar</option>';
         saldoList.forEach(s => {
             fMasuk.innerHTML += `<option value="${s}">${s}</option>`;
             fKeluar.innerHTML += `<option value="${s}">${s}</option>`;
         });
+        if (fMasuk && prevM) fMasuk.value = prevM;
+        if (fKeluar && prevK) fKeluar.value = prevK;
 
         const dList = document.getElementById('listVlookup');
         const chipsEl = document.getElementById('vlookupChips');
@@ -4019,6 +4088,44 @@
         switchMainPage('page-transaksi');
     };
 
+    window.resetJurnalFiltersToToday = function() {
+        const today = getTodayIsoStr();
+        selectedDateFilter = today;
+        const fm = document.getElementById('filterModeJurnal');
+        if (fm) fm.value = 'DATE';
+        const dp = document.getElementById('datePickerFilter');
+        if (dp) {
+            dp.style.display = 'inline-block';
+            dp.value = today;
+        }
+        const mp = document.getElementById('monthPickerFilter');
+        if (mp) mp.style.display = 'none';
+        const kf = document.getElementById('katFilterJurnal');
+        if (kf) kf.value = 'ALL';
+        const mf = document.getElementById('masukFilterJurnal');
+        if (mf) mf.value = 'ALL';
+        const klf = document.getElementById('keluarFilterJurnal');
+        if (klf) klf.value = 'ALL';
+        const sq = document.getElementById('searchJurnalInput');
+        if (sq) sq.value = '';
+        renderJurnalTable();
+    };
+
+    window.quickFilterJurnalByAccountCard = function(patternKey) {
+        const matched = saldoList.find(s => {
+            const up = s.trim().toUpperCase();
+            return up === patternKey || up.includes(patternKey);
+        }) || patternKey;
+        const mf = document.getElementById('masukFilterJurnal');
+        if (mf) mf.value = 'ALL';
+        const klf = document.getElementById('keluarFilterJurnal');
+        if (klf) klf.value = 'ALL';
+        const sq = document.getElementById('searchJurnalInput');
+        if (sq) sq.value = matched;
+        switchMainPage('page-transaksi');
+        renderJurnalTable();
+    };
+
     window.renderJurnalTable = function() {
         const bJurnal = document.getElementById('bodyJurnal');
         const fJurnal = document.getElementById('footJurnal');
@@ -4027,6 +4134,12 @@
         const masukFilter = document.getElementById('masukFilterJurnal')?.value || 'ALL';
         const keluarFilter = document.getElementById('keluarFilterJurnal')?.value || 'ALL';
         const qSearch = (document.getElementById('searchJurnalInput')?.value || '').trim().toLowerCase();
+
+        const btnReset = document.getElementById('btnResetJurnalFilter');
+        if (btnReset) {
+            const isDefault = mode === 'DATE' && selectedDateFilter === getTodayIsoStr() && katFilter === 'ALL' && masukFilter === 'ALL' && keluarFilter === 'ALL' && !qSearch;
+            btnReset.style.display = isDefault ? 'none' : 'inline-block';
+        }
 
         let filteredList = transaksiJurnal.map((t, idx) => ({ ...t, originalIndex: idx }));
         if (mode === 'DATE' && selectedDateFilter !== 'ALL') {
@@ -4247,6 +4360,42 @@
         document.getElementById('topPengeluaranHariIni').innerText = formatRp(hI_Pengeluaran);
         document.getElementById('topFastMoney').innerText = formatRp(totalFastMoney);
         document.getElementById('topTotalSaldoRiil').innerText = formatRp(sumSaldoRiilMurni);
+
+        // Update 4 Kartu Informasi Saldo (1. Tunai, 2. Brankas, 3. SeaBank & Krom Bank Terpisah, 4. Piutang)
+        const findAccByPatterns = (patterns, fallback) => {
+            return saldoList.find(s => {
+                const up = s.trim().toUpperCase();
+                return patterns.some(p => up === p || up.includes(p));
+            }) || fallback;
+        };
+        const accTunai = findAccByPatterns(['TUNAI', 'CASH', 'KAS'], 'TUNAI');
+        const accBrankas = findAccByPatterns(['BRANKAS'], 'BRANKAS');
+        const accSeabank = findAccByPatterns(['SEABANK', 'SEA BANK'], 'SEABANK');
+        const accKrom = findAccByPatterns(['KROM BANK', 'KROM'], 'KROM BANK');
+        const accPiutang = findAccByPatterns(['PIUTANG'], 'PIUTANG');
+
+        const lblTunai = document.getElementById('lblCardSaldoTunai');
+        const valTunai = document.getElementById('valCardSaldoTunai');
+        if (lblTunai) lblTunai.innerText = 'SALDO ' + accTunai;
+        if (valTunai) valTunai.innerText = formatRp(displaySaldo[accTunai] || 0);
+
+        const lblBrankas = document.getElementById('lblCardSaldoBrankas');
+        const valBrankas = document.getElementById('valCardSaldoBrankas');
+        if (lblBrankas) lblBrankas.innerText = 'SALDO ' + accBrankas;
+        if (valBrankas) valBrankas.innerText = formatRp(displaySaldo[accBrankas] || 0);
+
+        const lblSeabank = document.getElementById('lblCardSaldoSeabank');
+        const valSeabank = document.getElementById('valCardSaldoSeabank');
+        if (lblSeabank) lblSeabank.innerText = accSeabank;
+        if (valSeabank) valSeabank.innerText = formatRp(displaySaldo[accSeabank] || 0);
+
+        const lblKrom = document.getElementById('lblCardSaldoKrom');
+        const valKrom = document.getElementById('valCardSaldoKrom');
+        if (lblKrom) lblKrom.innerText = accKrom;
+        if (valKrom) valKrom.innerText = formatRp(displaySaldo[accKrom] || 0);
+
+        const valPiutangCard = document.getElementById('valCardSaldoPiutang');
+        if (valPiutangCard) valPiutangCard.innerText = formatRp(displaySaldo[accPiutang] || 0);
 
         // =====================================================================
         // RENDER TABEL PIUTANG (DENGAN KOLOM DIBAYAR/SISA & HISTORY CICILAN)
