@@ -2719,6 +2719,89 @@
         return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
     }
 
+    let activeAlarmNotification = null;
+
+    function closeSystemAlarmNotif(jadwalId) {
+        if (activeAlarmNotification) {
+            try { activeAlarmNotification.close(); } catch (e) {}
+            activeAlarmNotification = null;
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(reg => {
+                    if (reg.getNotifications) {
+                        reg.getNotifications().then(list => {
+                            list.forEach(n => {
+                                if (!jadwalId || n.tag === 'zencell-alarm-' + jadwalId || (n.tag && n.tag.indexOf('zencell-alarm-') === 0)) {
+                                    n.close();
+                                }
+                            });
+                        }).catch(() => {});
+                    }
+                });
+            }).catch(() => {});
+        }
+    }
+
+    function showSystemHeadsUpAlarmNotification(due) {
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        const title = `⏰ ALARM [${due.kategori || 'PRIBADI'}]: ${due.judul}`;
+        const body = `${due.keterangan ? due.keterangan + ' • ' : ''}Pukul ${due.jam} — Ketuk untuk Matikan / Tunda 5 Menit`;
+        const icon = 'https://cdn-icons-png.flaticon.com/512/2845/2845701.png';
+        const tag = 'zencell-alarm-' + (due.id || Date.now());
+
+        const showDirectNotif = () => {
+            try {
+                if (activeAlarmNotification) {
+                    try { activeAlarmNotification.close(); } catch (e) {}
+                }
+                const n = new Notification(title, {
+                    body,
+                    icon,
+                    badge: icon,
+                    tag,
+                    requireInteraction: true,
+                    renotify: true,
+                    vibrate: [400, 150, 400, 150, 600]
+                });
+                activeAlarmNotification = n;
+                n.onclick = function(ev) {
+                    ev.preventDefault();
+                    try { window.focus(); } catch (e) {}
+                    try { n.close(); } catch (e) {}
+                    if (activeRingingJadwal || due) {
+                        openRingingAlarmPopup(activeRingingJadwal || due);
+                    }
+                };
+            } catch (e) {}
+        };
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistration().then(reg => {
+                if (reg && reg.showNotification) {
+                    reg.showNotification(title, {
+                        body,
+                        icon,
+                        badge: icon,
+                        tag,
+                        requireInteraction: true,
+                        renotify: true,
+                        vibrate: [400, 150, 400, 150, 600],
+                        data: { jadwalId: due.id, url: window.location.href },
+                        actions: [
+                            { action: 'snooze', title: '💤 Tunda 5 Menit' },
+                            { action: 'dismiss', title: '✅ Matikan Alarm' }
+                        ]
+                    }).catch(() => showDirectNotif());
+                } else {
+                    showDirectNotif();
+                }
+            }).catch(() => showDirectNotif());
+        } else {
+            showDirectNotif();
+        }
+    }
+
     function openRingingAlarmPopup(due) {
         activeRingingJadwal = due;
         const katEl = document.getElementById('ringingAlarmKatBadge');
@@ -2752,14 +2835,16 @@
         }, 4500);
     }
 
-    window.dismissRingingAlarm = function() {
+    window.dismissRingingAlarm = function(targetOverride) {
         window.stopAlarmSound();
         closeModal('popupRingingAlarmModal');
-        if (!activeRingingJadwal) return;
-        const targetId = activeRingingJadwal.id;
-        const rep = activeRingingJadwal.repeat || 'ONCE';
-        const curTgl = activeRingingJadwal.tanggal || getTodayIsoStr();
+        const target = targetOverride || activeRingingJadwal;
+        if (!target) return;
+        const targetId = target.id;
+        const rep = target.repeat || 'ONCE';
+        const curTgl = target.tanggal || getTodayIsoStr();
         activeRingingJadwal = null;
+        closeSystemAlarmNotif(targetId);
 
         if (rep !== 'ONCE') {
             const nextDate = advanceScheduleIsoDate(curTgl, rep);
@@ -2771,12 +2856,14 @@
         saveToFirebase();
     };
 
-    window.snoozeRingingAlarm = function() {
+    window.snoozeRingingAlarm = function(targetOverride) {
         window.stopAlarmSound();
         closeModal('popupRingingAlarmModal');
-        if (!activeRingingJadwal) return;
-        const targetId = activeRingingJadwal.id;
+        const target = targetOverride || activeRingingJadwal;
+        if (!target) return;
+        const targetId = target.id;
         activeRingingJadwal = null;
+        closeSystemAlarmNotif(targetId);
 
         const now = new Date();
         now.setMinutes(now.getMinutes() + 5);
@@ -2789,19 +2876,55 @@
     function checkScheduleAlarms(now) {
         if (!jadwalData.length) return;
         const todayIso = getTodayIsoStr();
-        const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-        const key = `${todayIso} ${hhmm}`;
-        const due = jadwalData.find(j => !j.selesai && j.alarmAktif && j.tanggal === todayIso && j.jam === hhmm && j.lastTriggeredDate !== key);
+        const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+        const due = jadwalData.find(j => {
+            if (j.selesai || !j.alarmAktif || j.tanggal !== todayIso) return false;
+            const parts = String(j.jam || '00:00').split(':').map(Number);
+            if (isNaN(parts[0]) || isNaN(parts[1])) return false;
+            const schedMinutes = parts[0] * 60 + parts[1];
+            const diff = nowMinutes - schedMinutes;
+            const targetKey = `${todayIso} ${j.jam}`;
+            // Tangkap alarm tepat waktu maupun alarm yang terlewat hingga 60 menit saat sedang buka app lain / layar mati
+            return diff >= 0 && diff <= 60 && j.lastTriggeredDate !== targetKey;
+        });
+
         if (due) {
-            due.lastTriggeredDate = key;
-            try {
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification(`⏰ JADWAL [${due.kategori}]: ${due.judul}`, { body: due.keterangan || `Jadwal pukul ${due.jam}` });
-                }
-            } catch (e) {}
+            due.lastTriggeredDate = `${todayIso} ${due.jam}`;
+            showSystemHeadsUpAlarmNotification(due);
             openRingingAlarmPopup(due);
             saveToFirebase();
         }
+    }
+
+    // Saat kembali dari aplikasi lain / Home Screen ke aplikasi ini, langsung cek & tampilkan pop-up alarm yang sedang aktif
+    function handleAppResumeCheck() {
+        if (document.visibilityState === 'visible') {
+            checkScheduleAlarms(new Date());
+            if (activeRingingJadwal) {
+                openModal('popupRingingAlarmModal');
+                playAlarmSound(activeRingingJadwal.soundType || 'SIRINE', true);
+            }
+        }
+    }
+    document.addEventListener('visibilitychange', handleAppResumeCheck);
+    window.addEventListener('focus', handleAppResumeCheck);
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', function(event) {
+            const data = event.data;
+            if (!data || data.type !== 'ALARM_NOTIFICATION_ACTION') return;
+            const jId = Number(data.jadwalId);
+            const matched = jadwalData.find(j => j.id === jId) || activeRingingJadwal;
+            if (!matched) return;
+            if (data.action === 'dismiss') {
+                window.dismissRingingAlarm(matched);
+            } else if (data.action === 'snooze') {
+                window.snoozeRingingAlarm(matched);
+            } else {
+                openRingingAlarmPopup(matched);
+            }
+        });
     }
 
     // =========================================================================
