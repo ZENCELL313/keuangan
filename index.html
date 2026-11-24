@@ -1007,19 +1007,19 @@
                     </div>
                 </div>
 
-                <!-- 4 KARTU INFORMASI SALDO (1. TUNAI, 2. BRANKAS, 3. SEABANK & KROM BANK TERPISAH, 4. PIUTANG) -->
+                <!-- 4 KARTU INFORMASI (1. TUNAI, 2. BRANKAS, 3. SEABANK & KROM BANK TERPISAH, 4. PIUTANG) -->
                 <div class="top-summary-grid" style="margin-top:5px;">
                     <div class="grad-card grad-card-emerald" onclick="quickFilterJurnalByAccountCard('TUNAI')" title="Klik untuk filter mutasi TUNAI">
                         <div class="grad-icon-box">💵</div>
                         <div class="grad-info">
-                            <div class="grad-lbl" id="lblCardSaldoTunai">SALDO TUNAI</div>
+                            <div class="grad-lbl" id="lblCardSaldoTunai">TUNAI</div>
                             <div class="grad-val" id="valCardSaldoTunai">Rp0</div>
                         </div>
                     </div>
                     <div class="grad-card grad-card-amber" onclick="quickFilterJurnalByAccountCard('BRANKAS')" title="Klik untuk filter mutasi BRANKAS">
                         <div class="grad-icon-box">🗄️</div>
                         <div class="grad-info">
-                            <div class="grad-lbl" id="lblCardSaldoBrankas">SALDO BRANKAS</div>
+                            <div class="grad-lbl" id="lblCardSaldoBrankas">BRANKAS</div>
                             <div class="grad-val" id="valCardSaldoBrankas">Rp0</div>
                         </div>
                     </div>
@@ -1040,7 +1040,7 @@
                     <div class="grad-card grad-card-purple" onclick="switchMainPage('page-piutang', 'sub-piutang-list')" title="Klik untuk buka Rekapan Utang / Piutang">
                         <div class="grad-icon-box">🤝</div>
                         <div class="grad-info">
-                            <div class="grad-lbl">SALDO PIUTANG</div>
+                            <div class="grad-lbl" id="lblCardSaldoPiutang">PIUTANG</div>
                             <div class="grad-val" id="valCardSaldoPiutang">Rp0</div>
                         </div>
                     </div>
@@ -4376,12 +4376,12 @@
 
         const lblTunai = document.getElementById('lblCardSaldoTunai');
         const valTunai = document.getElementById('valCardSaldoTunai');
-        if (lblTunai) lblTunai.innerText = 'SALDO ' + accTunai;
+        if (lblTunai) lblTunai.innerText = accTunai;
         if (valTunai) valTunai.innerText = formatRp(displaySaldo[accTunai] || 0);
 
         const lblBrankas = document.getElementById('lblCardSaldoBrankas');
         const valBrankas = document.getElementById('valCardSaldoBrankas');
-        if (lblBrankas) lblBrankas.innerText = 'SALDO ' + accBrankas;
+        if (lblBrankas) lblBrankas.innerText = accBrankas;
         if (valBrankas) valBrankas.innerText = formatRp(displaySaldo[accBrankas] || 0);
 
         const lblSeabank = document.getElementById('lblCardSaldoSeabank');
@@ -4394,7 +4394,9 @@
         if (lblKrom) lblKrom.innerText = accKrom;
         if (valKrom) valKrom.innerText = formatRp(displaySaldo[accKrom] || 0);
 
+        const lblPiutangCard = document.getElementById('lblCardSaldoPiutang');
         const valPiutangCard = document.getElementById('valCardSaldoPiutang');
+        if (lblPiutangCard) lblPiutangCard.innerText = accPiutang;
         if (valPiutangCard) valPiutangCard.innerText = formatRp(displaySaldo[accPiutang] || 0);
 
         // =====================================================================
