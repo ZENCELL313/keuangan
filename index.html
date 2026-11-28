@@ -924,7 +924,7 @@
         <div class="drawer-body">
             <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:5px; margin-bottom:8px;">
                 <button class="btn drawer-btn" style="background:#0284C7;" onclick="openModal('popupPindahSaldo');">🔄 Pindah</button>
-                <button class="btn drawer-btn" style="background:#16A34A;" onclick="openModal('popupSaldoAwal');">⚙ Saldo Awal</button>
+                <button class="btn drawer-btn" style="background:#16A34A;" onclick="openKoreksiSaldoModal('AKHIR');">⚖️ Koreksi Saldo</button>
                 <button class="btn drawer-btn" style="background:#334155;" onclick="openModal('popupKelolaSaldo');">+ Edit Akun</button>
             </div>
             <div class="table-responsive">
@@ -1053,6 +1053,9 @@
                     </button>
                     <button class="btn-strip-action" onclick="openModal('popupPindahSaldo')">
                         🔄 Pindah Saldo
+                    </button>
+                    <button class="btn-strip-action" style="border-color:#10B981; color:#047857; background:#ECFDF5;" onclick="openKoreksiSaldoModal('AKHIR')">
+                        ⚖️ Koreksi Saldo
                     </button>
                     <button class="btn-strip-action" onclick="openModal('popupVlookup')">
                         ⚙️ Master VLOOKUP
@@ -1444,7 +1447,8 @@
                         <div class="card-header">
                             <span>💰 Rekap Saldo Semua Akun</span>
                             <div style="display:flex; gap:5px;">
-                                <button class="btn-strip-action" onclick="openModal('popupSaldoAwal')">⚙ Set Awal</button>
+                                <button class="btn-strip-action" style="border-color:#10B981; color:#047857; background:#ECFDF5;" onclick="openKoreksiSaldoModal('AKHIR')">⚖️ Koreksi Saldo Akhir</button>
+                                <button class="btn-strip-action" onclick="openKoreksiSaldoModal('AWAL')">⚙ Set Awal</button>
                                 <button class="btn-strip-action" onclick="openModal('popupKelolaSaldo')">+ Kelola Akun</button>
                             </div>
                         </div>
@@ -1806,15 +1810,39 @@
     </div>
 </div>
 
-<!-- POPUP 4: SET SALDO AWAL -->
+<!-- POPUP 4: KOREKSI SALDO AKHIR & SET SALDO AWAL -->
 <div id="popupSaldoAwal" class="modal-overlay">
-    <div class="modal-content-popup">
+    <div class="modal-content-popup" style="max-width: 520px;">
         <div class="modal-header-popup">
-            <h3>⚙ Atur Saldo Awal Akun</h3>
+            <div>
+                <h3 id="titleModalSaldoAwal">⚖️ Koreksi Saldo Akhir (Edit Langsung)</h3>
+                <div id="subModalSaldoAwal" style="font-size:9.5px; color:var(--text-muted);">Ketik langsung saldo riil Anda saat ini (cocok jika sudah lama tidak input)</div>
+            </div>
             <button class="btn-close-popup" onclick="closeModal('popupSaldoAwal')">&times;</button>
         </div>
-        <div id="saldoInputGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; margin-bottom:10px;"></div>
-        <button class="btn" style="background-color:#16A34A;" onclick="simpanSaldoAwal()">Simpan Saldo Awal</button>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px; padding:4px; border-radius:10px; background:var(--strip-bg); border:1px solid var(--border); margin-bottom:10px;">
+            <button type="button" id="btnTabKoreksiAkhir" onclick="switchSaldoModalTab('AKHIR')" style="padding:6px 8px; border-radius:7px; border:none; font-size:10px; font-weight:800; cursor:pointer; background:#16A34A; color:#FFF;">⚖️ Edit Saldo Akhir (Saat Ini)</button>
+            <button type="button" id="btnTabSetAwal" onclick="switchSaldoModalTab('AWAL')" style="padding:6px 8px; border-radius:7px; border:none; font-size:10px; font-weight:800; cursor:pointer; background:transparent; color:var(--text);">⚙ Edit Saldo Awal (Dasar)</button>
+        </div>
+
+        <div id="paneKoreksiSaldoAkhir">
+            <div id="koreksiAkhirGrid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap:8px; max-height:46vh; overflow-y:auto; padding-right:2px; margin-bottom:10px;"></div>
+            <div style="padding:9px; border-radius:10px; background:var(--strip-bg); border:1px solid var(--border); margin-bottom:10px;">
+                <label style="display:block; font-size:9.5px; font-weight:800; text-transform:uppercase; margin-bottom:4px;">Metode Penyimpanan Koreksi Saldo:</label>
+                <select id="selectMetodeKoreksiSaldo" class="form-control" style="font-size:10px; font-weight:700; margin-bottom:6px;">
+                    <option value="SESUAIKAN_AWAL">📌 Langsung Update Saldo Akhir (Tanpa Mengubah Selisih/Pengeluaran Hari Ini)</option>
+                    <option value="CATAT_JURNAL">📖 Catat Selisihnya sebagai Transaksi [KOREKSI SALDO] di Jurnal Hari Ini</option>
+                </select>
+                <input type="text" id="inputCatatanKoreksiSaldo" class="form-control" style="font-size:10px;" placeholder="Catatan koreksi opsional (misal: Penyesuaian setelah lama tidak input)...">
+            </div>
+            <button type="button" class="btn" style="background-color:#16A34A; font-weight:800;" onclick="simpanKoreksiSaldoAkhir()">💾 Simpan Koreksi Saldo Akhir</button>
+        </div>
+
+        <div id="paneAturSaldoAwal" style="display:none;">
+            <div id="saldoInputGrid" style="display:grid; grid-template-columns: 1fr 1fr; gap:6px; max-height:52vh; overflow-y:auto; margin-bottom:10px;"></div>
+            <button type="button" class="btn" style="background-color:#0284C7; font-weight:800;" onclick="simpanSaldoAwal()">💾 Simpan Saldo Awal</button>
+        </div>
     </div>
 </div>
 
@@ -2490,6 +2518,9 @@
     window.openModal = function(id) {
         const el = document.getElementById(id);
         if (!el) return;
+        if (id === 'popupSaldoAwal' && typeof initSaldoGrid === 'function') {
+            initSaldoGrid();
+        }
         resetPopupPosition(el);
         el.classList.add('active');
     };
@@ -3743,28 +3774,157 @@
         );
     };
 
+    let currentSaldoModalTab = 'AKHIR';
+
+    window.switchSaldoModalTab = function(tab) {
+        currentSaldoModalTab = tab === 'AWAL' ? 'AWAL' : 'AKHIR';
+        const paneAkhir = document.getElementById('paneKoreksiSaldoAkhir');
+        const paneAwal = document.getElementById('paneAturSaldoAwal');
+        const btnAkhir = document.getElementById('btnTabKoreksiAkhir');
+        const btnAwal = document.getElementById('btnTabSetAwal');
+        const titleEl = document.getElementById('titleModalSaldoAwal');
+        const subEl = document.getElementById('subModalSaldoAwal');
+
+        if (currentSaldoModalTab === 'AKHIR') {
+            if (paneAkhir) paneAkhir.style.display = 'block';
+            if (paneAwal) paneAwal.style.display = 'none';
+            if (btnAkhir) { btnAkhir.style.background = '#16A34A'; btnAkhir.style.color = '#FFF'; }
+            if (btnAwal) { btnAwal.style.background = 'transparent'; btnAwal.style.color = 'var(--text)'; }
+            if (titleEl) titleEl.innerText = '⚖️ Koreksi Saldo Akhir (Edit Langsung)';
+            if (subEl) subEl.innerText = 'Ketik langsung saldo riil Anda saat ini (cocok jika sudah lama tidak input)';
+        } else {
+            if (paneAkhir) paneAkhir.style.display = 'none';
+            if (paneAwal) paneAwal.style.display = 'block';
+            if (btnAkhir) { btnAkhir.style.background = 'transparent'; btnAkhir.style.color = 'var(--text)'; }
+            if (btnAwal) { btnAwal.style.background = '#0284C7'; btnAwal.style.color = '#FFF'; }
+            if (titleEl) titleEl.innerText = '⚙ Atur Saldo Awal Setiap Akun';
+            if (subEl) subEl.innerText = 'Ubah nilai saldo dasar (awal) pembukuan untuk masing-masing akun';
+        }
+    };
+
+    window.openKoreksiSaldoModal = function(tab) {
+        initSaldoGrid();
+        window.switchSaldoModalTab(tab || 'AKHIR');
+        openModal('popupSaldoAwal');
+    };
+
+    window.onKoreksiAkhirInput = function(inputEl, accName) {
+        const rawDigits = inputEl.value.replace(/\D/g, '');
+        const numVal = rawDigits ? parseInt(rawDigits, 10) : 0;
+        inputEl.value = numVal > 0 ? numVal.toLocaleString('id-ID') : '';
+        const hiddenEl = document.getElementById('koreksiAkhir_' + accName);
+        if (hiddenEl) hiddenEl.value = String(numVal);
+
+        const snap = window._latestSaldoSnapshot || { displaySaldo: {} };
+        const currentVal = (snap.displaySaldo && snap.displaySaldo[accName]) || 0;
+        const delta = numVal - currentVal;
+
+        const diffEl = document.getElementById('koreksiDiff_' + accName);
+        const cardEl = document.getElementById('koreksiCard_' + accName);
+        const btnResetEl = document.getElementById('koreksiResetBtn_' + accName);
+
+        if (diffEl) {
+            if (delta === 0) {
+                diffEl.innerText = 'Tetap';
+                diffEl.style.color = 'var(--text-muted)';
+            } else if (delta > 0) {
+                diffEl.innerText = '+' + formatRp(delta);
+                diffEl.style.color = '#16A34A';
+            } else {
+                diffEl.innerText = '-' + formatRp(Math.abs(delta));
+                diffEl.style.color = '#E11D48';
+            }
+        }
+        if (cardEl) {
+            cardEl.style.borderColor = delta !== 0 ? '#10B981' : 'var(--border)';
+        }
+        if (btnResetEl) {
+            btnResetEl.style.display = delta !== 0 ? 'inline-block' : 'none';
+        }
+    };
+
+    window.resetSingleKoreksiAkhir = function(accName, targetValue) {
+        const dispEl = document.getElementById('koreksiAkhirDisplay_' + accName);
+        if (!dispEl) return;
+        dispEl.value = targetValue > 0 ? Number(targetValue).toLocaleString('id-ID') : '';
+        window.onKoreksiAkhirInput(dispEl, accName);
+    };
+
     function initSaldoGrid() {
         const gridSaldo = document.getElementById('saldoInputGrid');
-        gridSaldo.innerHTML = '';
+        const gridKoreksi = document.getElementById('koreksiAkhirGrid');
+        if (gridSaldo) gridSaldo.innerHTML = '';
+        if (gridKoreksi) gridKoreksi.innerHTML = '';
+
+        const snap = window._latestSaldoSnapshot || { displaySaldo: {}, targetIndukByAccount: {} };
+
         saldoList.forEach(s => {
             const isPiutangAcc = s.trim().toUpperCase() === 'PIUTANG';
-            const val = saldoAwalData[s] || 0;
-            const formattedVal = val > 0 ? Number(val).toLocaleString('id-ID') : '';
-            if (isPiutangAcc) {
-                gridSaldo.innerHTML += `
-                    <div>
-                        <label style="font-size:9px; font-weight:700;">${s}</label>
-                        <div style="padding:6px 8px; font-size:9.5px; font-weight:800; border-radius:6px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE;">🤝 Otomatis dari Rekapan Piutang</div>
-                    </div>
-                `;
-            } else {
-                gridSaldo.innerHTML += `
-                    <div>
-                        <label style="font-size:9px; font-weight:700;">${s}</label>
-                        <input type="text" id="saldoAwalDisplay_${s}" inputmode="numeric" class="form-control" value="${formattedVal}" placeholder="0" oninput="formatSaldoAwalInput(this, 'saldoAwal_${s}')">
-                        <input type="hidden" id="saldoAwal_${s}" value="${val}">
-                    </div>
-                `;
+            const valAwal = saldoAwalData[s] || 0;
+            const formattedAwal = valAwal > 0 ? Number(valAwal).toLocaleString('id-ID') : '';
+
+            if (gridSaldo) {
+                if (isPiutangAcc) {
+                    gridSaldo.innerHTML += `
+                        <div>
+                            <label style="font-size:9px; font-weight:700;">${s}</label>
+                            <div style="padding:6px 8px; font-size:9.5px; font-weight:800; border-radius:6px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE;">🤝 Otomatis dari Rekapan Piutang</div>
+                        </div>
+                    `;
+                } else {
+                    gridSaldo.innerHTML += `
+                        <div>
+                            <label style="font-size:9px; font-weight:700;">${s}</label>
+                            <input type="text" id="saldoAwalDisplay_${s}" inputmode="numeric" class="form-control" value="${formattedAwal}" placeholder="0" oninput="formatSaldoAwalInput(this, 'saldoAwal_${s}')">
+                            <input type="hidden" id="saldoAwal_${s}" value="${valAwal}">
+                        </div>
+                    `;
+                }
+            }
+
+            if (gridKoreksi) {
+                const currentAkhir = (snap.displaySaldo && snap.displaySaldo[s] !== undefined) ? snap.displaySaldo[s] : valAwal;
+                const formattedAkhir = currentAkhir > 0 ? Number(currentAkhir).toLocaleString('id-ID') : '';
+                const targetInduk = snap.targetIndukByAccount ? snap.targetIndukByAccount[s] : null;
+                const badgeInduk = targetInduk ? `<span style="font-size:8px; padding:1px 4px; border-radius:4px; background:rgba(245,158,11,0.2); color:#D97706;">Potong ${targetInduk}</span>` : '';
+
+                if (isPiutangAcc) {
+                    gridKoreksi.innerHTML += `
+                        <div style="padding:8px; border-radius:10px; border:1px solid var(--border); background:var(--strip-bg);">
+                            <div style="font-size:10px; font-weight:800; margin-bottom:2px;">${s}</div>
+                            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted); margin-bottom:4px;">
+                                <span>Saldo Tercatat:</span>
+                                <b style="font-family:monospace;">${formatRp(currentAkhir)}</b>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 8px; font-size:9px; font-weight:800; border-radius:6px; background:#F3E8FF; color:#6B21A8; border:1px solid #D8B4FE;">
+                                <span>🤝 Otomatis dari Piutang</span>
+                                <a href="javascript:void(0)" onclick="closeModal('popupSaldoAwal'); switchMainPage('page-piutang');" style="color:#6B21A8; text-decoration:underline;">Buka ➜</a>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    gridKoreksi.innerHTML += `
+                        <div id="koreksiCard_${s}" style="padding:8px; border-radius:10px; border:1px solid var(--border); background:var(--strip-bg);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:4px; margin-bottom:2px;">
+                                <label style="font-size:10px; font-weight:800; display:flex; align-items:center; gap:4px;">${s} ${badgeInduk}</label>
+                                <button type="button" id="koreksiResetBtn_${s}" onclick="resetSingleKoreksiAkhir('${s}', ${currentAkhir})" style="display:none; font-size:8.5px; font-weight:800; padding:1px 5px; border-radius:4px; border:none; background:#E2E8F0; color:#334155; cursor:pointer;">↺ Batal</button>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:9px; color:var(--text-muted); margin-bottom:4px;">
+                                <span>Saldo Tercatat:</span>
+                                <b style="font-family:monospace;">${formatRp(currentAkhir)}</b>
+                            </div>
+                            <div style="position:relative; display:flex; align-items:center;">
+                                <input type="text" id="koreksiAkhirDisplay_${s}" inputmode="numeric" class="form-control" style="font-family:monospace; font-weight:800; font-size:11px; padding-right:34px;" value="${formattedAkhir}" placeholder="0" oninput="onKoreksiAkhirInput(this, '${s}')">
+                                <input type="hidden" id="koreksiAkhir_${s}" value="${currentAkhir}">
+                                <button type="button" onclick="resetSingleKoreksiAkhir('${s}', 0)" title="Set Rp0" style="position:absolute; right:5px; font-size:8.5px; font-weight:800; padding:2px 5px; border-radius:4px; border:none; background:#FFE4E6; color:#BE123C; cursor:pointer;">Rp0</button>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; font-size:9px; font-weight:700; margin-top:4px;">
+                                <span>Selisih Koreksi:</span>
+                                <span id="koreksiDiff_${s}" style="font-family:monospace; color:var(--text-muted);">Tetap</span>
+                            </div>
+                        </div>
+                    `;
+                }
             }
         });
     }
@@ -3778,6 +3938,93 @@
                 if (inputEl) saldoAwalData[s] = parseFloat(inputEl.value) || 0;
             }
         });
+        addLogEntry('SALDO', 'Perbarui Saldo Awal Akun', 'Menyimpan perubahan nilai saldo awal akun', 'EDIT');
+        if (saveToFirebase()) closeModal('popupSaldoAwal');
+    };
+
+    window.simpanKoreksiSaldoAkhir = function() {
+        const snap = window._latestSaldoSnapshot || { rekapSaldo: {}, rawSaldo: {}, displaySaldo: {}, targetIndukByAccount: {} };
+        const metode = document.getElementById('selectMetodeKoreksiSaldo')?.value || 'SESUAIKAN_AWAL';
+        const catatan = (document.getElementById('inputCatatanKoreksiSaldo')?.value || '').trim();
+        const noteSuffix = catatan ? ` (${catatan})` : '';
+
+        const newTotalPotonganInduk = {};
+        saldoList.forEach(s => {
+            if (s.trim().toUpperCase() === 'PIUTANG') return;
+            const targetInduk = snap.targetIndukByAccount ? snap.targetIndukByAccount[s] : resolveTargetPotonganSaldo(s);
+            if (targetInduk) {
+                const el = document.getElementById('koreksiAkhir_' + s);
+                const valChild = el ? (parseFloat(el.value) || 0) : ((snap.displaySaldo && snap.displaySaldo[s]) || 0);
+                newTotalPotonganInduk[targetInduk] = (newTotalPotonganInduk[targetInduk] || 0) + valChild;
+            }
+        });
+
+        const changedAccounts = [];
+        saldoList.forEach(s => {
+            if (s.trim().toUpperCase() === 'PIUTANG') return;
+            const oldDisplay = (snap.displaySaldo && snap.displaySaldo[s]) || 0;
+            const el = document.getElementById('koreksiAkhir_' + s);
+            const newDisplay = el ? (parseFloat(el.value) || 0) : oldDisplay;
+            const deltaDisplay = newDisplay - oldDisplay;
+
+            const rekap = (snap.rekapSaldo && snap.rekapSaldo[s]) || { awal: saldoAwalData[s] || 0, masuk: 0, keluar: 0 };
+            const potonganBaru = newTotalPotonganInduk[s] || 0;
+            const targetRaw = newDisplay + potonganBaru;
+            const currentRaw = (snap.rawSaldo && snap.rawSaldo[s]) || 0;
+            const deltaRaw = targetRaw - currentRaw;
+            const newAwal = targetRaw - rekap.masuk + rekap.keluar;
+
+            if (deltaDisplay !== 0 || deltaRaw !== 0) {
+                changedAccounts.push({
+                    akun: s,
+                    oldDisplay,
+                    newDisplay,
+                    deltaDisplay,
+                    newAwal,
+                    deltaRaw
+                });
+            }
+        });
+
+        if (changedAccounts.length === 0) {
+            closeModal('popupSaldoAwal');
+            return;
+        }
+
+        const rincianLog = changedAccounts
+            .filter(c => c.deltaDisplay !== 0)
+            .map(c => `${c.akun}: ${formatRp(c.oldDisplay)} ➜ ${formatRp(c.newDisplay)} (${c.deltaDisplay >= 0 ? '+' : '-'}${formatRp(Math.abs(c.deltaDisplay))})`)
+            .join(' • ');
+
+        if (metode === 'SESUAIKAN_AWAL') {
+            changedAccounts.forEach(c => {
+                saldoAwalData[c.akun] = c.newAwal;
+            });
+            addLogEntry('SALDO', `Koreksi Saldo Akhir (${changedAccounts.filter(c => c.deltaDisplay !== 0).length} Akun)${noteSuffix}`, rincianLog || 'Penyesuaian saldo akhir akun', 'EDIT');
+        } else {
+            const skrg = new Date();
+            const waktuStr = skrg.toLocaleDateString('id-ID', { weekday: 'short', day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+            const isoDateStr = getTodayIsoStr();
+            const baseId = Date.now();
+            changedAccounts.forEach((c, idx) => {
+                if (c.deltaRaw === 0) return;
+                const isMasuk = c.deltaRaw > 0;
+                transaksiJurnal.unshift({
+                    id: baseId + idx,
+                    waktu: waktuStr,
+                    isoDate: isoDateStr,
+                    keterangan: `[KOREKSI SALDO] ${c.akun}: ${formatRp(c.oldDisplay)} ➜ ${formatRp(c.newDisplay)}${noteSuffix}`,
+                    jenis: 'LAIN LAIN',
+                    jenisKas: isMasuk ? 'MASUK' : 'KELUAR',
+                    akun: c.akun,
+                    nominal: Math.abs(c.deltaRaw)
+                });
+            });
+            addLogEntry('SALDO', `Koreksi Saldo Akhir via Jurnal (${changedAccounts.length} Akun)${noteSuffix}`, rincianLog || 'Penyesuaian saldo akhir via jurnal', 'EDIT');
+        }
+
+        const noteInput = document.getElementById('inputCatatanKoreksiSaldo');
+        if (noteInput) noteInput.value = '';
         if (saveToFirebase()) closeModal('popupSaldoAwal');
     };
 
@@ -4295,6 +4542,7 @@
                 displaySaldo[s] = (rawSaldo[s] || 0) - totalPotonganInduk[s];
             }
         });
+        window._latestSaldoSnapshot = { rekapSaldo, rawSaldo, targetIndukByAccount, totalPotonganInduk, displaySaldo };
 
         let sumAwal = 0, sumMasuk = 0, sumKeluar = 0, sumSaldoRiilMurni = 0, totalFastMoney = 0;
 
